@@ -77,6 +77,10 @@ return (function()
         gensCnt = 0, -- 攻击手数量
         deadCnt = 0 -- 已死量数量
     }
+    -- 游戏道具数据
+    local props = {
+        jetBackpack = {name = '喷射背包', duration = 20, propId = 4226}
+    }
     -- 玩家打败目标
     function Player_Attack(event)
         print('玩家开始攻击')
@@ -94,6 +98,12 @@ return (function()
     function Player_MoveOneBlockSize(event)
         print('玩家移动一格')
         Chat:sendSystemMsg('玩家移动一格')
+        -- local result1 = Backpack:actDestructEquip(event.eventobjid, 4226)
+        -- 移除第一组物品
+        --   local result = Backpack:actDestructEquip(event.eventobjid, 5)
+        -- Backpack:actDestructEquip(event.eventobjid, 4)
+
+        --   print(result1)
         -- local result, x, y, z = Actor:getPosition(event.eventobjid)
         -- print(x, y, z)
         -- -- 在聊天框显示
@@ -155,12 +165,12 @@ return (function()
     -- 回旋镖效果
     local boomerang = {
         itemid = 4098, -- 回旋镖投掷物道具id，不同地图需要改变该值
-        countdown = 20, -- 倒计时2秒
+        countdown = 6, -- 倒计时2秒
         missileids = {}, -- 代码创建的投掷物
         timerPool = {} -- 计时器池 { timerid = { isOver, missileInfo } }
     }
     -- 获得一个计时器id
-    function boomerang:getTimer()
+    function boomerang:getTimer(timerName, playerId)
         local timerid
         -- 查找一个停止的计时器
         for k, v in pairs(self.timerPool) do
@@ -173,78 +183,88 @@ return (function()
         -- 没找到则创建一个计时器，并加入计时器池中s
         if (not (timerid)) then
             local result
-            result, timerid = MiniTimer:createTimer('', nil, true)
-            self.timerPool[timerid] = {false, ''}
+            result, timerid = MiniTimer:createTimer(timerName, nil, true)
+            self.timerPool[timerid] = {false, playerId}
         end
         return timerid
     end
     -- timerid, timername
     local minitimerChange = function(arg)
+        print(arg)
         -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
         local result, second = MiniTimer:getTimerTime(arg.timerid)
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
             Chat:sendSystemMsg('计时器结束')
+
             local timerInfo = boomerang.timerPool[arg.timerid]
-            -- if (timerInfo) then -- 是计时器池里面的计时器
-            --     timerInfo[1] = true -- 设置计时器结束工作标识isOver
-            --     local arg2 = timerInfo[2]
-            --     local result1, x, y, z = Actor:getPosition(arg2.toobjid) -- 获取投掷物位置
-            --     if (result1 and not (timerInfo[2].isHit)) then -- 如果投掷物还存在并且未命中，则销毁重新创建一个飞回来的投掷物
-            --         World:despawnActor(arg2.toobjid) -- 销毁投掷物
-            --         local result2, missileid =
-            --             World:spawnProjectile(arg2.eventobjid, arg2.itemid, x,
-            --                                   y, z, arg2.x, arg2.y, arg2.z)
-            --         boomerang.missileids[missileid] = true -- 记录是代码创建的投掷物
-            --     end
-            -- end
+            if (timerInfo) then -- 是计时器池里面的计时器
+                timerInfo[1] = true -- 设置计时器结束工作标识isOver
+                local playerId = timerInfo[2]
+                if arg.timername == '喷射倒计时' then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+
+                end
+
+            end
         end
     end
     -- 玩家穿上装备
     local function Player_EquipOn(event)
-        print('玩家穿上装备', event)
-        Chat:sendSystemMsg("发生事件：玩家穿上装备")
         local result, name = Item:getItemName(event.itemid)
-        -- 在聊天框显示
-        print(name)
-        Chat:sendSystemMsg("玩家获得装备：" .. name)
-        -- local result, id = MiniTimer:createTimer("timer", nil, true)
-        -- -- 在聊天框显示
-        -- Chat:sendSystemMsg("新建了名为“timer”的计时器，id为" ..
-        --                        id)
-        -- -- 让id为1的计时器开始20秒倒计时
-        -- -- 第一个参数为计时器id，第二个参数为倒计时时间，第三个参数为是否重复执行(貌似无效)
-        -- MiniTimer:startBackwardTimer(id, 20, false)
-        -- -- 在聊天框显示
-        -- Chat:sendSystemMsg("启动了id为1的计时器，倒计时20秒！")
-        -- -- 在房主游戏界面显示id为1的计时器的计时
-        -- MiniTimer:showTimerTips({0}, id, "id为1的计时器的计时为：",
-        --                         true)
-        local timerid = boomerang:getTimer()
-
-        MiniTimer:startBackwardTimer(timerid, boomerang.countdown) -- 启动倒计时
-        MiniTimer:showTimerTips({0}, timerid,
-                                "id为1的计时器的计时为：", true)
-
         -- 判断道具类型
-        if name == '装备模板' then
-            -- body
-            print('开始飞天')
-            Chat:sendSystemMsg('开始飞天')
+        if name == props["jetBackpack"].name then
+            print('开始喷射')
+            Chat:sendSystemMsg('开始喷射')
+            local timerid = boomerang:getTimer('喷射倒计时',
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid, props["jetBackpack"].duration)
+            MiniTimer:showTimerTips({0}, timerid, "喷射时间剩余：", true)
             Player:changPlayerMoveType(event.eventobjid, 1)
         end
     end
+
     -- 玩家新增道具
     local function Player_AddItem(event)
-        print('玩家新增道具', event)
-        Chat:sendSystemMsg("发生事件：玩家新增道具")
+        -- print('玩家新增道具', event)
+        -- Chat:sendSystemMsg("发生事件：玩家新增道具")
         local result3, itemid = Item:getItemId(event.itemid)
-        -- 在聊天框显示
-        Chat:sendSystemMsg(
-            "附近10格发现掉落物品！其中一个物品id为" .. itemid)
+        -- print(itemid)
         local result, name = Item:getItemName(event.itemid)
+        Prop_Add(name)
+    end
+    -- 玩家开始攻击
+    local function Player_Attack(event)
+        print('玩家开始攻击', event)
+        Chat:sendSystemMsg("玩家开始攻击")
+        Actor:addEnchant(event.eventobjid, 5, 11, 1)
         -- 在聊天框显示
-        Chat:sendSystemMsg("id为1的物品的名字是：" .. name)
+        Chat:sendSystemMsg("objid为" .. event.eventobjid ..
+                               "的生物手中的物品被添加了击退1的附魔")
+    end
+    -- 玩家道具附魔属性增加
+    local function Prop_Add(eventobjid, pName)
+        print('玩家获得装备', pName)
+        -- 击退附魔（11为附魔id,1-5个等级）
+        Actor:addEnchant(eventobjid, 5, 11, 1)
+        -- 在聊天框显示
+        Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+
+    end
+    -- 玩家选择快捷栏
+    local function Player_SelectShortcut(event)
+        print('玩家选择快捷栏', event)
+        Chat:sendSystemMsg("玩家选择快捷栏")
+        local result3, itemid = Item:getItemId(event.itemid)
+        -- print(itemid)
+        local result, name = Item:getItemName(event.itemid)
+        Prop_Add(event.eventobjid, name)
     end
     -- 监听事件
     function ListenEvents_MiniDemo()
@@ -257,8 +277,13 @@ return (function()
         -- 玩家打败目标
         -- ScriptSupportEvent:registerEvent([=[Player.Attack]=], Player_Attack)
         -- 玩家移动一格
-        ScriptSupportEvent:registerEvent([=[Player.MoveOneBlockSize]=],
-                                         Player_MoveOneBlockSize)
+        -- ScriptSupportEvent:registerEvent([=[Player.MoveOneBlockSize]=],
+        --                                  Player_MoveOneBlockSize)
+        -- 玩家开始攻击
+        -- ScriptSupportEvent:registerEvent([=[Player.Attack]=], Player_Attack)
+        -- 玩家选择快捷栏
+        -- ScriptSupportEvent:registerEvent([=[Player.SelectShortcut]=],
+        --                                  Player_SelectShortcut)
         -- 注册监听器，玩家进入区域时执行Player_AreaIn函数
         -- 第一个参数是监听的事件，第二个参数Player_AreaIn即事件发生时执行的函数
         ScriptSupportEvent:registerEvent([=[Player.AreaIn]=], Player_AreaIn)
@@ -266,8 +291,8 @@ return (function()
         -- 第一个参数是监听的事件，第二个参数Player_AreaOut即事件发生时执行的函数
         ScriptSupportEvent:registerEvent([=[Player.AreaOut]=], Player_AreaOut)
         -- 注册监听器，点击生物时执行Player_ClickActor函数
-        ScriptSupportEvent:registerEvent([=[Player.ClickActor]=],
-                                         Player_ClickActor)
+        -- ScriptSupportEvent:registerEvent([=[Player.ClickActor]=],
+        --                                  Player_ClickActor)
         --  玩家穿上装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOn]=], Player_EquipOn)
         -- 玩家新增道具
@@ -290,7 +315,7 @@ return (function()
     -- 初始玩家道具
     function GainItems(playerId)
         -- 给玩家一个枕头,优先快捷栏
-        local itemId, itemCnt, prioritytype = 15500, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
+        local itemId, itemCnt, prioritytype = 4228, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
         -- 检测是否有空间
         local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
         if ret == ErrorCode.OK then
@@ -301,6 +326,13 @@ return (function()
         end
         -- 给玩家一个信纸
         local itemId, itemCnt, prioritytype = 11806, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
+        -- 检测是否有空间
+        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
+        if ret == ErrorCode.OK then
+            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
+        end
+        -- 给玩家一个喷射背包
+        local itemId, itemCnt, prioritytype = props["jetBackpack"].propId, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
         -- 检测是否有空间
         local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
         if ret == ErrorCode.OK then
@@ -326,7 +358,7 @@ return (function()
             print('玩家id', playerId)
             Chat:sendSystemMsg('玩家id' .. playerId)
             -- 清空玩家的所有物品
-            -- Backpack:clearAllPack(playerId)
+            Backpack:clearAllPack(playerId)
             -- 可移动
             -- Player:setActionAttrState(playerId, 1, false)
             Actor:setActionAttrState(3402, 1, false)
