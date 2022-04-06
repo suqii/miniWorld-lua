@@ -79,7 +79,18 @@ return (function()
     }
     -- 游戏道具数据
     local props = {
-        jetBackpack = {name = '喷射背包', duration = 20, propId = 4226}
+        jetBackpack = {
+            name = '喷射背包',
+            duration = 20,
+            propId = 4226,
+            desc = '喷射剩余时间'
+        },
+        armor = {
+            name = '无敌装甲',
+            duration = 5,
+            propId = 4225,
+            desc = '无法击飞剩余时间'
+        }
     }
     -- 玩家打败目标
     function Player_Attack(event)
@@ -201,7 +212,7 @@ return (function()
             if (timerInfo) then -- 是计时器池里面的计时器
                 timerInfo[1] = true -- 设置计时器结束工作标识isOver
                 local playerId = timerInfo[2]
-                if arg.timername == '喷射倒计时' then
+                if (arg.timername == props["jetBackpack"].name) then
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
                     --  移动方式变为默认
@@ -209,7 +220,13 @@ return (function()
                     -- 销毁装备
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
-
+                elseif (arg.timername == props["armor"].name) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                    Creature:addModAttrib(playerId, 26, 0)
                 end
 
             end
@@ -218,16 +235,29 @@ return (function()
     -- 玩家穿上装备
     local function Player_EquipOn(event)
         local result, name = Item:getItemName(event.itemid)
+        print('获得装备' .. name)
+        Chat:sendSystemMsg('获得装备' .. name)
         -- 判断道具类型
-        if name == props["jetBackpack"].name then
-            print('开始喷射')
-            Chat:sendSystemMsg('开始喷射')
-            local timerid = boomerang:getTimer('喷射倒计时',
+        if (name == props["jetBackpack"].name) then
+            print('获得飞行技能')
+            Chat:sendSystemMsg('获得飞行技能')
+            local timerid = boomerang:getTimer(props["jetBackpack"].name,
                                                event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["jetBackpack"].duration)
-            MiniTimer:showTimerTips({0}, timerid, "喷射时间剩余：", true)
+            MiniTimer:showTimerTips({0}, timerid, props["jetBackpack"].desc,
+                                    true)
             Player:changPlayerMoveType(event.eventobjid, 1)
+        elseif (name == props["armor"].name) then
+            print('获得无法击飞技能')
+            Chat:sendSystemMsg('获得无法击飞技能')
+            local timerid = boomerang:getTimer(props["armor"].name,
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["armor"].desc, true)
+            -- 击退概率抵抗值, 0.2表示有20%概率不被击退
+            Creature:addModAttrib(event.eventobjid, 26, 1)
         end
+
     end
 
     -- 玩家新增道具
