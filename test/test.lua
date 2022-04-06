@@ -92,6 +92,10 @@ return (function()
             desc = '无法击飞剩余时间'
         }
     }
+    local gainProps = {
+      feather = {name = '羽毛', itemId = 11303, itemCnt = 60, prioritytype = 1},
+      basePillow = {name = '枕头', itemId = 4228, itemCnt = 1, prioritytype = 1}
+  }
     -- 玩家打败目标
     function Player_Attack(event)
         print('玩家开始攻击')
@@ -109,6 +113,12 @@ return (function()
     function Player_MoveOneBlockSize(event)
         print('玩家移动一格')
         Chat:sendSystemMsg('玩家移动一格')
+        local result = Actor:changeCustomModel(event.eventobjid, "mob_3402")
+        -- local result = Creature:replaceActor(event.eventobjid, 3402, 1)
+
+        print(result)
+        Chat:sendSystemMsg(result)
+
         -- local result1 = Backpack:actDestructEquip(event.eventobjid, 4226)
         -- 移除第一组物品
         --   local result = Backpack:actDestructEquip(event.eventobjid, 5)
@@ -138,6 +148,21 @@ return (function()
         -- Chat:sendSystemMsg("房主被添加了抖动")
         -- -- print(event)
         -- -- Chat:sendSystemMsg(event)
+    end
+    -- 玩家复活
+    function Player_Revive(event)
+        print('玩家复活')
+        print(event)
+        Chat:sendSystemMsg('玩家复活')
+        print(event.eventobjid)
+        -- local result = Actor:changeCustomModel(event.toobjid, "豹子")
+        local result = Actor:changeCustomModel(event.toobjid, "喷射背包")
+        -- local result = Creature:replaceActor(event.toobjid, 3402, 1)
+        -- local result = Actor:changeCustomModel(event.toobjid, 3402)
+        -- local result =Actor:changeCustomModel(event.eventobjid, 3402)
+        print(result)
+        Chat:sendSystemMsg(result)
+
     end
     local function Player_ClickActor(event)
         -- 判断生物是否成年，参数为生物在存档中的id
@@ -262,12 +287,13 @@ return (function()
 
     -- 玩家新增道具
     local function Player_AddItem(event)
-        -- print('玩家新增道具', event)
-        -- Chat:sendSystemMsg("发生事件：玩家新增道具")
-        local result3, itemid = Item:getItemId(event.itemid)
-        -- print(itemid)
+
+        -- local result3, itemid = Item:getItemId(event.itemid)
+        -- -- print(itemid)
         local result, name = Item:getItemName(event.itemid)
-        Prop_Add(name)
+        print('玩家新增道具', name)
+        Chat:sendSystemMsg("发生事件：玩家新增道具" .. name)
+        -- Prop_Add(name)
     end
     -- 玩家开始攻击
     local function Player_Attack(event)
@@ -281,10 +307,14 @@ return (function()
     -- 玩家道具附魔属性增加
     local function Prop_Add(eventobjid, pName)
         print('玩家获得装备', pName)
-        -- 击退附魔（11为附魔id,1-5个等级）
+        
+        -- 击退附魔
+        if (pName == '中型枕头') then
+          -- 击退附魔（11为附魔id,1-5个等级）
         Actor:addEnchant(eventobjid, 5, 11, 1)
         -- 在聊天框显示
         Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+        end
 
     end
     -- 玩家选择快捷栏
@@ -302,6 +332,8 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Game.Start]=], Game_StartGame)
         -- 玩家死亡
         ScriptSupportEvent:registerEvent([=[Player.Die]=], Player_Dead)
+        -- 玩家复活
+        -- ScriptSupportEvent:registerEvent([=[Player.Revive]=], Player_Revive)
         -- 方块被破坏
         ScriptSupportEvent:registerEvent([=[Block.DestroyBy]=], Block_DestroyBy)
         -- 玩家打败目标
@@ -312,8 +344,8 @@ return (function()
         -- 玩家开始攻击
         -- ScriptSupportEvent:registerEvent([=[Player.Attack]=], Player_Attack)
         -- 玩家选择快捷栏
-        -- ScriptSupportEvent:registerEvent([=[Player.SelectShortcut]=],
-        --                                  Player_SelectShortcut)
+        ScriptSupportEvent:registerEvent([=[Player.SelectShortcut]=],
+                                         Player_SelectShortcut)
         -- 注册监听器，玩家进入区域时执行Player_AreaIn函数
         -- 第一个参数是监听的事件，第二个参数Player_AreaIn即事件发生时执行的函数
         ScriptSupportEvent:registerEvent([=[Player.AreaIn]=], Player_AreaIn)
@@ -326,7 +358,7 @@ return (function()
         --  玩家穿上装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOn]=], Player_EquipOn)
         -- 玩家新增道具
-        -- ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
+        ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
         -- 任意计时器发生变化事件
         ScriptSupportEvent:registerEvent([=[minitimer.change]=], minitimerChange) -- 任意计时器发生变化事件
 
@@ -344,6 +376,22 @@ return (function()
     end
     -- 初始玩家道具
     function GainItems(playerId)
+      -- for i,v in pairs(gainProps) do
+      --   -- print(i,v)
+      --   print(gainProps[i].name)
+      -- end
+        -- 改变外观
+        local result1 = Actor:getActorFacade(playerId)
+        print(result)
+        -- local result = Actor:changeCustomModel(playerId, '秋果')
+        -- print(result)
+        -- 给玩家羽毛,优先快捷栏
+        local itemId, itemCnt, prioritytype = 11303, 60, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
+        -- 检测是否有空间
+        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
+        if ret == ErrorCode.OK then
+            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
+        end
         -- 给玩家一个枕头,优先快捷栏
         local itemId, itemCnt, prioritytype = 4228, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
         -- 检测是否有空间
