@@ -1,4 +1,5 @@
 return (function()
+    local testNum = 1
 
     -- 地图常量数据
     local Cfg = {
@@ -93,9 +94,19 @@ return (function()
         }
     }
     local gainProps = {
-      feather = {name = '羽毛', itemId = 11303, itemCnt = 60, prioritytype = 1},
-      basePillow = {name = '枕头', itemId = 4228, itemCnt = 1, prioritytype = 1}
-  }
+        feather = {
+            name = '羽毛',
+            itemId = 11303,
+            itemCnt = 60,
+            prioritytype = 1
+        },
+        basePillow = {
+            name = '枕头',
+            itemId = 4228,
+            itemCnt = 1,
+            prioritytype = 1
+        }
+    }
     -- 玩家打败目标
     function Player_Attack(event)
         print('玩家开始攻击')
@@ -113,12 +124,13 @@ return (function()
     function Player_MoveOneBlockSize(event)
         print('玩家移动一格')
         Chat:sendSystemMsg('玩家移动一格')
-        local result = Actor:changeCustomModel(event.eventobjid, "mob_3402")
-        -- local result = Creature:replaceActor(event.eventobjid, 3402, 1)
+        -- local result = Actor:changeCustomModel(event.eventobjid, "mob_3402")
+        -- -- local result = Creature:replaceActor(event.eventobjid, 3402, 1)
 
-        print(result)
-        Chat:sendSystemMsg(result)
-
+        -- print(result)
+        -- Chat:sendSystemMsg(result)
+        Actor:killSelf(event.eventobjid)
+        testNum = testNum + 1
         -- local result1 = Backpack:actDestructEquip(event.eventobjid, 4226)
         -- 移除第一组物品
         --   local result = Backpack:actDestructEquip(event.eventobjid, 5)
@@ -154,14 +166,18 @@ return (function()
         print('玩家复活')
         print(event)
         Chat:sendSystemMsg('玩家复活')
-        print(event.eventobjid)
-        -- local result = Actor:changeCustomModel(event.toobjid, "豹子")
-        local result = Actor:changeCustomModel(event.toobjid, "喷射背包")
-        -- local result = Creature:replaceActor(event.toobjid, 3402, 1)
-        -- local result = Actor:changeCustomModel(event.toobjid, 3402)
-        -- local result =Actor:changeCustomModel(event.eventobjid, 3402)
-        print(result)
-        Chat:sendSystemMsg(result)
+        
+        -- print(event.eventobjid)
+        -- -- local result = Actor:changeCustomModel(event.toobjid, "豹子")
+        -- local result = Actor:changeCustomModel(event.toobjid, "喷射背包")
+        -- -- local result = Creature:replaceActor(event.toobjid, 3402, 1)
+        -- -- local result = Actor:changeCustomModel(event.toobjid, 3402)
+        -- -- local result =Actor:changeCustomModel(event.eventobjid, 3402)
+        -- print(result)
+        -- Chat:sendSystemMsg(result)
+        print('testNum', testNum)
+        Chat:sendSystemMsg('testNum' .. testNum)
+
 
     end
     local function Player_ClickActor(event)
@@ -307,13 +323,13 @@ return (function()
     -- 玩家道具附魔属性增加
     local function Prop_Add(eventobjid, pName)
         print('玩家获得装备', pName)
-        
+
         -- 击退附魔
         if (pName == '中型枕头') then
-          -- 击退附魔（11为附魔id,1-5个等级）
-        Actor:addEnchant(eventobjid, 5, 11, 1)
-        -- 在聊天框显示
-        Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+            -- 击退附魔（11为附魔id,1-5个等级）
+            Actor:addEnchant(eventobjid, 5, 11, 1)
+            -- 在聊天框显示
+            Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
         end
 
     end
@@ -376,39 +392,19 @@ return (function()
     end
     -- 初始玩家道具
     function GainItems(playerId)
-      -- for i,v in pairs(gainProps) do
-      --   -- print(i,v)
-      --   print(gainProps[i].name)
-      -- end
-        -- 改变外观
-        local result1 = Actor:getActorFacade(playerId)
-        print(result)
-        -- local result = Actor:changeCustomModel(playerId, '秋果')
-        -- print(result)
-        -- 给玩家羽毛,优先快捷栏
-        local itemId, itemCnt, prioritytype = 11303, 60, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
-        -- 检测是否有空间
-        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
-        if ret == ErrorCode.OK then
-            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
+        for i, v in pairs(gainProps) do
+            -- print(i,v)
+            print(gainProps[i].name)
+            -- 检测是否有空间
+            local ret = Backpack:enoughSpaceForItem(playerId,
+                                                    gainProps[i].itemId,
+                                                    gainProps[i].itemCnt)
+            if ret == ErrorCode.OK then
+                Player:gainItems(playerId, gainProps[i].itemId,
+                                 gainProps[i].itemCnt, gainProps[i].prioritytype)
+            end
         end
-        -- 给玩家一个枕头,优先快捷栏
-        local itemId, itemCnt, prioritytype = 4228, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
-        -- 检测是否有空间
-        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
-        if ret == ErrorCode.OK then
-            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
-            -- local re = Creature:addModAttrib(playerId, 0, 100)
-            -- print('附魔结果', re)
-            -- Chat:sendSystemMsg('附魔结果' .. re)
-        end
-        -- 给玩家一个信纸
-        local itemId, itemCnt, prioritytype = 11806, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
-        -- 检测是否有空间
-        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
-        if ret == ErrorCode.OK then
-            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
-        end
+
         -- 给玩家一个喷射背包
         local itemId, itemCnt, prioritytype = props["jetBackpack"].propId, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
         -- 检测是否有空间
@@ -521,6 +517,8 @@ return (function()
     end
     -------------------------------游戏事件-------------------------------
     Game_StartGame = function()
+        -- print('testNum', testNum)
+        -- Chat:sendSystemMsg('testNum' .. testNum)
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
         -- 初始化区域
@@ -553,6 +551,7 @@ return (function()
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
+        testNum = testNum + 1
         print('player die')
         Chat:sendSystemMsg('player ' .. 'die')
         if (trigger_obj['toobjid']) then
