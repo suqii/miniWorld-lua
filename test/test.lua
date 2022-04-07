@@ -83,15 +83,21 @@ return (function()
     local props = {
         jetBackpack = {
             name = '喷射背包',
-            duration = 20,
+            duration = 6,
             propId = 4226,
-            desc = '喷射剩余时间'
+            desc = '喷射剩余时间:'
+        },
+        shield15 = {
+            name = '15秒防护盾',
+            duration = 6,
+            propId = 4244,
+            desc = '护盾剩余时间:'
         },
         armor = {
             name = '无敌装甲',
-            duration = 5,
+            duration = 6,
             propId = 4225,
-            desc = '无法击飞剩余时间'
+            desc = '无法击飞剩余时间:'
         }
     }
     -- 初始道具
@@ -330,6 +336,7 @@ return (function()
     }
     -- 获得一个计时器id
     function boomerang:getTimer(timerName, playerId)
+      -- print("创建计时器")
         local timerid
         -- 查找一个停止的计时器
         for k, v in pairs(self.timerPool) do
@@ -339,19 +346,22 @@ return (function()
                 break
             end
         end
-        -- 没找到则创建一个计时器，并加入计时器池中s
+        -- 没找到则创建一个计时器，并加入计时器池中
         if (not (timerid)) then
             local result
             result, timerid = MiniTimer:createTimer(timerName, nil, true)
             self.timerPool[timerid] = {false, playerId}
         end
+        -- print("计时器Id:",timerid)
         return timerid
     end
     -- timerid, timername
     local minitimerChange = function(arg)
-        print(arg)
+        -- print(arg)
         -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
         local result, second = MiniTimer:getTimerTime(arg.timerid)
+        print('time:', second)
+        Chat:sendSystemMsg('time:' .. second)
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
             Chat:sendSystemMsg('计时器结束')
@@ -375,6 +385,15 @@ return (function()
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
                     Creature:addModAttrib(playerId, 26, 0)
+                    Player:setActionAttrState(playerId, 1, true)
+                elseif (arg.timername == props["shield15"].name) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                    Creature:addModAttrib(playerId, 26, 0)
+
                 end
 
             end
@@ -402,6 +421,18 @@ return (function()
                                                event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
             MiniTimer:showTimerTips({0}, timerid, props["armor"].desc, true)
+            -- 击退概率抵抗值, 0.2表示有20%概率不被击退
+            Creature:addModAttrib(event.eventobjid, 26, 1)
+            Player:setActionAttrState(event.eventobjid, 1, false)
+        elseif (name == props["shield15"].name) then
+            print('获得15s护盾技能1')
+            Chat:sendSystemMsg('获得15s护盾技能')
+
+            local timerid = boomerang:getTimer(props["shield15"].name,
+                                               event.eventobjid)
+            print(timerid)
+            MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["shield15"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
         end
@@ -447,7 +478,15 @@ return (function()
         local result3, itemid = Item:getItemId(event.itemid)
         -- print(itemid)
         local result, name = Item:getItemName(event.itemid)
-        Prop_Add(event.eventobjid, name)
+        -- 如果是装备
+        -- jetBackpack  shield15  armor
+        if (event.itemid == props["jetBackpack"].propId or event.itemid ==
+            props["shield15"].propId or event.itemid == props["armor"].propId) then
+            Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
+        else
+            Prop_Add(event.eventobjid, name)
+        end
+
     end
     -- 投掷物命中
     local function Actor_Projectile_Hit(event)
@@ -509,8 +548,8 @@ return (function()
     end
     -- 初始玩家道具
     function GainItems(playerId)
+        -- 基础
         for i, v in pairs(gainProps) do
-            -- print(i,v)
             print(gainProps[i].name)
             -- 检测是否有空间
             local ret = Backpack:enoughSpaceForItem(playerId,
@@ -521,14 +560,23 @@ return (function()
                                  gainProps[i].itemCnt, gainProps[i].prioritytype)
             end
         end
-
-        -- 给玩家一个喷射背包
-        local itemId, itemCnt, prioritytype = props["jetBackpack"].propId, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
-        -- 检测是否有空间
-        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
-        if ret == ErrorCode.OK then
-            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
+        -- 道具测试
+        for i, v in pairs(props) do
+            print(props[i].name)
+            -- 检测是否有空间
+            local ret =
+                Backpack:enoughSpaceForItem(playerId, props[i].propId, 1)
+            if ret == ErrorCode.OK then
+                Player:gainItems(playerId, props[i].propId, 1, 1)
+            end
         end
+        -- -- 给玩家一个喷射背包
+        -- local itemId, itemCnt, prioritytype = props["jetBackpack"].propId, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
+        -- -- 检测是否有空间
+        -- local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
+        -- if ret == ErrorCode.OK then
+        --     Player:gainItems(playerId, itemId, itemCnt, prioritytype)
+        -- end
 
     end
     -- 初始化玩家信息
@@ -656,8 +704,10 @@ return (function()
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
         -- testNum = testNum + 1
+        print(trigger_obj)
         print('player die')
         Chat:sendSystemMsg('player ' .. 'die')
+        -- 自杀
         if (trigger_obj['toobjid']) then
             local killById = trigger_obj['toobjid']
             print("killer id:", killById)
@@ -665,11 +715,13 @@ return (function()
         else
             print("无toobjid")
         end
+        -- 他杀
         if (trigger_obj['eventobjid']) then
             local playerId = trigger_obj['eventobjid']
             print("be killed id:", playerId)
             Chat:sendSystemMsg(playerId)
             Chat:sendSystemMsg("be killed id" .. playerId)
+            PlayerAddScore(playerId, 20)
         else
             print("无eventobjid")
         end
