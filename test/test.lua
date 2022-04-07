@@ -102,24 +102,113 @@ return (function()
         --     itemCnt = 60,
         --     prioritytype = 1
         -- },
-        bigBombPillow = {
-            name = '大枕头炸弹',
-            itemId = 4231,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        smallBombPillow = {
-            name = '小枕头炸弹',
-            itemId = 4231,
-            itemCnt = 1,
-            prioritytype = 1
-        },
+        -- 基础枕头
         basePillow = {
             name = '枕头',
             itemId = 4228,
             itemCnt = 1,
             prioritytype = 1
+        },
+        -- -- 哈士奇狗头枕头
+        -- haskiPillow = {
+        --     name = '哈士奇狗头枕头',
+        --     itemId = 4230,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- 大枕头炸弹
+        bigBomb = {
+            name = '大枕头炸弹',
+            itemId = 4231,
+            itemCnt = 10,
+            prioritytype = 1
+        },
+
+        -- 小枕头炸弹
+        smallBomb = {
+            name = '小枕头炸弹',
+            itemId = 4232,
+            itemCnt = 10,
+            prioritytype = 1
+        },
+        -- -- 小熊枕头
+        -- bearPillow = {
+        --     name = '小熊枕头',
+        --     itemId = 4233,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 小熊枕头
+        -- bearPillow = {
+        --     name = '小熊枕头',
+        --     itemId = 4233,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 鸡腿枕头
+        -- chickenPillow = {
+        --     name = '鸡腿枕头',
+        --     itemId = 4234,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 葱鸭枕头
+        -- duckPillow = {
+        --     name = '葱鸭枕头',
+        --     itemId = 4235,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 葱鸭枕头
+        -- rabbitPillow = {
+        --     name = '小兔子枕头',
+        --     itemId = 4236,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 咸鱼枕头
+        -- fishPillow = {
+        --     name = '咸鱼枕头',
+        --     itemId = 4237,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 书包枕头
+        -- bagPillow = {
+        --     name = '书包枕头',
+        --     itemId = 4238,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 鳄鱼枕头
+        -- crocodilePillow = {
+        --     name = '鳄鱼枕头',
+        --     itemId = 4239,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 小花枕头
+        -- crocodilePillow = {
+        --     name = '小花枕头',
+        --     itemId = 4239,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 饼干枕头
+        -- crocodilePillow = {
+        --     name = '饼干枕头',
+        --     itemId = 4239,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- 计时器
+        crocodilePillow = {
+            name = '计时器',
+            itemId = 4243,
+            itemCnt = 20,
+            prioritytype = 1
         }
+
     }
     -- 玩家打败目标
     function Player_Attack(event)
@@ -360,6 +449,12 @@ return (function()
         local result, name = Item:getItemName(event.itemid)
         Prop_Add(event.eventobjid, name)
     end
+    -- 投掷物命中
+    local function Actor_Projectile_Hit(event)
+        print('投掷物命中', event)
+        Chat:sendSystemMsg("投掷物命中")
+
+    end
     -- 监听事件
     function ListenEvents_MiniDemo()
         -- 游戏事件---
@@ -394,7 +489,10 @@ return (function()
         -- 玩家新增道具
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
         -- 任意计时器发生变化事件
-        ScriptSupportEvent:registerEvent([=[minitimer.change]=], minitimerChange) -- 任意计时器发生变化事件
+        ScriptSupportEvent:registerEvent([=[minitimer.change]=], minitimerChange)
+        -- 投掷物命中
+        ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
+                                         Actor_Projectile_Hit)
 
     end
 
@@ -402,10 +500,11 @@ return (function()
     function Block_DestroyBy(event)
         Chat:sendSystemMsg("发生事件：方块被破坏")
         print(event)
-        print(event.eventobjid)
-        PlayerAddScore(event.eventobjid, 1)
-        Chat:sendSystemMsg("创建特效")
-        Actor:playBodyEffect(event.eventobjid, 1203)
+        -- print(event.eventobjid)
+        -- PlayerAddScore(event.eventobjid, 1)
+        -- Chat:sendSystemMsg("创建特效")
+        -- Actor:playBodyEffect(event.eventobjid, 1203)
+        Block:placeBlock(event.blockid, event.x, event.y, event.z, 0)
 
     end
     -- 初始玩家道具
