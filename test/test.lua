@@ -336,11 +336,11 @@ return (function()
     }
     -- 获得一个计时器id
     function boomerang:getTimer(timerName, playerId)
-      -- print("创建计时器")
+        timername = timername or 'default'
         local timerid
         -- 查找一个停止的计时器
         for k, v in pairs(self.timerPool) do
-            if (v[1]) then
+            if (v[1] and v[2] == timername) then
                 v[1] = false -- 设置计时器开始工作标识isOver
                 timerid = k
                 break
@@ -349,10 +349,9 @@ return (function()
         -- 没找到则创建一个计时器，并加入计时器池中
         if (not (timerid)) then
             local result
-            result, timerid = MiniTimer:createTimer(timerName, nil, true)
-            self.timerPool[timerid] = {false, playerId}
+            result, timerid = MiniTimer:createTimer(timername, nil, true)
+            self.timerPool[timerid] = {false, timername, playerId}
         end
-        -- print("计时器Id:",timerid)
         return timerid
     end
     -- timerid, timername
@@ -494,6 +493,17 @@ return (function()
         Chat:sendSystemMsg("投掷物命中")
 
     end
+    local function Player_BeHurt(event)
+        -- Chat:sendSystemMsg("玩家受伤开始加血")
+        Actor:addHP(event.eventobjid, 10)
+
+    end
+    local function Game_AnyPlayer_EnterGame(event)
+        -- Chat:sendSystemMsg("玩家进入游戏")
+        -- 初始化玩家信息
+        InitGamePlayer(event.eventobjid)
+
+    end
     -- 监听事件
     function ListenEvents_MiniDemo()
         -- 游戏事件---
@@ -529,6 +539,10 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
         -- 任意计时器发生变化事件
         ScriptSupportEvent:registerEvent([=[minitimer.change]=], minitimerChange)
+        -- 玩家受到伤害
+        ScriptSupportEvent:registerEvent([=[Player.BeHurt]=], Player_BeHurt)
+        -- 任一玩家进入游戏	
+        ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.EnterGame]=], Game_AnyPlayer_EnterGame)
         -- 投掷物命中
         ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
                                          Actor_Projectile_Hit)
@@ -580,7 +594,7 @@ return (function()
 
     end
     -- 初始化玩家信息
-    function InitGamePlayer(isTestMode)
+    function InitGamePlayer(playerId)
         -- 在两点之间的范围内填充某方块
         -- 前两个参数为填充范围的起点和终点坐标组成的表
         -- 第三个参数1为要填充的方块id，1是地心基石
@@ -592,7 +606,8 @@ return (function()
         --     "从(0,0)高度7到(5,5)高度9的范围被填充了基岩")
 
         -- 获取本地玩家信息
-        local ret, playerId = Player:getMainPlayerUin()
+        -- local ret, playerId = Player:getMainPlayerUin()
+        -- local playerId = event.eventobjid
         if ret == ErrorCode.OK then
             print('玩家id', playerId)
             Chat:sendSystemMsg('玩家id' .. playerId)
@@ -608,30 +623,30 @@ return (function()
             -- 可破坏方块
             Player:setActionAttrState(playerId, 8, false)
             -- 可被攻击
-            Player:setActionAttrState(playerId, 64, false)
+            -- Player:setActionAttrState(playerId, 64, false)
             -- 玩家移动方式
             -- Player:changPlayerMoveType(playerId, 1)
             -- 加入玩家id组
-            Players[#Players + 1] = playerId
+            -- Players[#Players + 1] = playerId
         end
         -- 设置队伍
-        if #Players == 1 then
-            Player:setTeam(playerId, Teams.red)
-            print('你是红队')
-            Chat:sendSystemMsg('你是红队')
-        elseif #Players == 2 then
-            Player:setTeam(playerId, Teams.blue)
-            print('你是蓝队')
-            Chat:sendSystemMsg('你是蓝队')
-        elseif #Players == 3 then
-            Player:setTeam(playerId, Teams.yellow)
-            print('你是黄队')
-            Chat:sendSystemMsg('你是黄队')
-        else
-            Player:setTeam(playerId, Teams.green)
-            print('你是绿队')
-            Chat:sendSystemMsg('你是绿队')
-        end
+        -- if #Players == 1 then
+        --     Player:setTeam(playerId, Teams.red)
+        --     print('你是红队')
+        --     Chat:sendSystemMsg('你是红队')
+        -- elseif #Players == 2 then
+        --     Player:setTeam(playerId, Teams.blue)
+        --     print('你是蓝队')
+        --     Chat:sendSystemMsg('你是蓝队')
+        -- elseif #Players == 3 then
+        --     Player:setTeam(playerId, Teams.yellow)
+        --     print('你是黄队')
+        --     Chat:sendSystemMsg('你是黄队')
+        -- else
+        --     Player:setTeam(playerId, Teams.green)
+        --     print('你是绿队')
+        --     Chat:sendSystemMsg('你是绿队')
+        -- end
         -- 默认给玩家的道具
         GainItems(playerId)
     end
@@ -698,7 +713,7 @@ return (function()
         -- print("创建区域，id为", areaid)
 
         -- 初始化玩家信息
-        InitGamePlayer(isTestMode)
+        -- InitGamePlayer(isTestMode)
 
     end
     -- 玩家死亡
@@ -710,20 +725,21 @@ return (function()
         -- 自杀
         if (trigger_obj['toobjid']) then
             local killById = trigger_obj['toobjid']
-            print("killer id:", killById)
-            Chat:sendSystemMsg("killer id:" .. killById)
+            -- print("killer id:", killById)
+            -- Chat:sendSystemMsg("killer id:" .. killById)
+            PlayerAddScore(killById, 5)
         else
-            print("无toobjid")
+            -- print("无toobjid")
         end
         -- 他杀
         if (trigger_obj['eventobjid']) then
             local playerId = trigger_obj['eventobjid']
-            print("be killed id:", playerId)
-            Chat:sendSystemMsg(playerId)
-            Chat:sendSystemMsg("be killed id" .. playerId)
-            PlayerAddScore(playerId, 20)
+            -- print("be killed id:", playerId)
+            -- Chat:sendSystemMsg(playerId)
+            -- Chat:sendSystemMsg("be killed id" .. playerId)
+
         else
-            print("无eventobjid")
+            -- print("无eventobjid")
         end
     end
 
