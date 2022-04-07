@@ -1,4 +1,5 @@
 return (function()
+    GameRule.CountDown = 10
     local testNum = 1
 
     -- 地图常量数据
@@ -93,11 +94,24 @@ return (function()
             desc = '无法击飞剩余时间'
         }
     }
+    -- 初始道具
     local gainProps = {
-        feather = {
-            name = '羽毛',
-            itemId = 11303,
-            itemCnt = 60,
+        -- feather = {
+        --     name = '羽毛',
+        --     itemId = 11303,
+        --     itemCnt = 60,
+        --     prioritytype = 1
+        -- },
+        bigBombPillow = {
+            name = '大枕头炸弹',
+            itemId = 4231,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        smallBombPillow = {
+            name = '小枕头炸弹',
+            itemId = 4231,
+            itemCnt = 1,
             prioritytype = 1
         },
         basePillow = {
@@ -166,7 +180,7 @@ return (function()
         print('玩家复活')
         print(event)
         Chat:sendSystemMsg('玩家复活')
-        
+
         -- print(event.eventobjid)
         -- -- local result = Actor:changeCustomModel(event.toobjid, "豹子")
         -- local result = Actor:changeCustomModel(event.toobjid, "喷射背包")
@@ -177,7 +191,6 @@ return (function()
         -- Chat:sendSystemMsg(result)
         print('testNum', testNum)
         Chat:sendSystemMsg('testNum' .. testNum)
-
 
     end
     local function Player_ClickActor(event)
@@ -211,8 +224,13 @@ return (function()
     local function Player_AreaIn(event)
         print('玩家进入区域', event)
         Chat:sendSystemMsg("发生事件：玩家进入区域")
-        Chat:sendSystemMsg("参数eventobjid为:" .. event.eventobjid)
-        Chat:sendSystemMsg("参数areaid为:" .. event.areaid)
+        -- Chat:sendSystemMsg("参数eventobjid为:" .. event.eventobjid)
+        -- Chat:sendSystemMsg("参数areaid为:" .. event.areaid)
+        local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
+        -- 在聊天框显示提示
+        -- Chat:sendSystemMsg(
+        --     "在(0,0)高度7的位置生成了3个土块，它们在存档中的id是" ..
+        --         objid)
     end
     -- 回旋镖效果
     local boomerang = {
@@ -367,7 +385,7 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.AreaIn]=], Player_AreaIn)
         -- 注册监听器，玩家离开区域时执行Player_AreaOut函数
         -- 第一个参数是监听的事件，第二个参数Player_AreaOut即事件发生时执行的函数
-        ScriptSupportEvent:registerEvent([=[Player.AreaOut]=], Player_AreaOut)
+        -- ScriptSupportEvent:registerEvent([=[Player.AreaOut]=], Player_AreaOut)
         -- 注册监听器，点击生物时执行Player_ClickActor函数
         -- ScriptSupportEvent:registerEvent([=[Player.ClickActor]=],
         --                                  Player_ClickActor)
@@ -512,36 +530,23 @@ return (function()
         GameRule.StartPlayers = 1
         -- GameRule.ScoreKillMob = 3 --击杀特定怪物+3分
         GameRule.ScoreKillPlayer = 5 -- 击杀玩家+5分
-        GameRule.PlayerDieDrops = 1 -- 死亡掉落 1:true
+        -- GameRule.PlayerDieDrops = 0 -- 死亡掉落 1:true
         GameRule.DisplayScore = 1 -- 显示比分 1:true
+        GameRule.CountDown = 10
     end
     -------------------------------游戏事件-------------------------------
     Game_StartGame = function()
-        -- print('testNum', testNum)
-        -- Chat:sendSystemMsg('testNum' .. testNum)
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
-        -- 初始化区域
-        -- 通过中心点和扩展长度创建一个区域
-        -- 第一个参数{x=0,y=10,z=0}为区域中心坐标组成的表
-        -- 第二个参数{x=1,y=2,z=3}为区域各方向扩展的距离组成的表
-        -- local result, areaid = Area:createAreaRect({x = -337, y = 180, z = 7},
-        --                                            {x = 1, y = 2, z = 3})
-        -- -- 在聊天框显示
-        -- Chat:sendSystemMsg(
-        --     "以(0,0)高度10为中心，左右各扩展1格，上下各扩展2格，前后各扩展3格，创建了一个区域，id为" ..
-        --         areaid)
+        -- 初始化生成道具区域
         -- 通过起点终点坐标创建区域
         -- 第一个参数为区域起点坐标组成的表，即面朝北时，区域的左、下、后方的顶点坐标
         -- 第二个参数为区域终点坐标组成的表，即面朝北时，区域的右、上、前方的顶点坐标
-        local result, areaid = Area:createAreaRectByRange({
-            x = -332,
-            y = 7,
-            z = 170
-        }, {x = -345, y = 7, z = 175})
+        local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
+                                                          {x = 8, y = 8, z = 3})
         -- 销毁指定区域，参数为区域id
         -- Area:destroyArea(areaid)
-        Area:fillBlock(areaid, 112) -- 用112这个方块填充区域
+        -- Area:fillBlock(areaid, 112) -- 用112这个方块填充区域
         -- Chat:sendSystemMsg("创建区域，id为" .. areaid)
         -- print("创建区域，id为", areaid)
 
@@ -551,7 +556,7 @@ return (function()
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
-        testNum = testNum + 1
+        -- testNum = testNum + 1
         print('player die')
         Chat:sendSystemMsg('player ' .. 'die')
         if (trigger_obj['toobjid']) then
