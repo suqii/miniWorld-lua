@@ -102,12 +102,13 @@ return (function()
     }
     -- 初始道具
     local gainProps = {
-        -- feather = {
-        --     name = '羽毛',
-        --     itemId = 11303,
-        --     itemCnt = 60,
-        --     prioritytype = 1
-        -- },
+        -- 羽毛
+        feather = {
+            name = '羽毛',
+            itemId = 11303,
+            itemCnt = 60,
+            prioritytype = 1
+        },
         -- 基础枕头
         basePillow = {
             name = '枕头',
@@ -316,17 +317,7 @@ return (function()
         Chat:sendSystemMsg("参数eventobjid为:" .. event.eventobjid)
         Chat:sendSystemMsg("参数areaid为:" .. event.areaid)
     end
-    local function Player_AreaIn(event)
-        print('玩家进入区域', event)
-        Chat:sendSystemMsg("发生事件：玩家进入区域")
-        -- Chat:sendSystemMsg("参数eventobjid为:" .. event.eventobjid)
-        -- Chat:sendSystemMsg("参数areaid为:" .. event.areaid)
-        local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
-        -- 在聊天框显示提示
-        -- Chat:sendSystemMsg(
-        --     "在(0,0)高度7的位置生成了3个土块，它们在存档中的id是" ..
-        --         objid)
-    end
+
     -- 回旋镖效果
     local boomerang = {
         itemid = 4098, -- 回旋镖投掷物道具id，不同地图需要改变该值
@@ -336,6 +327,7 @@ return (function()
     }
     -- 获得一个计时器id
     function boomerang:getTimer(timerName, playerId)
+      -- print(timerName)
         timername = timername or 'default'
         local timerid
         -- 查找一个停止的计时器
@@ -359,10 +351,11 @@ return (function()
         -- print(arg)
         -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
         local result, second = MiniTimer:getTimerTime(arg.timerid)
-        print('time:', second)
-        Chat:sendSystemMsg('time:' .. second)
+        -- print('time:', second)
+        -- Chat:sendSystemMsg('time:' .. second)
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
+            print(arg.timername)
             Chat:sendSystemMsg('计时器结束')
 
             local timerInfo = boomerang.timerPool[arg.timerid]
@@ -392,11 +385,27 @@ return (function()
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
                     Creature:addModAttrib(playerId, 26, 0)
+                elseif (arg.timername == "featherTimer") then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 生成羽毛
+                    local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
 
                 end
 
             end
         end
+    end
+    local function Player_AreaIn(event)
+        print('玩家进入区域', event)
+        Chat:sendSystemMsg("发生事件：玩家进入区域")
+        -- 生成羽毛
+        local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
+        -- local timerid = boomerang:getTimer("featherTimer1", event.eventobjid)
+        -- MiniTimer:startBackwardTimer(timerid, 5)
+        -- MiniTimer:showTimerTips({0}, timerid, "5秒后即将产生羽毛：",
+        --                         true)
+
     end
     -- 玩家穿上装备
     local function Player_EquipOn(event)
@@ -542,7 +551,8 @@ return (function()
         -- 玩家受到伤害
         ScriptSupportEvent:registerEvent([=[Player.BeHurt]=], Player_BeHurt)
         -- 任一玩家进入游戏	
-        ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.EnterGame]=], Game_AnyPlayer_EnterGame)
+        ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.EnterGame]=],
+                                         Game_AnyPlayer_EnterGame)
         -- 投掷物命中
         ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
                                          Actor_Projectile_Hit)
