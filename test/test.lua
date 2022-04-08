@@ -103,12 +103,12 @@ return (function()
     -- 初始道具
     local gainProps = {
         -- 羽毛
-        feather = {
-            name = '羽毛',
-            itemId = 11303,
-            itemCnt = 60,
-            prioritytype = 1
-        },
+        -- feather = {
+        --     name = '羽毛',
+        --     itemId = 11303,
+        --     itemCnt = 60,
+        --     prioritytype = 1
+        -- },
         -- 基础枕头
         basePillow = {
             name = '枕头',
@@ -209,12 +209,12 @@ return (function()
         --     prioritytype = 1
         -- },
         -- 计时器
-        crocodilePillow = {
-            name = '计时器',
-            itemId = 4243,
-            itemCnt = 20,
-            prioritytype = 1
-        }
+        -- crocodilePillow = {
+        --     name = '计时器',
+        --     itemId = 4243,
+        --     itemCnt = 20,
+        --     prioritytype = 1
+        -- }
 
     }
     -- 玩家打败目标
@@ -327,8 +327,8 @@ return (function()
     }
     -- 获得一个计时器id
     function boomerang:getTimer(timerName, playerId)
-      -- print(timerName)
-        timername = timername or 'default'
+        -- print(timerName)
+        timername = timerName or 'default'
         local timerid
         -- 查找一个停止的计时器
         for k, v in pairs(self.timerPool) do
@@ -360,8 +360,10 @@ return (function()
 
             local timerInfo = boomerang.timerPool[arg.timerid]
             if (timerInfo) then -- 是计时器池里面的计时器
+              -- print(timerInfo)
+              -- print(timerInfo[3])
                 timerInfo[1] = true -- 设置计时器结束工作标识isOver
-                local playerId = timerInfo[2]
+                local playerId = timerInfo[3]
                 if (arg.timername == props["jetBackpack"].name) then
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
