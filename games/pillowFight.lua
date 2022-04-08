@@ -77,36 +77,420 @@ return (function()
         gensCnt = 0, -- 攻击手数量
         deadCnt = 0 -- 已死量数量
     }
-    -- 玩家打败目标
-    function Player_Attack(event)
-        print('玩家开始攻击')
-        Chat:sendSystemMsg('玩家开始攻击')
-        -- Player:gainItems(0,1,10,1)
-        print(event)
-        Actor:playBodyEffect(0, 1027)
-        -- Actor:playBodyEffect(0, 1024)
-        -- Actor:playBodyEffect(event.eventobjid, 1024)
-        Chat:sendSystemMsg("房主被添加了特效1024")
-        -- print(event)
-        -- Chat:sendSystemMsg(event)
-    end
-    -- 玩家移动一格
-    function Player_MoveOneBlockSize(event)
-        print('玩家移动一格')
-        Chat:sendSystemMsg('玩家移动一格')
+    -- 游戏道具数据
+    local props = {
+        bigJetBackpack = {
+            name = '喷射背包（大）',
+            duration = 20,
+            propId = 4226,
+            desc = '喷射剩余时间:'
+        },
+        smallJetBackpack = {
+            name = '喷射背包（小）',
+            duration = 5,
+            propId = 4246,
+            desc = '喷射剩余时间:'
+        },
+        midJetBackpack = {
+            name = '喷射背包（中）',
+            duration = 10,
+            propId = 4247,
+            desc = '喷射剩余时间:'
+        },
+        shield15 = {
+            name = '15秒防护盾',
+            duration = 15,
+            propId = 4244,
+            desc = '护盾剩余时间:'
+        },
+        armor = {
+            name = '无敌装甲',
+            duration = 25,
+            propId = 4225,
+            desc = '无法击飞剩余时间:'
+        }
+    }
+    -- 初始道具
+    local gainProps = {
+        -- 羽毛
+        -- feather = {
+        --     name = '羽毛',
+        --     itemId = 11303,
+        --     itemCnt = 60,
+        --     prioritytype = 1
+        -- },
+        -- 基础枕头
+        basePillow = {
+            name = '枕头',
+            itemId = 4228,
+            itemCnt = 1,
+            prioritytype = 1
+        }
+        -- -- 哈士奇狗头枕头
+        -- haskiPillow = {
+        --     name = '哈士奇狗头枕头',
+        --     itemId = 4230,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- 大枕头炸弹
+        -- bigBomb = {
+        --     name = '大枕头炸弹',
+        --     itemId = 4231,
+        --     itemCnt = 10,
+        --     prioritytype = 1
+        -- },
 
-        -- Actor:playBodyEffect(0, 1027)
-        -- -- Actor:playBodyEffect(0, 1024)
-        -- print(event)
-        -- print(event.toobjid)
-        -- print(event.eventobjid)
-        -- local re = Player:shakeCamera(event.eventobjid, 3, 500)
-        -- print(re)
-        -- print(ErrorCode.OK)
-        -- print(ErrorCode)
-        -- Chat:sendSystemMsg("房主被添加了抖动")
-        -- -- print(event)
-        -- -- Chat:sendSystemMsg(event)
+        -- -- 小枕头炸弹
+        -- smallBomb = {
+        --     name = '小枕头炸弹',
+        --     itemId = 4232,
+        --     itemCnt = 10,
+        --     prioritytype = 1
+        -- }
+        -- -- 小熊枕头
+        -- bearPillow = {
+        --     name = '小熊枕头',
+        --     itemId = 4233,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 小熊枕头
+        -- bearPillow = {
+        --     name = '小熊枕头',
+        --     itemId = 4233,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 鸡腿枕头
+        -- chickenPillow = {
+        --     name = '鸡腿枕头',
+        --     itemId = 4234,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 葱鸭枕头
+        -- duckPillow = {
+        --     name = '葱鸭枕头',
+        --     itemId = 4235,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 葱鸭枕头
+        -- rabbitPillow = {
+        --     name = '小兔子枕头',
+        --     itemId = 4236,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 咸鱼枕头
+        -- fishPillow = {
+        --     name = '咸鱼枕头',
+        --     itemId = 4237,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 书包枕头
+        -- bagPillow = {
+        --     name = '书包枕头',
+        --     itemId = 4238,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 鳄鱼枕头
+        -- crocodilePillow = {
+        --     name = '鳄鱼枕头',
+        --     itemId = 4239,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 小花枕头
+        -- crocodilePillow = {
+        --     name = '小花枕头',
+        --     itemId = 4240,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 饼干枕头
+        -- crocodilePillow = {
+        --     name = '饼干枕头',
+        --     itemId = 4241,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 玲娜贝儿抱枕
+        -- linaBellPillow = {
+        --     name = '玲娜贝儿抱枕',
+        --     itemId = 4242,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- 计时器
+        -- crocodilePillow = {
+        --     name = '计时器',
+        --     itemId = 4243,
+        --     itemCnt = 20,
+        --     prioritytype = 1
+        -- },
+        -- 库洛米抱枕q
+        -- kuromiPillow = {
+        --     name = '库洛米抱枕',
+        --     itemId = 4245,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+
+    }
+
+    -- 玩家复活
+    function Player_Revive(event)
+        print('玩家复活')
+        print(event)
+        Chat:sendSystemMsg('玩家复活')
+
+    end
+    local function Player_ClickActor(event)
+        -- 判断生物是否成年，参数为生物在存档中的id
+        local result = Creature:isAdult(event.toobjid)
+        if result == 0 then -- 如果已成年
+            -- 在聊天框显示
+            Chat:sendSystemMsg("objid为" .. event.toobjid ..
+                                   "的生物已成年")
+        else -- 如果未成年
+            -- 在聊天框显示
+            Chat:sendSystemMsg("objid为" .. event.toobjid ..
+                                   "的生物未成年")
+
+        end
+
+        Actor:playBodyEffect(event.toobjid, 1024)
+        Actor:playBodyEffect(0, 1024)
+    end
+    -- 写个函数，随便命名，当玩家离开区域时会执行此函数
+    local function Player_AreaOut(event)
+        print('玩家离开区域', event)
+        Chat:sendSystemMsg("发生事件：玩家离开区域")
+        Chat:sendSystemMsg("参数eventobjid为:" .. event.eventobjid)
+        Chat:sendSystemMsg("参数areaid为:" .. event.areaid)
+    end
+
+    -- 回旋镖效果
+    local boomerang = {
+        itemid = 4098, -- 回旋镖投掷物道具id，不同地图需要改变该值
+        countdown = 6, -- 倒计时2秒
+        missileids = {}, -- 代码创建的投掷物
+        timerPool = {} -- 计时器池 { timerid = { isOver, missileInfo } }
+    }
+    -- 获得一个计时器id
+    function boomerang:getTimer(timerName, playerId)
+        -- print(timerName)
+        timername = timerName or 'default'
+        local timerid
+        -- 查找一个停止的计时器
+        for k, v in pairs(self.timerPool) do
+            if (v[1] and v[2] == timername) then
+                v[1] = false -- 设置计时器开始工作标识isOver
+                timerid = k
+                break
+            end
+        end
+        -- 没找到则创建一个计时器，并加入计时器池中
+        if (not (timerid)) then
+            local result
+            result, timerid = MiniTimer:createTimer(timername, nil, true)
+            self.timerPool[timerid] = {false, timername, playerId}
+        end
+        return timerid
+    end
+    -- timerid, timername
+    local minitimerChange = function(arg)
+        -- print(arg)
+        -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
+        local result, second = MiniTimer:getTimerTime(arg.timerid)
+        -- print('time:', second)
+        -- Chat:sendSystemMsg('time:' .. second)
+        if (second == 0) then -- 倒计时为0
+            print('计时器结束')
+            -- print(arg)
+            Chat:sendSystemMsg('计时器结束')
+
+            local timerInfo = boomerang.timerPool[arg.timerid]
+            if (timerInfo) then -- 是计时器池里面的计时器
+                -- print(timerInfo)
+                -- print(timerInfo[3])
+                timerInfo[1] = true -- 设置计时器结束工作标识isOver
+                local playerId = timerInfo[3]
+                if (arg.timername == props["smallJetBackpack"].name..timerInfo[3] or
+                    arg.timername == props["midJetBackpack"].name..timerInfo[3] or
+                    arg.timername == props["bigJetBackpack"].name..timerInfo[3]) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                elseif (arg.timername == props["armor"].name..timerInfo[3]) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                    Creature:addModAttrib(playerId, 26, 0)
+                    Player:setActionAttrState(playerId, 1, true)
+                elseif (arg.timername == props["shield15"].name..timerInfo[3]) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                    Creature:addModAttrib(playerId, 26, 0)
+                elseif (arg.timername == "featherTimer") then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 生成羽毛
+                    local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
+
+                end
+
+            end
+        end
+    end
+    local function Player_AreaIn(event)
+        -- print('玩家进入区域', event)
+        -- Chat:sendSystemMsg("发生事件：玩家进入区域")
+        -- 生成羽毛
+        local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
+        -- local timerid = boomerang:getTimer("featherTimer1", event.eventobjid)
+        -- MiniTimer:startBackwardTimer(timerid, 5)
+        -- MiniTimer:showTimerTips({0}, timerid, "5秒后即将产生羽毛：",
+        --                         true)
+
+    end
+    -- 玩家穿上装备
+    local function Player_EquipOn(event)
+        local result, name = Item:getItemName(event.itemid)
+        print('获得装备' .. name)
+        -- Chat:sendSystemMsg('获得装备' .. name)
+        -- 判断道具类型
+        if (name == props["smallJetBackpack"].name) then
+            print('获得飞行技能')
+            Chat:sendSystemMsg('获得飞行技能')
+            local timerid = boomerang:getTimer(props["smallJetBackpack"].name..event.eventobjid,
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid,
+                                         props["smallJetBackpack"].duration)
+            MiniTimer:showTimerTips({0}, timerid,
+                                    props["smallJetBackpack"].desc, true)
+            Player:changPlayerMoveType(event.eventobjid, 1)
+        elseif (name == props["midJetBackpack"].name) then
+            print('获得飞行技能')
+            Chat:sendSystemMsg('获得飞行技能')
+            local timerid = boomerang:getTimer(props["midJetBackpack"].name..event.eventobjid,
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid,
+                                         props["midJetBackpack"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["midJetBackpack"].desc,
+                                    true)
+            Player:changPlayerMoveType(event.eventobjid, 1)
+        elseif (name == props["bigJetBackpack"].name) then
+            print('获得飞行技能')
+            Chat:sendSystemMsg('获得飞行技能')
+            local timerid = boomerang:getTimer(props["bigJetBackpack"].name..event.eventobjid,
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid,
+                                         props["bigJetBackpack"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["bigJetBackpack"].desc,
+                                    true)
+            Player:changPlayerMoveType(event.eventobjid, 1)
+        elseif (name == props["armor"].name) then
+            print('获得无法击飞技能')
+            Chat:sendSystemMsg('获得无法击飞技能')
+            local timerid = boomerang:getTimer(props["armor"].name..event.eventobjid,
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["armor"].desc, true)
+            -- 击退概率抵抗值, 0.2表示有20%概率不被击退
+            Creature:addModAttrib(event.eventobjid, 26, 1)
+            Player:setActionAttrState(event.eventobjid, 1, false)
+        elseif (name == props["shield15"].name) then
+            print('获得15s护盾技能1')
+            Chat:sendSystemMsg('获得15s护盾技能')
+
+            local timerid = boomerang:getTimer(props["shield15"].name..event.eventobjid,
+                                               event.eventobjid)
+            print(timerid)
+            MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["shield15"].desc, true)
+            -- 击退概率抵抗值, 0.2表示有20%概率不被击退
+            Creature:addModAttrib(event.eventobjid, 26, 1)
+        end
+
+    end
+
+    -- 玩家新增道具
+    local function Player_AddItem(event)
+
+        local result, name = Item:getItemName(event.itemid)
+        print('玩家新增道具', name)
+        -- Chat:sendSystemMsg("发生事件：玩家新增道具" .. name)
+        -- Prop_Add(name)
+    end
+
+    -- 玩家道具附魔属性增加
+    local function Prop_Add(eventobjid, pName)
+        print('玩家获得装备', pName)
+
+        -- 击退附魔 “葱鸭”抱枕 咸鱼抱枕
+        if (pName == '中型枕头' or pName == '“葱鸭”抱枕' or pName ==
+            '咸鱼抱枕') then
+            -- 击退附魔（11为附魔id,1-5个等级）
+            Actor:addEnchant(eventobjid, 5, 11, 1)
+            -- 在聊天框显示
+            Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+        elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕') then
+            -- 击退附魔（11为附魔id,1-5个等级）
+            Actor:addEnchant(eventobjid, 5, 11, 2)
+            -- 在聊天框显示
+            Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
+        end
+
+    end
+    -- 玩家选择快捷栏
+    local function Player_SelectShortcut(event)
+        -- print('玩家选择快捷栏', event)
+        -- Chat:sendSystemMsg("玩家选择快捷栏")
+        local result3, itemid = Item:getItemId(event.itemid)
+        -- print(itemid)
+        local result, name = Item:getItemName(event.itemid)
+        -- 如果是装备
+        -- jetBackpack  shield15  armor
+        if (event.itemid == props["smallJetBackpack"].propId or event.itemid ==
+            props["midJetBackpack"].propId or event.itemid ==
+            props["bigJetBackpack"].propId or event.itemid ==
+            props["shield15"].propId or event.itemid == props["armor"].propId) then
+            Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
+        else
+            Prop_Add(event.eventobjid, name)
+        end
+
+    end
+    -- 投掷物命中
+    local function Actor_Projectile_Hit(event)
+        print('投掷物命中', event)
+        Chat:sendSystemMsg("投掷物命中")
+
+    end
+    local function Player_BeHurt(event)
+        -- Chat:sendSystemMsg("玩家受伤开始加血")
+        Actor:addHP(event.eventobjid, 100)
+
+    end
+    local function Game_AnyPlayer_EnterGame(event)
+        -- Chat:sendSystemMsg("玩家进入游戏")
+        -- 初始化玩家信息
+        InitGamePlayer(event.eventobjid)
+
     end
     -- 监听事件
     function ListenEvents_MiniDemo()
@@ -114,86 +498,96 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Game.Start]=], Game_StartGame)
         -- 玩家死亡
         ScriptSupportEvent:registerEvent([=[Player.Die]=], Player_Dead)
+        -- 玩家复活
+        -- ScriptSupportEvent:registerEvent([=[Player.Revive]=], Player_Revive)
         -- 方块被破坏
         ScriptSupportEvent:registerEvent([=[Block.DestroyBy]=], Block_DestroyBy)
-        -- 玩家打败目标
-        -- ScriptSupportEvent:registerEvent([=[Player.Attack]=], Player_Attack)
-        -- 玩家移动一格
-        ScriptSupportEvent:registerEvent([=[Player.MoveOneBlockSize]=],
-                                         Player_MoveOneBlockSize)
+
+        -- 玩家选择快捷栏
+        ScriptSupportEvent:registerEvent([=[Player.SelectShortcut]=],
+                                         Player_SelectShortcut)
+        -- 注册监听器，玩家进入区域时执行Player_AreaIn函数
+        -- 第一个参数是监听的事件，第二个参数Player_AreaIn即事件发生时执行的函数
+        ScriptSupportEvent:registerEvent([=[Player.AreaIn]=], Player_AreaIn)
+        -- 注册监听器，玩家离开区域时执行Player_AreaOut函数
+        -- 第一个参数是监听的事件，第二个参数Player_AreaOut即事件发生时执行的函数
+        -- ScriptSupportEvent:registerEvent([=[Player.AreaOut]=], Player_AreaOut)
+        -- 注册监听器，点击生物时执行Player_ClickActor函数
+        -- ScriptSupportEvent:registerEvent([=[Player.ClickActor]=],
+        --                                  Player_ClickActor)
+        --  玩家穿上装备
+        ScriptSupportEvent:registerEvent([=[Player.EquipOn]=], Player_EquipOn)
+        -- 玩家新增道具
+        ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
+        -- 任意计时器发生变化事件
+        ScriptSupportEvent:registerEvent([=[minitimer.change]=], minitimerChange)
+        -- 玩家受到伤害
+        ScriptSupportEvent:registerEvent([=[Player.BeHurt]=], Player_BeHurt)
+        -- 任一玩家进入游戏	
+        ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.EnterGame]=],
+                                         Game_AnyPlayer_EnterGame)
+        -- 投掷物命中
+        ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
+                                         Actor_Projectile_Hit)
 
     end
+
     -- 方块被破坏
     function Block_DestroyBy(event)
-        Chat:sendSystemMsg("发生事件：方块被破坏")
-        print(event)
-        print(event.eventobjid)
-        PlayerAddScore(event.eventobjid, 1)
-        Chat:sendSystemMsg("创建特效")
-        Actor:playBodyEffect(event.eventobjid, 1203)
+        -- Chat:sendSystemMsg("发生事件：方块被破坏")
+        -- print(event)
+
+        Block:placeBlock(event.blockid, event.x, event.y, event.z, 0)
 
     end
     -- 初始玩家道具
     function GainItems(playerId)
-        -- 给玩家一个枕头,优先快捷栏
-        local itemId, itemCnt, prioritytype = 15500, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
-        -- 检测是否有空间
-        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
-        if ret == ErrorCode.OK then
-            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
-            local re = Creature:addModAttrib(playerId, 0, 100)
-            print('附魔结果', re)
-            Chat:sendSystemMsg('附魔结果' .. re)
+        -- 基础
+        for i, v in pairs(gainProps) do
+            print(gainProps[i].name)
+            -- 检测是否有空间
+            local ret = Backpack:enoughSpaceForItem(playerId,
+                                                    gainProps[i].itemId,
+                                                    gainProps[i].itemCnt)
+            if ret == ErrorCode.OK then
+                Player:gainItems(playerId, gainProps[i].itemId,
+                                 gainProps[i].itemCnt, gainProps[i].prioritytype)
+            end
         end
-        -- 给玩家一个信纸
-        local itemId, itemCnt, prioritytype = 11806, 1, 1 -- 物品的id, 物品的id, 1优先快捷栏/2优先背包栏
-        -- 检测是否有空间
-        local ret = Backpack:enoughSpaceForItem(playerId, itemId, itemCnt)
-        if ret == ErrorCode.OK then
-            Player:gainItems(playerId, itemId, itemCnt, prioritytype)
+
+        -- 道具测试
+        for i, v in pairs(props) do
+            print(props[i].name)
+            -- 检测是否有空间
+            local ret =
+                Backpack:enoughSpaceForItem(playerId, props[i].propId, 1)
+            if ret == ErrorCode.OK then
+                Player:gainItems(playerId, props[i].propId, 1, 1)
+            end
         end
 
     end
     -- 初始化玩家信息
-    function InitGamePlayer(isTestMode)
-        -- 获取本地玩家信息
-        local ret, playerId = Player:getMainPlayerUin()
-        if ret == ErrorCode.OK then
-            print('玩家id', playerId)
-            Chat:sendSystemMsg('玩家id' .. playerId)
-            -- 清空玩家的所有物品
-            Backpack:clearAllPack(playerId)
-            -- 可移动
-            -- Player:setActionAttrState(playerId, 1, false)
-            -- 可摆放方块
-            Player:setActionAttrState(playerId, 2, false)
-            -- 可操作方块
-            Player:setActionAttrState(playerId, 4, false)
-            -- 可破坏方块
-            Player:setActionAttrState(playerId, 8, false)
-            -- 可被攻击
-            Player:setActionAttrState(playerId, 64, false)
-            -- 加入玩家id组
-            Players[#Players + 1] = playerId
-        end
-        -- 设置队伍
-        if #Players == 1 then
-            Player:setTeam(playerId, Teams.red)
-            print('你是红队')
-            Chat:sendSystemMsg('你是红队')
-        elseif #Players == 2 then
-            Player:setTeam(playerId, Teams.blue)
-            print('你是蓝队')
-            Chat:sendSystemMsg('你是蓝队')
-        elseif #Players == 3 then
-            Player:setTeam(playerId, Teams.yellow)
-            print('你是黄队')
-            Chat:sendSystemMsg('你是黄队')
-        else
-            Player:setTeam(playerId, Teams.green)
-            print('你是绿队')
-            Chat:sendSystemMsg('你是绿队')
-        end
+    function InitGamePlayer(playerId)
+
+        -- 清空玩家的所有物品
+        Backpack:clearAllPack(playerId)
+        -- 可移动
+        -- Player:setActionAttrState(playerId, 1, false)
+        Actor:setActionAttrState(3402, 1, false)
+        -- 可摆放方块
+        Player:setActionAttrState(playerId, 2, false)
+        -- 可操作方块
+        Player:setActionAttrState(playerId, 4, false)
+        -- 可破坏方块
+        Player:setActionAttrState(playerId, 8, false)
+        -- 可被攻击
+        -- Player:setActionAttrState(playerId, 64, false)
+        -- 玩家移动方式
+        -- Player:changPlayerMoveType(playerId, 1)
+        -- 加入玩家id组
+        -- Players[#Players + 1] = playerId
+
         -- 默认给玩家的道具
         GainItems(playerId)
     end
@@ -229,60 +623,70 @@ return (function()
     -- 游戏规则
     function InitGameRule()
         Data.isRuleInit = true
-        GameRule.EndTime = 9 -- 游戏时长
-        GameRule.CurTime = 17.9 -- 当前时间
-        GameRule.LifeNum = 3 -- 玩家生命
-        GameRule.TeamNum = 2
-        GameRule.MaxPlayers = 2
+        GameRule.EndTime = 10 -- 游戏时长
+        -- GameRule.CurTime = 17.9 -- 当前时间
+        GameRule.LifeNum = 999 -- 玩家生命
+        -- GameRule.TeamNum = 2
+        GameRule.MaxPlayers = 12
         GameRule.CameraDir = 1 -- 1:正视角
         GameRule.StartMode = 0 -- 0:房主开启
-        GameRule.StartPlayers = 1
+        GameRule.StartPlayers = 2
         -- GameRule.ScoreKillMob = 3 --击杀特定怪物+3分
         GameRule.ScoreKillPlayer = 5 -- 击杀玩家+5分
-        GameRule.PlayerDieDrops = 1 -- 死亡掉落 1:true
+        -- GameRule.PlayerDieDrops = 0 -- 死亡掉落 1:true
         GameRule.DisplayScore = 1 -- 显示比分 1:true
+        GameRule.ViewMode = 1 -- 开启失败观战 0:不开启 1:开启
+        GameRule.BlockDestroy = 0 -- 是否可摧毁方块 0:否 1:是
+        GameRule.CountDown = 10
     end
     -------------------------------游戏事件-------------------------------
     Game_StartGame = function()
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
+        -- 初始化生成道具区域
+        -- 通过起点终点坐标创建区域
+        -- 第一个参数为区域起点坐标组成的表，即面朝北时，区域的左、下、后方的顶点坐标
+        -- 第二个参数为区域终点坐标组成的表，即面朝北时，区域的右、上、前方的顶点坐标
+        local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
+                                                          {x = 8, y = 8, z = 3})
+        -- 销毁指定区域，参数为区域id
+        -- Area:destroyArea(areaid)
+        -- Area:fillBlock(areaid, 112) -- 用112这个方块填充区域
+        -- Chat:sendSystemMsg("创建区域，id为" .. areaid)
+        -- print("创建区域，id为", areaid)
+
         -- 初始化玩家信息
-        InitGamePlayer(isTestMode)
+        -- InitGamePlayer(isTestMode)
 
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
+
+        print(trigger_obj)
         print('player die')
         Chat:sendSystemMsg('player ' .. 'die')
+        -- 他杀
         if (trigger_obj['toobjid']) then
             local killById = trigger_obj['toobjid']
-            print("killer id:", killById)
-            Chat:sendSystemMsg("killer id:" .. killById)
+            -- print("killer id:", killById)
+            -- Chat:sendSystemMsg("killer id:" .. killById)
+            PlayerAddScore(killById, 5)
         else
-            print("无toobjid")
+            -- print("无toobjid")
         end
+        -- 自杀
         if (trigger_obj['eventobjid']) then
             local playerId = trigger_obj['eventobjid']
-            print("be killed id:", playerId)
-            Chat:sendSystemMsg(playerId)
-            Chat:sendSystemMsg("be killed id" .. playerId)
+            -- print("be killed id:", playerId)
+            -- Chat:sendSystemMsg(playerId)
+            -- Chat:sendSystemMsg("be killed id" .. playerId)
+
         else
-            print("无eventobjid")
+            -- print("无eventobjid")
         end
     end
 
     -- 调用监听事件
     ListenEvents_MiniDemo();
-    -- 外挂脚本---start
-    local function Player_ClickActor(event)
-        Creature:setHpRecover(event.toobjid, 100)
-        Creature:setWalkSpeed(event.toobjid, 100)
-        Creature:setJumpPower(event.toobjid, 100)
-        -- 在聊天框显示
-        Chat:sendSystemMsg("objid为" .. event.toobjid ..
-                               "的生物的 当前生命值被设置为了100")
-    end
-    -- ScriptSupportEvent:registerEvent([=[Game.Run]=], Player_ClickActor)
-    -- 外挂脚本---end
 
 end)()

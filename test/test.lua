@@ -1,6 +1,4 @@
 return (function()
-    GameRule.CountDown = 10
-    local testNum = 1
 
     -- 地图常量数据
     local Cfg = {
@@ -83,19 +81,19 @@ return (function()
     local props = {
         jetBackpack = {
             name = '喷射背包',
-            duration = 6,
+            duration = 10,
             propId = 4226,
             desc = '喷射剩余时间:'
         },
         shield15 = {
             name = '15秒防护盾',
-            duration = 6,
+            duration = 15,
             propId = 4244,
             desc = '护盾剩余时间:'
         },
         armor = {
             name = '无敌装甲',
-            duration = 6,
+            duration = 25,
             propId = 4225,
             desc = '无法击飞剩余时间:'
         }
@@ -124,20 +122,20 @@ return (function()
         --     prioritytype = 1
         -- },
         -- 大枕头炸弹
-        bigBomb = {
-            name = '大枕头炸弹',
-            itemId = 4231,
-            itemCnt = 10,
-            prioritytype = 1
-        },
+        -- bigBomb = {
+        --     name = '大枕头炸弹',
+        --     itemId = 4231,
+        --     itemCnt = 10,
+        --     prioritytype = 1
+        -- },
 
-        -- 小枕头炸弹
-        smallBomb = {
-            name = '小枕头炸弹',
-            itemId = 4232,
-            itemCnt = 10,
-            prioritytype = 1
-        },
+        -- -- 小枕头炸弹
+        -- smallBomb = {
+        --     name = '小枕头炸弹',
+        --     itemId = 4232,
+        --     itemCnt = 10,
+        --     prioritytype = 1
+        -- }
         -- -- 小熊枕头
         -- bearPillow = {
         --     name = '小熊枕头',
@@ -197,14 +195,21 @@ return (function()
         -- -- 小花枕头
         -- crocodilePillow = {
         --     name = '小花枕头',
-        --     itemId = 4239,
+        --     itemId = 4240,
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
         -- -- 饼干枕头
         -- crocodilePillow = {
         --     name = '饼干枕头',
-        --     itemId = 4239,
+        --     itemId = 4241,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 玲娜贝儿抱枕
+        -- linaBellPillow = {
+        --     name = '玲娜贝儿抱枕',
+        --     itemId = 4242,
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
@@ -213,6 +218,13 @@ return (function()
         --     name = '计时器',
         --     itemId = 4243,
         --     itemCnt = 20,
+        --     prioritytype = 1
+        -- },
+        -- 库洛米抱枕q
+        -- kuromiPillow = {
+        --     name = '库洛米抱枕',
+        --     itemId = 4245,
+        --     itemCnt = 1,
         --     prioritytype = 1
         -- }
 
@@ -240,7 +252,7 @@ return (function()
         -- print(result)
         -- Chat:sendSystemMsg(result)
         Actor:killSelf(event.eventobjid)
-        testNum = testNum + 1
+
         -- local result1 = Backpack:actDestructEquip(event.eventobjid, 4226)
         -- 移除第一组物品
         --   local result = Backpack:actDestructEquip(event.eventobjid, 5)
@@ -285,8 +297,6 @@ return (function()
         -- -- local result =Actor:changeCustomModel(event.eventobjid, 3402)
         -- print(result)
         -- Chat:sendSystemMsg(result)
-        print('testNum', testNum)
-        Chat:sendSystemMsg('testNum' .. testNum)
 
     end
     local function Player_ClickActor(event)
@@ -360,8 +370,8 @@ return (function()
 
             local timerInfo = boomerang.timerPool[arg.timerid]
             if (timerInfo) then -- 是计时器池里面的计时器
-              -- print(timerInfo)
-              -- print(timerInfo[3])
+                -- print(timerInfo)
+                -- print(timerInfo[3])
                 timerInfo[1] = true -- 设置计时器结束工作标识isOver
                 local playerId = timerInfo[3]
                 if (arg.timername == props["jetBackpack"].name) then
@@ -399,8 +409,8 @@ return (function()
         end
     end
     local function Player_AreaIn(event)
-        print('玩家进入区域', event)
-        Chat:sendSystemMsg("发生事件：玩家进入区域")
+        -- print('玩家进入区域', event)
+        -- Chat:sendSystemMsg("发生事件：玩家进入区域")
         -- 生成羽毛
         local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
         -- local timerid = boomerang:getTimer("featherTimer1", event.eventobjid)
@@ -413,7 +423,7 @@ return (function()
     local function Player_EquipOn(event)
         local result, name = Item:getItemName(event.itemid)
         print('获得装备' .. name)
-        Chat:sendSystemMsg('获得装备' .. name)
+        -- Chat:sendSystemMsg('获得装备' .. name)
         -- 判断道具类型
         if (name == props["jetBackpack"].name) then
             print('获得飞行技能')
@@ -456,7 +466,7 @@ return (function()
         -- -- print(itemid)
         local result, name = Item:getItemName(event.itemid)
         print('玩家新增道具', name)
-        Chat:sendSystemMsg("发生事件：玩家新增道具" .. name)
+        -- Chat:sendSystemMsg("发生事件：玩家新增道具" .. name)
         -- Prop_Add(name)
     end
     -- 玩家开始攻击
@@ -472,19 +482,25 @@ return (function()
     local function Prop_Add(eventobjid, pName)
         print('玩家获得装备', pName)
 
-        -- 击退附魔
-        if (pName == '中型枕头') then
+        -- 击退附魔 “葱鸭”抱枕 咸鱼抱枕
+        if (pName == '中型枕头' or pName == '“葱鸭”抱枕' or pName ==
+            '咸鱼抱枕') then
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 1)
             -- 在聊天框显示
             Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+        elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕') then
+            -- 击退附魔（11为附魔id,1-5个等级）
+            Actor:addEnchant(eventobjid, 5, 11, 2)
+            -- 在聊天框显示
+            Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
         end
 
     end
     -- 玩家选择快捷栏
     local function Player_SelectShortcut(event)
-        print('玩家选择快捷栏', event)
-        Chat:sendSystemMsg("玩家选择快捷栏")
+        -- print('玩家选择快捷栏', event)
+        -- Chat:sendSystemMsg("玩家选择快捷栏")
         local result3, itemid = Item:getItemId(event.itemid)
         -- print(itemid)
         local result, name = Item:getItemName(event.itemid)
@@ -563,7 +579,7 @@ return (function()
 
     -- 方块被破坏
     function Block_DestroyBy(event)
-        Chat:sendSystemMsg("发生事件：方块被破坏")
+        -- Chat:sendSystemMsg("发生事件：方块被破坏")
         print(event)
         -- print(event.eventobjid)
         -- PlayerAddScore(event.eventobjid, 1)
@@ -694,18 +710,20 @@ return (function()
     -- 游戏规则
     function InitGameRule()
         Data.isRuleInit = true
-        GameRule.EndTime = 9 -- 游戏时长
-        GameRule.CurTime = 17.9 -- 当前时间
-        GameRule.LifeNum = 3 -- 玩家生命
-        GameRule.TeamNum = 2
-        GameRule.MaxPlayers = 2
+        GameRule.EndTime = 10 -- 游戏时长
+        -- GameRule.CurTime = 17.9 -- 当前时间
+        GameRule.LifeNum = 999 -- 玩家生命
+        -- GameRule.TeamNum = 2
+        GameRule.MaxPlayers = 12
         GameRule.CameraDir = 1 -- 1:正视角
         GameRule.StartMode = 0 -- 0:房主开启
-        GameRule.StartPlayers = 1
+        GameRule.StartPlayers = 2
         -- GameRule.ScoreKillMob = 3 --击杀特定怪物+3分
         GameRule.ScoreKillPlayer = 5 -- 击杀玩家+5分
         -- GameRule.PlayerDieDrops = 0 -- 死亡掉落 1:true
         GameRule.DisplayScore = 1 -- 显示比分 1:true
+        GameRule.ViewMode = 1 -- 开启失败观战 0:不开启 1:开启
+        GameRule.BlockDestroy = 0 -- 是否可摧毁方块 0:否 1:是
         GameRule.CountDown = 10
     end
     -------------------------------游戏事件-------------------------------
@@ -730,7 +748,7 @@ return (function()
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
-        -- testNum = testNum + 1
+
         print(trigger_obj)
         print('player die')
         Chat:sendSystemMsg('player ' .. 'die')
