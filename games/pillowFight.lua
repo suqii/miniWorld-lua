@@ -77,6 +77,29 @@ return (function()
         gensCnt = 0, -- 攻击手数量
         deadCnt = 0 -- 已死量数量
     }
+    -- 特效
+    local effects = {
+        smallJetBackpack = {
+            name = '喷射背包（大）',
+            particleId = 1000,
+            scale = 1
+        },
+        midJetBackpack = {
+            name = '喷射背包（大）',
+            particleId = 1001,
+            scale = 1
+        },
+        bigJetBackpack = {
+            name = '喷射背包（大）',
+            particleId = 1002,
+            scale = 1
+        },
+        shield15 = {name = '15秒防护盾', particleId = 1002, scale = 1},
+        armor = {name = '无敌装甲', particleId = 1002, scale = 1},
+        superShield = {name = '超级遁甲', particleId = 1002, scale = 1}
+    }
+    -- 是否开局增加道具
+    local propsFlag = true
     -- 游戏道具数据
     local props = {
         bigJetBackpack = {
@@ -105,9 +128,15 @@ return (function()
         },
         armor = {
             name = '无敌装甲',
-            duration = 25,
+            duration = 15,
             propId = 4225,
             desc = '无法击飞剩余时间:'
+        },
+        superShield = {
+            name = '超级遁甲',
+            duration = 25,
+            propId = 4248,
+            desc = '超级遁甲剩余时间:'
         }
     }
     -- 初始道具
@@ -125,7 +154,7 @@ return (function()
             itemId = 4228,
             itemCnt = 1,
             prioritytype = 1
-        }
+        },
         -- -- 哈士奇狗头枕头
         -- haskiPillow = {
         --     name = '哈士奇狗头枕头',
@@ -141,13 +170,13 @@ return (function()
         --     prioritytype = 1
         -- },
 
-        -- -- 小枕头炸弹
-        -- smallBomb = {
-        --     name = '小枕头炸弹',
-        --     itemId = 4232,
-        --     itemCnt = 10,
-        --     prioritytype = 1
-        -- }
+        -- 小枕头炸弹
+        smallBomb = {
+            name = '小枕头炸弹',
+            itemId = 4232,
+            itemCnt = 30,
+            prioritytype = 1
+        }
         -- -- 小熊枕头
         -- bearPillow = {
         --     name = '小熊枕头',
@@ -311,18 +340,29 @@ return (function()
         -- Chat:sendSystemMsg('time:' .. second)
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
-            -- print(arg)
+            print(arg)
             Chat:sendSystemMsg('计时器结束')
 
             local timerInfo = boomerang.timerPool[arg.timerid]
             if (timerInfo) then -- 是计时器池里面的计时器
-                -- print(timerInfo)
+                print(timerInfo)
                 -- print(timerInfo[3])
                 timerInfo[1] = true -- 设置计时器结束工作标识isOver
                 local playerId = timerInfo[3]
-                if (arg.timername == props["smallJetBackpack"].name..timerInfo[3] or
-                    arg.timername == props["midJetBackpack"].name..timerInfo[3] or
-                    arg.timername == props["bigJetBackpack"].name..timerInfo[3]) then
+                if (arg.timername == props["smallJetBackpack"].name ..
+                    timerInfo[3]) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    -- 停止特效
+                    stopEffect(playerId, effects["smallJetBackpack"].particleId)
+                    print(result)
+                    -- 喷射背包（中）
+                elseif (arg.timername == props["midJetBackpack"].name ..
+                    timerInfo[3]) then
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
                     --  移动方式变为默认
@@ -330,21 +370,56 @@ return (function()
                     -- 销毁装备
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
-                elseif (arg.timername == props["armor"].name..timerInfo[3]) then
+                    -- 停止特效
+                    stopEffect(playerId, effects["midJetBackpack"].particleId)
+                    -- 喷射背包（大）
+                elseif (arg.timername == props["bigJetBackpack"].name ..
+                    timerInfo[3]) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                    -- 停止特效
+                    stopEffect(playerId, effects["bigJetBackpack"].particleId)
+
+                    -- 无敌装甲
+                elseif (arg.timername == props["armor"].name .. timerInfo[3]) then
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
                     -- 销毁装备
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
                     Creature:addModAttrib(playerId, 26, 0)
+                    --  玩家可移动
                     Player:setActionAttrState(playerId, 1, true)
-                elseif (arg.timername == props["shield15"].name..timerInfo[3]) then
+                    -- 停止特效
+                    stopEffect(playerId, effects["armor"].particleId)
+                    -- 超级遁甲
+                elseif (arg.timername == props["superShield"].name ..
+                    timerInfo[3]) then
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
                     -- 销毁装备
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
+                    -- 玩家可被击退
                     Creature:addModAttrib(playerId, 26, 0)
+                    -- 停止特效
+                    stopEffect(playerId, effects["superShield"].particleId)
+
+                elseif (arg.timername == props["shield15"].name .. timerInfo[3]) then
+                    -- 删除计时器
+                    MiniTimer:deleteTimer(arg.timerid)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    print(result)
+                    -- 玩家可被击退
+                    Creature:addModAttrib(playerId, 26, 0)
+                    -- 停止特效
+                    stopEffect(playerId, effects["shield15"].particleId)
                 elseif (arg.timername == "featherTimer") then
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
@@ -376,8 +451,14 @@ return (function()
         if (name == props["smallJetBackpack"].name) then
             print('获得飞行技能')
             Chat:sendSystemMsg('获得飞行技能')
-            local timerid = boomerang:getTimer(props["smallJetBackpack"].name..event.eventobjid,
-                                               event.eventobjid)
+            -- 播放特效
+            playEffect(event.eventobjid, effects["smallJetBackpack"].particleId,
+                       effects["smallJetBackpack"].scale)
+            -- 设置计时器
+            local timerid = boomerang:getTimer(
+                                props["smallJetBackpack"].name ..
+                                    event.eventobjid, event.eventobjid)
+
             MiniTimer:startBackwardTimer(timerid,
                                          props["smallJetBackpack"].duration)
             MiniTimer:showTimerTips({0}, timerid,
@@ -386,8 +467,13 @@ return (function()
         elseif (name == props["midJetBackpack"].name) then
             print('获得飞行技能')
             Chat:sendSystemMsg('获得飞行技能')
-            local timerid = boomerang:getTimer(props["midJetBackpack"].name..event.eventobjid,
-                                               event.eventobjid)
+            -- 播放特效
+            playEffect(event.eventobjid, effects["midJetBackpack"].particleId,
+                       effects["midJetBackpack"].scale)
+            -- 设置计时器
+            local timerid = boomerang:getTimer(
+                                props["midJetBackpack"].name .. event.eventobjid,
+                                event.eventobjid)
             MiniTimer:startBackwardTimer(timerid,
                                          props["midJetBackpack"].duration)
             MiniTimer:showTimerTips({0}, timerid, props["midJetBackpack"].desc,
@@ -396,8 +482,13 @@ return (function()
         elseif (name == props["bigJetBackpack"].name) then
             print('获得飞行技能')
             Chat:sendSystemMsg('获得飞行技能')
-            local timerid = boomerang:getTimer(props["bigJetBackpack"].name..event.eventobjid,
-                                               event.eventobjid)
+            -- 播放特效
+            playEffect(event.eventobjid, effects["bigJetBackpack"].particleId,
+                       effects["bigJetBackpack"].scale)
+            -- 设置计时器
+            local timerid = boomerang:getTimer(
+                                props["bigJetBackpack"].name .. event.eventobjid,
+                                event.eventobjid)
             MiniTimer:startBackwardTimer(timerid,
                                          props["bigJetBackpack"].duration)
             MiniTimer:showTimerTips({0}, timerid, props["bigJetBackpack"].desc,
@@ -406,19 +497,44 @@ return (function()
         elseif (name == props["armor"].name) then
             print('获得无法击飞技能')
             Chat:sendSystemMsg('获得无法击飞技能')
-            local timerid = boomerang:getTimer(props["armor"].name..event.eventobjid,
-                                               event.eventobjid)
+            -- 播放特效
+            playEffect(event.eventobjid, effects["armor"].particleId,
+                       effects["armor"].scale)
+            -- 设置计时器
+            local timerid = boomerang:getTimer(
+                                props["armor"].name .. event.eventobjid,
+                                event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
             MiniTimer:showTimerTips({0}, timerid, props["armor"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
             Player:setActionAttrState(event.eventobjid, 1, false)
+        elseif (name == props["superShield"].name) then
+            print('获得超级遁甲技能')
+            Chat:sendSystemMsg('获得超级遁甲技能')
+            -- 播放特效
+            playEffect(event.eventobjid, effects["superShield"].particleId,
+                       effects["superShield"].scale)
+            -- 设置计时器
+            local timerid = boomerang:getTimer(
+                                props["superShield"].name .. event.eventobjid,
+                                event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid, props["superShield"].duration)
+            MiniTimer:showTimerTips({0}, timerid, props["superShield"].desc,
+                                    true)
+            -- 击退概率抵抗值, 0.2表示有20%概率不被击退
+            -- 击退概率抵抗值, 0.2表示有20%概率不被击退
+            Creature:addModAttrib(event.eventobjid, 26, 1)
         elseif (name == props["shield15"].name) then
             print('获得15s护盾技能1')
             Chat:sendSystemMsg('获得15s护盾技能')
-
-            local timerid = boomerang:getTimer(props["shield15"].name..event.eventobjid,
-                                               event.eventobjid)
+            -- 播放特效
+            playEffect(event.eventobjid, effects["shield15"].particleId,
+                       effects["shield15"].scale)
+            -- 设置计时器
+            local timerid = boomerang:getTimer(
+                                props["shield15"].name .. event.eventobjid,
+                                event.eventobjid)
             print(timerid)
             MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
             MiniTimer:showTimerTips({0}, timerid, props["shield15"].desc, true)
@@ -468,7 +584,8 @@ return (function()
         if (event.itemid == props["smallJetBackpack"].propId or event.itemid ==
             props["midJetBackpack"].propId or event.itemid ==
             props["bigJetBackpack"].propId or event.itemid ==
-            props["shield15"].propId or event.itemid == props["armor"].propId) then
+            props["shield15"].propId or event.itemid == props["armor"].propId or
+            event.itemid == props["superShield"].propId) then
             Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
         else
             Prop_Add(event.eventobjid, name)
@@ -492,6 +609,7 @@ return (function()
         InitGamePlayer(event.eventobjid)
 
     end
+
     -- 监听事件
     function ListenEvents_MiniDemo()
         -- 游戏事件---
@@ -506,15 +624,9 @@ return (function()
         -- 玩家选择快捷栏
         ScriptSupportEvent:registerEvent([=[Player.SelectShortcut]=],
                                          Player_SelectShortcut)
-        -- 注册监听器，玩家进入区域时执行Player_AreaIn函数
-        -- 第一个参数是监听的事件，第二个参数Player_AreaIn即事件发生时执行的函数
+        -- 玩家进入区域
         ScriptSupportEvent:registerEvent([=[Player.AreaIn]=], Player_AreaIn)
-        -- 注册监听器，玩家离开区域时执行Player_AreaOut函数
-        -- 第一个参数是监听的事件，第二个参数Player_AreaOut即事件发生时执行的函数
-        -- ScriptSupportEvent:registerEvent([=[Player.AreaOut]=], Player_AreaOut)
-        -- 注册监听器，点击生物时执行Player_ClickActor函数
-        -- ScriptSupportEvent:registerEvent([=[Player.ClickActor]=],
-        --                                  Player_ClickActor)
+
         --  玩家穿上装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOn]=], Player_EquipOn)
         -- 玩家新增道具
@@ -556,13 +668,15 @@ return (function()
         end
 
         -- 道具测试
-        for i, v in pairs(props) do
-            print(props[i].name)
-            -- 检测是否有空间
-            local ret =
-                Backpack:enoughSpaceForItem(playerId, props[i].propId, 1)
-            if ret == ErrorCode.OK then
-                Player:gainItems(playerId, props[i].propId, 1, 1)
+        if propsFlag then
+            for i, v in pairs(props) do
+                print(props[i].name)
+                -- 检测是否有空间
+                local ret = Backpack:enoughSpaceForItem(playerId,
+                                                        props[i].propId, 1)
+                if ret == ErrorCode.OK then
+                    Player:gainItems(playerId, props[i].propId, 1, 1)
+                end
             end
         end
 
@@ -592,6 +706,15 @@ return (function()
         GainItems(playerId)
     end
 
+    -- 给玩家播放特效
+    function playEffect(playerId, particleId, scale)
+        Scale = scale or 1
+        Actor:playBodyEffectById(playerId, particleId, Scale)
+    end
+    -- 停止玩家特效
+    function stopEffect(playerId, particleId)
+        Actor:stopBodyEffectById(playerId, particleId)
+    end
     -- 设置玩家分数
     function PlayerAddScore(playerId, addScore)
         if playerId <= 0 then return end
