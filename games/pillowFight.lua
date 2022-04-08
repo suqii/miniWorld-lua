@@ -98,6 +98,8 @@ return (function()
         armor = {name = '无敌装甲', particleId = 1185, scale = 1},
         superShield = {name = '超级遁甲', particleId = 1278, scale = 2}
     }
+    -- 装备标识
+    local isWare = false
     -- 是否开局增加道具
     local propsFlag = true
     -- 游戏道具数据
@@ -331,6 +333,7 @@ return (function()
         end
         return timerid
     end
+
     -- timerid, timername
     local minitimerChange = function(arg)
         -- print(arg)
@@ -445,7 +448,7 @@ return (function()
     -- 玩家穿上装备
     local function Player_EquipOn(event)
         local result, name = Item:getItemName(event.itemid)
-        print('获得装备' .. name)
+        -- print('获得装备' .. name)
         -- Chat:sendSystemMsg('获得装备' .. name)
         -- 判断道具类型
         if (name == props["smallJetBackpack"].name) then
@@ -476,8 +479,8 @@ return (function()
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid,
                                          props["midJetBackpack"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["midJetBackpack"].desc,
-                                    true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                    props["midJetBackpack"].desc, true)
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["bigJetBackpack"].name) then
             print('获得飞行技能')
@@ -491,8 +494,8 @@ return (function()
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid,
                                          props["bigJetBackpack"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["bigJetBackpack"].desc,
-                                    true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                    props["bigJetBackpack"].desc, true)
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["armor"].name) then
             print('获得无法击飞技能')
@@ -505,7 +508,8 @@ return (function()
                                 props["armor"].name .. event.eventobjid,
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["armor"].desc, true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                    props["armor"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
             Player:setActionAttrState(event.eventobjid, 1, false)
@@ -520,8 +524,8 @@ return (function()
                                 props["superShield"].name .. event.eventobjid,
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["superShield"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["superShield"].desc,
-                                    true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                    props["superShield"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
@@ -537,7 +541,8 @@ return (function()
                                 event.eventobjid)
             print(timerid)
             MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["shield15"].desc, true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                    props["shield15"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
         end
@@ -548,7 +553,7 @@ return (function()
     local function Player_AddItem(event)
 
         local result, name = Item:getItemName(event.itemid)
-        print('玩家新增道具', name)
+        -- print('玩家新增道具', name)
         -- Chat:sendSystemMsg("发生事件：玩家新增道具" .. name)
         -- Prop_Add(name)
     end
@@ -641,6 +646,8 @@ return (function()
         -- 投掷物命中
         ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
                                          Actor_Projectile_Hit)
+        -- 玩家脱下装备
+        ScriptSupportEvent:registerEvent([=[Player.EquipOff]=], Player_EquipOff)
 
     end
 
@@ -763,6 +770,29 @@ return (function()
         GameRule.CountDown = 10
     end
     -------------------------------游戏事件-------------------------------
+    Player_EquipOff = function(e)
+        print(boomerang.timerPool)
+        -- print('tset',e)
+        -- Chat:sendSystemMsg('test' .. e)
+        -- print(e.eventobjid, e.itemid)
+        -- isWare = false
+        -- local re = Backpack:actEquipUpByResID(e.eventobjid, e.itemid)
+        -- print(re)
+        -- 输出boomerang的timerPool
+        local name = ""
+        for k, v in pairs(props) do
+            if v.propId == e.itemid then
+                -- print(v.name)
+                name = v.name
+            end
+        end
+        local id = boomerang:getTimer(name .. e.eventobjid, e.eventobjid)
+        -- 停止计时器
+        local re = MiniTimer:stopTimer(id-1)
+        print(id)
+        print(re)
+
+    end
     Game_StartGame = function()
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
@@ -807,6 +837,19 @@ return (function()
         else
             -- print("无eventobjid")
         end
+        -- 清除所有特效
+        --   for i, v in pairs(effects) do
+        --     print(gainProps[i].name)
+        --     -- -- 检测是否有空间
+        --     -- local ret = Backpack:enoughSpaceForItem(playerId,
+        --     --                                         gainProps[i].itemId,
+        --     --                                         gainProps[i].itemCnt)
+        --     -- if ret == ErrorCode.OK then
+        --     --     Player:gainItems(playerId, gainProps[i].itemId,
+        --     --                      gainProps[i].itemCnt, gainProps[i].prioritytype)
+        --     -- end
+        -- end
+
     end
 
     -- 调用监听事件
