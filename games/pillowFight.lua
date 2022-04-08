@@ -80,23 +80,23 @@ return (function()
     -- 特效
     local effects = {
         smallJetBackpack = {
-            name = '喷射背包（大）',
-            particleId = 1000,
+            name = '喷射背包（小）',
+            particleId = 1312,
             scale = 1
         },
         midJetBackpack = {
-            name = '喷射背包（大）',
-            particleId = 1001,
-            scale = 1
+            name = '喷射背包（中）',
+            particleId = 1312,
+            scale = 2
         },
         bigJetBackpack = {
             name = '喷射背包（大）',
-            particleId = 1002,
+            particleId = 1194,
             scale = 1
         },
-        shield15 = {name = '15秒防护盾', particleId = 1002, scale = 1},
-        armor = {name = '无敌装甲', particleId = 1002, scale = 1},
-        superShield = {name = '超级遁甲', particleId = 1002, scale = 1}
+        shield15 = {name = '15秒防护盾', particleId = 1028, scale = 1},
+        armor = {name = '无敌装甲', particleId = 1185, scale = 1},
+        superShield = {name = '超级遁甲', particleId = 1278, scale = 2}
     }
     -- 是否开局增加道具
     local propsFlag = true
@@ -176,7 +176,7 @@ return (function()
             itemId = 4232,
             itemCnt = 30,
             prioritytype = 1
-        }
+        },
         -- -- 小熊枕头
         -- bearPillow = {
         --     name = '小熊枕头',
@@ -248,12 +248,12 @@ return (function()
         --     prioritytype = 1
         -- },
         -- -- 玲娜贝儿抱枕
-        -- linaBellPillow = {
-        --     name = '玲娜贝儿抱枕',
-        --     itemId = 4242,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        linaBellPillow = {
+            name = '玲娜贝儿抱枕',
+            itemId = 4242,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- 计时器
         -- crocodilePillow = {
         --     name = '计时器',
@@ -262,12 +262,12 @@ return (function()
         --     prioritytype = 1
         -- },
         -- 库洛米抱枕q
-        -- kuromiPillow = {
-        --     name = '库洛米抱枕',
-        --     itemId = 4245,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        kuromiPillow = {
+            name = '库洛米抱枕',
+            itemId = 4245,
+            itemCnt = 1,
+            prioritytype = 1
+        }
 
     }
 
@@ -461,7 +461,7 @@ return (function()
 
             MiniTimer:startBackwardTimer(timerid,
                                          props["smallJetBackpack"].duration)
-            MiniTimer:showTimerTips({0}, timerid,
+            MiniTimer:showTimerTips({event.eventobjid}, timerid,
                                     props["smallJetBackpack"].desc, true)
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["midJetBackpack"].name) then
@@ -476,7 +476,7 @@ return (function()
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid,
                                          props["midJetBackpack"].duration)
-            MiniTimer:showTimerTips({0}, timerid, props["midJetBackpack"].desc,
+            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["midJetBackpack"].desc,
                                     true)
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["bigJetBackpack"].name) then
@@ -491,7 +491,7 @@ return (function()
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid,
                                          props["bigJetBackpack"].duration)
-            MiniTimer:showTimerTips({0}, timerid, props["bigJetBackpack"].desc,
+            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["bigJetBackpack"].desc,
                                     true)
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["armor"].name) then
@@ -505,7 +505,7 @@ return (function()
                                 props["armor"].name .. event.eventobjid,
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
-            MiniTimer:showTimerTips({0}, timerid, props["armor"].desc, true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["armor"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
             Player:setActionAttrState(event.eventobjid, 1, false)
@@ -520,7 +520,7 @@ return (function()
                                 props["superShield"].name .. event.eventobjid,
                                 event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, props["superShield"].duration)
-            MiniTimer:showTimerTips({0}, timerid, props["superShield"].desc,
+            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["superShield"].desc,
                                     true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
@@ -537,7 +537,7 @@ return (function()
                                 event.eventobjid)
             print(timerid)
             MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
-            MiniTimer:showTimerTips({0}, timerid, props["shield15"].desc, true)
+            MiniTimer:showTimerTips({event.eventobjid}, timerid, props["shield15"].desc, true)
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
         end
@@ -600,7 +600,7 @@ return (function()
     end
     local function Player_BeHurt(event)
         -- Chat:sendSystemMsg("玩家受伤开始加血")
-        Actor:addHP(event.eventobjid, 100)
+        Actor:addHP(event.eventobjid, 10)
 
     end
     local function Game_AnyPlayer_EnterGame(event)
@@ -696,7 +696,7 @@ return (function()
         -- 可破坏方块
         Player:setActionAttrState(playerId, 8, false)
         -- 可被攻击
-        -- Player:setActionAttrState(playerId, 64, false)
+        Player:setActionAttrState(playerId, 64, true)
         -- 玩家移动方式
         -- Player:changPlayerMoveType(playerId, 1)
         -- 加入玩家id组
@@ -748,7 +748,7 @@ return (function()
         Data.isRuleInit = true
         GameRule.EndTime = 10 -- 游戏时长
         -- GameRule.CurTime = 17.9 -- 当前时间
-        GameRule.LifeNum = 999 -- 玩家生命
+        GameRule.LifeNum = 9 -- 玩家生命
         -- GameRule.TeamNum = 2
         GameRule.MaxPlayers = 12
         GameRule.CameraDir = 1 -- 1:正视角
