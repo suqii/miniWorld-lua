@@ -314,14 +314,23 @@ return (function()
     }
     -- 获得一个计时器id
     function boomerang:getTimer(timerName, playerId)
+        print("开始检测是否有重复")
         -- print(timerName)
         timername = timerName or 'default'
         local timerid
         -- 查找一个停止的计时器
         for k, v in pairs(self.timerPool) do
-            if (v[1] and v[2] == timername) then
-                v[1] = false -- 设置计时器开始工作标识isOver
-                timerid = k
+            print("v1", v[1])
+            print("v2", v[2])
+            if (v[2] == timername) then
+                v[1] = true -- 设置计时器开始工作标识isOver
+
+                print("当前时间池", self.timerPool)
+                print("计时器重复", k)
+
+                timerid = -1
+                -- 恢复计时器
+                -- MiniTimer:resumeTimer(k)
                 break
             end
         end
@@ -331,8 +340,62 @@ return (function()
             result, timerid = MiniTimer:createTimer(timername, nil, true)
             self.timerPool[timerid] = {false, timername, playerId}
         end
+        print("return的计时器id", timerid)
         return timerid
     end
+    function boomerang:getTimer2(timerName, playerId)
+        -- print("开始检测是否有重复")
+        -- print(timerName)
+        timername = timerName or 'default'
+        local timerid
+        -- 查找一个停止的计时器
+        for k, v in pairs(self.timerPool) do
+            print("v1", v[1])
+            print("v2", v[2])
+            if (v[2] == timername) then
+                v[1] = true -- 设置计时器开始工作标识isOver
+
+                -- print("当前时间池", self.timerPool)
+                -- print("计时器重复", k)
+                timerid = k
+                -- 恢复计时器
+                -- MiniTimer:resumeTimer(k)
+                break
+            end
+        end
+
+        return timerid
+    end
+    -- -- 获得一个计时器id
+    -- function boomerang:getTimer(timerName, playerId)
+    --   print("开始检测是否有重复")
+    --     -- print(timerName)
+    --     timername = timerName or 'default'
+    --     local timerid
+    --     -- 查找一个停止的计时器
+    --     for k, v in pairs(self.timerPool) do
+    --       print(v)
+    --       print("v1", v[1])
+    --       print("v2", v[2])
+    --         if (v[1] and v[2] == timername) then
+    --             v[1] = false -- 设置计时器开始工作标识isOver
+    --             timerid = -1
+    --             print("当前时间池",self.timerPool)
+    --             print("计时器重复",k)
+    --             -- 恢复计时器
+    --             MiniTimer:resumeTimer(k)
+    --             break
+    --         end
+    --     end
+    --     -- 没找到则创建一个计时器，并加入计时器池中
+    --     if (not (timerid)) then
+    --         local result
+    --         result, timerid = MiniTimer:createTimer(timername, nil, true)
+    --         self.timerPool[timerid] = {false, timername, playerId}
+    --     end
+    --     print("return的计时器id",timerid)
+    --     return timerid
+    -- end
 
     -- timerid, timername
     local minitimerChange = function(arg)
@@ -462,10 +525,21 @@ return (function()
                                 props["smallJetBackpack"].name ..
                                     event.eventobjid, event.eventobjid)
 
-            MiniTimer:startBackwardTimer(timerid,
-                                         props["smallJetBackpack"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid,
-                                    props["smallJetBackpack"].desc, true)
+            if (timerid > -1) then
+                MiniTimer:startBackwardTimer(timerid,
+                                             props["smallJetBackpack"].duration)
+                MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                        props["smallJetBackpack"].desc, true)
+            else
+                print('重启此计时器')
+                local id = boomerang:getTimer2(
+                               props["smallJetBackpack"].name ..
+                                   event.eventobjid, event.eventobjid)
+                MiniTimer:resumeTimer(id)
+                MiniTimer:showTimerTips({event.eventobjid}, id,
+                                        props["smallJetBackpack"].desc, true)
+            end
+
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["midJetBackpack"].name) then
             print('获得飞行技能')
@@ -477,10 +551,21 @@ return (function()
             local timerid = boomerang:getTimer(
                                 props["midJetBackpack"].name .. event.eventobjid,
                                 event.eventobjid)
-            MiniTimer:startBackwardTimer(timerid,
-                                         props["midJetBackpack"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid,
-                                    props["midJetBackpack"].desc, true)
+
+            if (timerid > -1) then
+                MiniTimer:startBackwardTimer(timerid,
+                                             props["midJetBackpack"].duration)
+                MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                        props["midJetBackpack"].desc, true)
+            else
+                print('重启此计时器')
+                local id = boomerang:getTimer2(
+                               props["midJetBackpack"].name .. event.eventobjid,
+                               event.eventobjid)
+                MiniTimer:resumeTimer(id)
+                MiniTimer:showTimerTips({event.eventobjid}, id,
+                                        props["midJetBackpack"].desc, true)
+            end
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["bigJetBackpack"].name) then
             print('获得飞行技能')
@@ -492,10 +577,21 @@ return (function()
             local timerid = boomerang:getTimer(
                                 props["bigJetBackpack"].name .. event.eventobjid,
                                 event.eventobjid)
-            MiniTimer:startBackwardTimer(timerid,
-                                         props["bigJetBackpack"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid,
-                                    props["bigJetBackpack"].desc, true)
+            if (timerid > -1) then
+                MiniTimer:startBackwardTimer(timerid,
+                                             props["bigJetBackpack"].duration)
+                MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                        props["bigJetBackpack"].desc, true)
+            else
+                print('重启此计时器')
+                local id = boomerang:getTimer2(
+                               props["bigJetBackpack"].name .. event.eventobjid,
+                               event.eventobjid)
+                MiniTimer:resumeTimer(id)
+                MiniTimer:showTimerTips({event.eventobjid}, id,
+                                        props["bigJetBackpack"].desc, true)
+            end
+
             Player:changPlayerMoveType(event.eventobjid, 1)
         elseif (name == props["armor"].name) then
             print('获得无法击飞技能')
@@ -507,9 +603,20 @@ return (function()
             local timerid = boomerang:getTimer(
                                 props["armor"].name .. event.eventobjid,
                                 event.eventobjid)
-            MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid,
-                                    props["armor"].desc, true)
+
+            if (timerid > -1) then
+                MiniTimer:startBackwardTimer(timerid, props["armor"].duration)
+                MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                        props["armor"].desc, true)
+            else
+                print('重启此计时器')
+                local id = boomerang:getTimer2(
+                               props["armor"].name .. event.eventobjid,
+                               event.eventobjid)
+                MiniTimer:resumeTimer(id)
+                MiniTimer:showTimerTips({event.eventobjid}, id,
+                                        props["armor"].desc, true)
+            end
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
             Player:setActionAttrState(event.eventobjid, 1, false)
@@ -523,9 +630,21 @@ return (function()
             local timerid = boomerang:getTimer(
                                 props["superShield"].name .. event.eventobjid,
                                 event.eventobjid)
-            MiniTimer:startBackwardTimer(timerid, props["superShield"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid,
-                                    props["superShield"].desc, true)
+
+            if (timerid > -1) then
+                MiniTimer:startBackwardTimer(timerid,
+                                             props["superShield"].duration)
+                MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                        props["superShield"].desc, true)
+            else
+                print('重启此计时器')
+                local id = boomerang:getTimer2(
+                               props["superShield"].name .. event.eventobjid,
+                               event.eventobjid)
+                MiniTimer:resumeTimer(id)
+                MiniTimer:showTimerTips({event.eventobjid}, id,
+                                        props["superShield"].desc, true)
+            end
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
@@ -540,9 +659,20 @@ return (function()
                                 props["shield15"].name .. event.eventobjid,
                                 event.eventobjid)
             print(timerid)
-            MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
-            MiniTimer:showTimerTips({event.eventobjid}, timerid,
-                                    props["shield15"].desc, true)
+
+            if (timerid > -1) then
+                MiniTimer:startBackwardTimer(timerid, props["shield15"].duration)
+                MiniTimer:showTimerTips({event.eventobjid}, timerid,
+                                        props["shield15"].desc, true)
+            else
+                print('重启此计时器')
+                local id = boomerang:getTimer2(
+                               props["shield15"].name .. event.eventobjid,
+                               event.eventobjid)
+                MiniTimer:resumeTimer(id)
+                MiniTimer:showTimerTips({event.eventobjid}, id,
+                                        props["shield15"].desc, true)
+            end
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             Creature:addModAttrib(event.eventobjid, 26, 1)
         end
@@ -579,6 +709,10 @@ return (function()
     end
     -- 玩家选择快捷栏
     local function Player_SelectShortcut(event)
+        -- 将玩家现装备的装备脱下
+       local re =  Backpack:actEquipOffByEquipID(event.eventobjid, 4)
+       print("脱下装备返回状态",re)
+
         -- print('玩家选择快捷栏', event)
         -- Chat:sendSystemMsg("玩家选择快捷栏")
         local result3, itemid = Item:getItemId(event.itemid)
@@ -704,6 +838,10 @@ return (function()
         Player:setActionAttrState(playerId, 8, false)
         -- 可被攻击
         Player:setActionAttrState(playerId, 64, true)
+        -- 可丢弃道具
+        -- Player:setActionAttrState(playerId, 2048, false)
+        Player:setItemAttAction(playerId, 4226, 1, false)
+
         -- 玩家移动方式
         -- Player:changPlayerMoveType(playerId, 1)
         -- 加入玩家id组
@@ -712,7 +850,27 @@ return (function()
         -- 默认给玩家的道具
         GainItems(playerId)
     end
+    -- 清除玩家所有的计时器
+    function ClearAllTimer(playerId)
+        -- 清除玩家的所有计时器
+        Timer:clearAllTimer(playerId)
+    end
 
+    -- 清除所有特效
+    function initEffect(playerId)
+        -- print("清除所有特效") 
+        -- 清除所有特效
+        for i, v in pairs(effects) do stopEffect(playerId, v.particleId) end
+    end
+    -- 清除玩家叠加状态
+    function clearPlayerState(playerId)
+        -- 玩家可被击退
+        Creature:addModAttrib(playerId, 26, 0)
+        --  玩家可移动
+        Player:setActionAttrState(playerId, 1, true)
+        --  移动方式变为默认
+        Player:changPlayerMoveType(playerId, 0)
+    end
     -- 给玩家播放特效
     function playEffect(playerId, particleId, scale)
         Scale = scale or 1
@@ -771,7 +929,7 @@ return (function()
     end
     -------------------------------游戏事件-------------------------------
     Player_EquipOff = function(e)
-        print(boomerang.timerPool)
+        print("脱下装备时的时间池：", boomerang.timerPool)
         -- print('tset',e)
         -- Chat:sendSystemMsg('test' .. e)
         -- print(e.eventobjid, e.itemid)
@@ -786,11 +944,19 @@ return (function()
                 name = v.name
             end
         end
-        local id = boomerang:getTimer(name .. e.eventobjid, e.eventobjid)
+        local id = boomerang:getTimer2(name .. e.eventobjid, e.eventobjid)
+        print("停止的id:", id)
         -- 停止计时器
-        local re = MiniTimer:stopTimer(id-1)
-        print(id)
-        print(re)
+        local re = MiniTimer:pauseTimer(id)
+        -- 清除计时器显示
+        MiniTimer:showTimerTips({e.eventobjid}, id, name, false)
+        -- 清除所有特效
+        initEffect(e.eventobjid)
+        -- 清楚玩家叠加状态
+        clearPlayerState(e.eventobjid)
+        -- -- 销毁装备
+        -- local result = Backpack:actDestructEquip(e.eventobjid, 4)
+        -- print(result)
 
     end
     Game_StartGame = function()
@@ -838,17 +1004,9 @@ return (function()
             -- print("无eventobjid")
         end
         -- 清除所有特效
-        --   for i, v in pairs(effects) do
-        --     print(gainProps[i].name)
-        --     -- -- 检测是否有空间
-        --     -- local ret = Backpack:enoughSpaceForItem(playerId,
-        --     --                                         gainProps[i].itemId,
-        --     --                                         gainProps[i].itemCnt)
-        --     -- if ret == ErrorCode.OK then
-        --     --     Player:gainItems(playerId, gainProps[i].itemId,
-        --     --                      gainProps[i].itemCnt, gainProps[i].prioritytype)
-        --     -- end
-        -- end
+        initEffect(trigger_obj['eventobjid'])
+        -- 清楚玩家叠加状态
+        clearPlayerState(trigger_obj['eventobjid'])
 
     end
 
