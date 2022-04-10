@@ -529,10 +529,20 @@ return (function()
         if not Data.isRuleInit then InitGameRule() end
         -- 初始化生成道具区域
         -- 通过起点终点坐标创建区域
-        -- 第一个参数为区域起点坐标组成的表，即面朝北时，区域的左、下、后方的顶点坐标
-        -- 第二个参数为区域终点坐标组成的表，即面朝北时，区域的右、上、前方的顶点坐标
         local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
                                                           {x = 8, y = 8, z = 3})
+        -- 在此位置播放特效
+        World:playParticalEffect(8, 7, 3, 1001, 1)
+        -- 创建一个文字板
+        local title = "#R 道具区" -- 文字内容
+        local font = 16 -- 字体大小
+        local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+        local itype = 1 -- 文字板编号
+        -- 创建一个文字板信息，存到graphicsInfo中
+        local graphicsInfo =
+            Graphics:makeGraphicsText(title, font, alpha, itype)
+        local re = Graphics:createGraphicsTxtByPos(8, 8, 3, graphicsInfo, 0, 0)
+        print("文字信息：", re)
         -- 销毁指定区域，参数为区域id
         -- Area:destroyArea(areaid)
         -- Area:fillBlock(areaid, 112) -- 用112这个方块填充区域
