@@ -1,5 +1,7 @@
 return (function()
 
+    -- 道具区域id
+    local propAreaId = 0
     -- 地图常量数据
     local Cfg = {
         map_size = 30, -- 地图大小
@@ -318,8 +320,8 @@ return (function()
         local timerid
         -- 查找一个停止的计时器
         for k, v in pairs(self.timerPool) do
-            print("v1", v[1])
-            print("v2", v[2])
+            -- print("v1", v[1])
+            -- print("v2", v[2])
             if (v[2] == timername) then
                 v[1] = true -- 设置计时器开始工作标识isOver
 
@@ -351,6 +353,8 @@ return (function()
                                          Player_SelectShortcut)
         -- 玩家进入区域
         ScriptSupportEvent:registerEvent([=[Player.AreaIn]=], Player_AreaIn)
+        -- 玩家离开区域
+        ScriptSupportEvent:registerEvent([=[Player.AreaOut]=], Player_AreaOut)
 
         --  玩家穿上装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOn]=], Player_EquipOn)
@@ -531,6 +535,7 @@ return (function()
         -- 通过起点终点坐标创建区域
         local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
                                                           {x = 8, y = 8, z = 3})
+        propAreaId = areaid
         -- 在此位置播放特效
         World:playParticalEffect(8, 7, 3, 1001, 1)
         -- 创建一个文字板
@@ -614,15 +619,34 @@ return (function()
             Prop_Add(event.eventobjid, name)
         end
     end
+    -- 玩家进入区域
     Player_AreaIn = function(event)
         -- print('玩家进入区域', event)
         -- Chat:sendSystemMsg("发生事件：玩家进入区域")
         -- 生成羽毛
-        local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
-        -- local timerid = boomerang:getTimer("featherTimer1", event.eventobjid)
-        -- MiniTimer:startBackwardTimer(timerid, 5)
-        -- MiniTimer:showTimerTips({0}, timerid, "5秒后即将产生羽毛：",
-        --                         true)
+        -- local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
+        if (event.areaid == propAreaId) then
+            local timerid = boomerang:getTimer("featherTimer" ..
+                                                   event.eventobjid,
+                                               event.eventobjid)
+            MiniTimer:startBackwardTimer(timerid, 5)
+            MiniTimer:showTimerTips({0}, timerid,
+                                    "5秒后即将产生羽毛：", true)
+        end
+
+    end
+    -- 玩家离开区域
+    Player_AreaOut = function(event)
+        if (event.areaid == propAreaId) then
+            -- print('玩家离开道具区域：', event)
+            local id = boomerang:getTimer2("featherTimer" .. event.eventobjid,
+                                           event.eventobjid)
+            -- print("道具区域计时器id:", id)
+            -- 删除计时器
+            MiniTimer:deleteTimer(id)
+            -- 将上一个道具区域计时器id移除
+            boomerang.timerPool[id] = nil
+        end
 
     end
     -- 玩家穿上装备
@@ -893,14 +917,16 @@ return (function()
                     Creature:addModAttrib(playerId, 26, 0)
                     -- 停止特效
                     stopEffect(playerId, effects["shield15"].particleId)
-                elseif (arg.timername == "featherTimer") then
+                elseif (arg.timername == "featherTimer" .. timerInfo[3]) then
+
                     -- 删除计时器
                     MiniTimer:deleteTimer(arg.timerid)
                     -- 生成羽毛
                     local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
 
                 end
-
+                -- 将boomerang.timerPool[arg.timerid]移除
+                boomerang.timerPool[arg.timerid] = nil
             end
         end
     end
