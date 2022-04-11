@@ -3,7 +3,16 @@ local function ClickBlock(event)
     local libname = "test" -- 组名
     local value = 10 -- 值
     local playerId = 123456 -- 私有变量组所属玩家id，0代表全局变量组
-    local data = {featherNum = 0, skins = {1, 2, 3}, props = {23, 33, 0}}
+    local data = {
+        skins = {1, 2, 3},
+        props = { -- 羽毛
+            feather = {id = 11303, num = 0},
+            -- 无敌装甲
+            armor = {id = 4225, num = 0},
+            -- 喷射背包(大)
+            bigJetBackpack = {id = 4226, num = 20}
+        }
+    }
     local ret = CloudSever:setDataListBykey("test", playerId, data)
     if ret == ErrorCode.OK then
         print('设置排行榜值成功 k = 123456 ,v = {}')
@@ -12,22 +21,20 @@ local function ClickBlock(event)
     end
 
 end
-local getData = function(ret, k, v)
 
-    if ret == true then
-        print("v.featherNum = ", v.featherNum)
-        print("v.skins = ", v.skins)
-        print("v.props = ", v.props)
-    else
-        print('返回表数据失败')
-        initGamer()
-    end
-
+-- 获取table长度
+function table_leng(t)
+    local leng = 0
+    for k, v in pairs(t) do leng = leng + 1 end
+    return leng;
 end
-local getUserData = function(libvarname, playerId)
-    local userData = {featherNum = 0, skins = {}, props = {}}
+
+function getUserData(libvarname, playerId)
+    local userData = {skins = {}, props = {}}
     local function initGamer()
         CloudSever:setDataListBykey("test", tostring(playerId), userData)
+        -- 初始化玩家道具
+        -- Player:gainItems(playerId, 4228, 1, 1)
     end
     local ret = CloudSever:getDataListByKey(libvarname, playerId,
                                             function(ret2, k, v, ix)
@@ -37,9 +44,43 @@ local getUserData = function(libvarname, playerId)
             print('返回表数据失败')
             initGamer()
         else
-            print("v.featherNum = ", v.featherNum)
-            print("v.skins = ", v.skins)
-            print("v.props = ", v.props)
+            -- print("v.skins = ", v.skins)
+            -- print("v.props = ", v.props)
+            -- 初始化玩家道具
+            local gainProps = v.props
+            if (table_leng(gainProps) ~= 0) then
+                for i, v in pairs(gainProps) do
+                    print("增加道具id=", gainProps[i].id, "的数量=",
+                          gainProps[i].num)
+                    -- 实例化玩家道具
+                    -- 检测是否有空间
+                    -- local ret = Backpack:enoughSpaceForItem(playerId,
+                    --                                         gainProps[i].id,
+                    --                                         gainProps[i].num)
+                    -- if ret == ErrorCode.OK then
+                    --     Player:gainItems(playerId, gainProps[i].id,
+                    --                      gainProps[i].num, 1)
+                    -- end
+                end
+            else
+                Player:gainItems(playerId, 4228, 1, 1)
+            end
+
+            -- 初始化玩家皮肤
+            local gainSkins = v.skins
+            if (table_leng(gainSkins) ~= 0) then
+                for i, v in pairs(gainSkins) do
+                    print("增加皮肤id=", gainSkins[i], "的数量=", 1)
+                    -- 实例化玩家皮肤
+                    -- 检测是否有空间
+                    -- local ret = Backpack:enoughSpaceForItem(playerId,
+                    --                                         gainSkins[i], 1)
+                    -- if ret == ErrorCode.OK then
+                    --     Player:gainItems(playerId, gainSkins[i], 1, 1)
+                    -- end
+                end
+            end
+
         end
     end) -- 获取key1的分数
 
@@ -65,7 +106,6 @@ Game_AnyPlayer_EnterGame = function(event)
     local playerId = event.eventobjid
     local libvarname = 'test'
     getUserData(libvarname, playerId)
-
 end
 
 ScriptSupportEvent:registerEvent([=[Player.ClickBlock]=], ClickBlock) -- 点击方块
