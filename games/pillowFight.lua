@@ -2,6 +2,11 @@ return (function()
 
     -- 道具区域id
     local propAreaId = 0
+    -- 准备区域id
+    local readyAreaId1 = 0
+    local readyAreaId2 = 0
+    -- 换装flag
+    local changeSkin = true
 
     -- ItemID数据
     local Items = {
@@ -71,12 +76,14 @@ return (function()
         gensCnt = 0, -- 攻击手数量
         deadCnt = 0 -- 已死量数量
     }
+    -- 玩家初始皮肤
+    local iniSkin = "mob_8"
     -- 是否开启皮肤
     skinFlag = true
     -- 皮肤
     local skin = {
         skin1 = {name = "凛冬", skinId = 7, id = 4102},
-        skin2 = {name = "胖哒", skinId = 8, id = 4103},
+        -- skin2 = {name = "胖哒", skinId = 8, id = 4103},
         skin3 = {name = "兔美美", skinId = 9, id = 4104},
         skin4 = {name = "齐天小圣", skinId = 10, id = 4105},
         skin5 = {name = "迷斯拉", skinId = 11, id = 4106},
@@ -481,6 +488,8 @@ return (function()
         -- 加入玩家id组
         -- Players[#Players + 1] = playerId
 
+        Actor:changeCustomModel(playerId, iniSkin)
+
         -- 默认给玩家的道具
         GainItems(playerId)
     end
@@ -561,9 +570,34 @@ return (function()
         end
 
     end
+    -- LInclude方法
+    function LInclude(id, table)
+        local flag = false
+        for i, v in ipairs(table) do if (v == id) then flag = true end end
+        return flag
+    end
+    -- 获取所有skin的id
+    function getAllSkinId()
+        local ids = {}
+        for i, v in pairs(skin) do ids[#ids + 1] = v.id end
+
+        return ids
+    end
+    -- 获取skin id 对应的skinId
+    function getSkinId(id)
+        local Id = 0
+        for i, v in pairs(skin) do
+            if v.id == id then
+                Id = v.skinId
+                break
+            end
+        end
+        return Id
+    end
     -------------------------------游戏事件-------------------------------
 
     Game_StartGame = function()
+        Chat:sendSystemMsg("游戏开始")
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
         -- 初始化生成道具区域
@@ -571,6 +605,23 @@ return (function()
         local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
                                                           {x = 8, y = 8, z = 3})
         propAreaId = areaid
+        print("道具区id=", areaid)
+        -- 初始化准备区
+        local result, areaid = Area:createAreaRectByRange({
+            x = -8,
+            y = 9,
+            z = -2
+        }, {x = -16, y = 19, z = 9})
+        print("准备区1id=", areaid)
+        readyAreaId1 = areaid
+        local result, areaid = Area:createAreaRectByRange({
+            x = 24,
+            y = 9,
+            z = 9
+        }, {x = 31, y = 17, z = -2})
+        print("准备区2id=", areaid)
+        readyAreaId1 = areaid
+
         -- 在此位置播放特效
         World:playParticalEffect(8, 7, 3, 1001, 1)
         -- 创建一个文字板
@@ -635,9 +686,10 @@ return (function()
     end
     -- 玩家选择快捷栏
     Player_SelectShortcut = function(event)
-        print(event)
+        -- print(event)
+
         local result3, itemid = Item:getItemId(event.itemid)
-        print(itemid)
+        -- print(itemid)
         local result, name = Item:getItemName(event.itemid)
         -- 如果是装备
         -- jetBackpack  shield15  armor
@@ -650,10 +702,20 @@ return (function()
             local re = Backpack:actEquipOffByEquipID(event.eventobjid, 4)
             print("脱下装备返回状态", re)
             Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
-        elseif (event.itemid == skin["skin11"].id) then
+            -- elseif (event.itemid == skin["skin11"].id) then
+        elseif (LInclude(event.itemid, getAllSkinId()) and changeSkin) then
             print("开始切换皮肤")
-            Actor:changeCustomModel(event.eventobjid,
-                                    "mob_" .. skin["skin11"].skinId)
+            local result12, name = Actor:getActorFacade(event.eventobjid)
+            print("name=", name)
+            if (name == "mob_" .. getSkinId(event.itemid)) then
+                -- local test = Actor:recoverinitialModel(event.eventobjid)
+                local test = Actor:changeCustomModel(event.eventobjid, iniSkin)
+                print("恢复外观=", test)
+            else
+                Actor:changeCustomModel(event.eventobjid,
+                                        "mob_" .. getSkinId(event.itemid))
+            end
+
         else
             Prop_Add(event.eventobjid, name)
         end
@@ -685,6 +747,11 @@ return (function()
             MiniTimer:deleteTimer(id)
             -- 将上一个道具区域计时器id移除
             boomerang.timerPool[id] = nil
+        end
+        -- 如果是准备区
+        if(event.areaid ==readyAreaId1 or event.areaid ==readyAreaId1) then
+          print("离开了准备区")
+          changeSkin = false
         end
 
     end
