@@ -3,8 +3,7 @@ return (function()
     -- 道具区域id
     local propAreaId = 0
     -- 准备区域id
-    local readyAreaId1 = 0
-    local readyAreaId2 = 0
+    local playAreaId = 0
     -- 换装flag
     local changeSkin = true
 
@@ -605,22 +604,14 @@ return (function()
         local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
                                                           {x = 8, y = 8, z = 3})
         propAreaId = areaid
-        print("道具区id=", areaid)
-        -- 初始化准备区
+        
+        -- 初始战斗区
         local result, areaid = Area:createAreaRectByRange({
-            x = -8,
-            y = 9,
-            z = -2
-        }, {x = -16, y = 19, z = 9})
-        print("准备区1id=", areaid)
-        readyAreaId1 = areaid
-        local result, areaid = Area:createAreaRectByRange({
-            x = 24,
-            y = 9,
-            z = 9
-        }, {x = 31, y = 17, z = -2})
-        print("准备区2id=", areaid)
-        readyAreaId1 = areaid
+            x = -7,
+            y = 0,
+            z = 16
+        }, {x = 22, y = 15, z = -9})
+        playAreaId = areaid
 
         -- 在此位置播放特效
         World:playParticalEffect(8, 7, 3, 1001, 1)
@@ -733,11 +724,18 @@ return (function()
             MiniTimer:startBackwardTimer(timerid, 5)
             MiniTimer:showTimerTips({0}, timerid,
                                     "5秒后即将产生羽毛：", true)
+        elseif (event.areaid == playAreaId) then
+            print("进入战斗区")
+            -- Chat:sendSystemMsg("进入战斗区")
+            changeSkin = false
         end
 
     end
     -- 玩家离开区域
     Player_AreaOut = function(event)
+
+        print("离开的区域id", event.areaid)
+
         if (event.areaid == propAreaId) then
             -- print('玩家离开道具区域：', event)
             local id = boomerang:getTimer2("featherTimer" .. event.eventobjid,
@@ -747,11 +745,7 @@ return (function()
             MiniTimer:deleteTimer(id)
             -- 将上一个道具区域计时器id移除
             boomerang.timerPool[id] = nil
-        end
-        -- 如果是准备区
-        if(event.areaid ==readyAreaId1 or event.areaid ==readyAreaId1) then
-          print("离开了准备区")
-          changeSkin = false
+
         end
 
     end
