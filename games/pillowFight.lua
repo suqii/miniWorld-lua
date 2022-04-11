@@ -2,14 +2,6 @@ return (function()
 
     -- 道具区域id
     local propAreaId = 0
-    -- 地图常量数据
-    local Cfg = {
-        map_size = 30, -- 地图大小
-        map_high = 5, -- 城墙高度
-        pool_width = 5, -- 水池竖宽
-        pool_lenth = 15, -- 水池横长
-        max_score = 35 -- 游戏分数
-    }
 
     -- ItemID数据
     local Items = {
@@ -79,6 +71,30 @@ return (function()
         gensCnt = 0, -- 攻击手数量
         deadCnt = 0 -- 已死量数量
     }
+    -- 是否开启皮肤
+    skinFlag = true
+    -- 皮肤
+    local skin = {
+        skin1 = {name = "凛冬", skinId = 7, id = 4102},
+        skin2 = {name = "胖哒", skinId = 8, id = 4103},
+        skin3 = {name = "兔美美", skinId = 9, id = 4104},
+        skin4 = {name = "齐天小圣", skinId = 10, id = 4105},
+        skin5 = {name = "迷斯拉", skinId = 11, id = 4106},
+        skin6 = {name = "琉璃酱", skinId = 12, id = 4107},
+        skin7 = {name = "乔治", skinId = 13, id = 4108},
+        skin8 = {name = "安妮", skinId = 14, id = 4109},
+        skin9 = {name = "墨家小飞", skinId = 15, id = 4110},
+        skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
+        skin11 = {name = "叮叮当", skinId = 17, id = 4112},
+        skin12 = {name = "羽姬", skinId = 18, id = 4113},
+        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
+        skin14 = {name = "秋果", skinId = 125, id = 4220},
+        skin15 = {name = "凌美琪", skinId = 126, id = 4221},
+        skin16 = {name = "游乐王子", skinId = 127, id = 4222},
+        skin17 = {name = "殷小敏", skinId = 128, id = 4223},
+        skin18 = {name = "施巧灵", skinId = 129, id = 4224}
+
+    }
     -- 特效
     local effects = {
         smallJetBackpack = {
@@ -103,7 +119,7 @@ return (function()
     -- 装备标识
     local isWare = false
     -- 是否开局增加道具
-    local propsFlag = true
+    local propsFlag = false
     -- 游戏道具数据
     local props = {
         bigJetBackpack = {
@@ -368,10 +384,15 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.EnterGame]=],
                                          Game_AnyPlayer_EnterGame)
         -- 投掷物命中
-        ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
-                                         Actor_Projectile_Hit)
+        -- ScriptSupportEvent:registerEvent([=[Actor.Projectile.Hit]=],
+        --                                  Actor_Projectile_Hit)
         -- 玩家脱下装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOff]=], Player_EquipOff)
+        -- 游戏结束
+        ScriptSupportEvent:registerEvent([=[Game.End]=], Game_GameOver)
+        -- 玩家移动一格
+        -- ScriptSupportEvent:registerEvent([=[Player.MoveOneBlockSize]=],
+        --                                  Player_MoveOneBlockSize)
 
     end
 
@@ -399,7 +420,7 @@ return (function()
     function GainItems(playerId)
         -- 基础
         for i, v in pairs(gainProps) do
-            print(gainProps[i].name)
+            -- print(gainProps[i].name)
             -- 检测是否有空间
             local ret = Backpack:enoughSpaceForItem(playerId,
                                                     gainProps[i].itemId,
@@ -413,12 +434,23 @@ return (function()
         -- 道具测试
         if propsFlag then
             for i, v in pairs(props) do
-                print(props[i].name)
+                -- print(props[i].name)
                 -- 检测是否有空间
                 local ret = Backpack:enoughSpaceForItem(playerId,
                                                         props[i].propId, 1)
                 if ret == ErrorCode.OK then
                     Player:gainItems(playerId, props[i].propId, 1, 1)
+                end
+            end
+        end
+        -- 皮肤测试
+        if skinFlag then
+            for i, v in pairs(skin) do
+                print(skin[i].name)
+                -- 检测是否有空间
+                local ret = Backpack:enoughSpaceForItem(playerId, skin[i].id, 1)
+                if ret == ErrorCode.OK then
+                    Player:gainItems(playerId, skin[i].id, 1, 1)
                 end
             end
         end
@@ -466,11 +498,13 @@ return (function()
     -- 清除玩家叠加状态
     function clearPlayerState(playerId)
         -- 玩家可被击退
-        Creature:addModAttrib(playerId, 26, 0)
+        local re1 = Creature:addModAttrib(playerId, 26, 0.1)
         --  玩家可移动
-        Player:setActionAttrState(playerId, 1, true)
+        local re2 = Player:setActionAttrState(playerId, 1, true)
         --  移动方式变为默认
-        Player:changPlayerMoveType(playerId, 0)
+        local re3 = Player:changPlayerMoveType(playerId, 0)
+        print("清除状态：", re1, re2, re3)
+
     end
     -- 给玩家播放特效
     function playEffect(playerId, particleId, scale)
@@ -497,6 +531,7 @@ return (function()
         end
 
         local ret, teamId = Player:getTeam(playerId)
+        print("队伍Id:", teamId)
         if ret == ErrorCode.OK and teamId > 0 then
             local ret, teamScore = Team:getTeamScore(teamId)
             if addScore < 0 then -- 设置队伍分数
@@ -562,7 +597,7 @@ return (function()
     Player_Dead = function(trigger_obj)
         print(trigger_obj)
         print('player die')
-        Chat:sendSystemMsg('player ' .. 'die')
+        -- Chat:sendSystemMsg('player ' .. 'die')
         -- 他杀
         if (trigger_obj['toobjid']) then
             local killById = trigger_obj['toobjid']
@@ -600,12 +635,9 @@ return (function()
     end
     -- 玩家选择快捷栏
     Player_SelectShortcut = function(event)
-        -- 将玩家现装备的装备脱下
-        local re = Backpack:actEquipOffByEquipID(event.eventobjid, 4)
-        print("脱下装备返回状态", re)
-
+        print(event)
         local result3, itemid = Item:getItemId(event.itemid)
-        -- print(itemid)
+        print(itemid)
         local result, name = Item:getItemName(event.itemid)
         -- 如果是装备
         -- jetBackpack  shield15  armor
@@ -614,7 +646,14 @@ return (function()
             props["bigJetBackpack"].propId or event.itemid ==
             props["shield15"].propId or event.itemid == props["armor"].propId or
             event.itemid == props["superShield"].propId) then
+            -- 将玩家现装备的装备脱下
+            local re = Backpack:actEquipOffByEquipID(event.eventobjid, 4)
+            print("脱下装备返回状态", re)
             Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
+        elseif (event.itemid == skin["skin11"].id) then
+            print("开始切换皮肤")
+            Actor:changeCustomModel(event.eventobjid,
+                                    "mob_" .. skin["skin11"].skinId)
         else
             Prop_Add(event.eventobjid, name)
         end
@@ -933,7 +972,7 @@ return (function()
     -- 玩家受到伤害
     Player_BeHurt = function(event)
         -- Chat:sendSystemMsg("玩家受伤开始加血")
-        Actor:addHP(event.eventobjid, 10)
+        Actor:addHP(event.eventobjid, 100)
 
     end
     -- 任一玩家进入游戏
@@ -965,13 +1004,48 @@ return (function()
         local re = MiniTimer:pauseTimer(id)
         -- 清除计时器显示
         MiniTimer:showTimerTips({e.eventobjid}, id, name, false)
-        -- 清除所有特效
-        initEffect(e.eventobjid)
         -- 清楚玩家叠加状态
         clearPlayerState(e.eventobjid)
+        -- 清除所有特效
+        initEffect(e.eventobjid)
+
         -- -- 销毁装备
         -- local result = Backpack:actDestructEquip(e.eventobjid, 4)
         -- print(result)
+
+    end
+    -- 游戏结束
+    Game_GameOver = function(e)
+        -- -- 获取队伍的分数，参数为队伍id
+        -- local result, score = Team:getTeamScore(1)
+        -- -- 在聊天框显示
+        -- Chat:sendSystemMsg("第一个队伍的游戏分数为" .. score)
+        -- -- 获取第一个队伍的玩家数量和列表
+        -- -- 第一个参数为队伍id
+        -- -- 第二个参数：0为当前队伍的死亡玩家数量 1为存活 2为全部
+        -- local result, num, array = Team:getTeamPlayers(1, 2)
+        -- -- 在聊天框显示数量
+        -- Chat:sendSystemMsg("第一个队伍的玩家总数为：" .. num)
+        -- for i, a in ipairs(array) do
+        --     -- 在聊天框显示列表
+        --     Chat:sendSystemMsg("第" .. i .. "个：" .. a)
+        -- end
+        -- 获取队伍是否获胜，参数为队伍id
+        local result, teamresult = Team:getTeamResults(1)
+        print(teamresult)
+        -- 在聊天框显示
+        Chat:sendSystemMsg(
+            "队伍1当前获胜状态为(1:获胜 2:失败)：" .. teamresult)
+    end
+    -- 玩家移动一格
+    Player_MoveOneBlockSize = function(event)
+        print('玩家移动一格')
+        Chat:sendSystemMsg('玩家移动一格')
+        local result = Actor:changeCustomModel(event.eventobjid, "mob_129")
+        -- -- local result = Creature:replaceActor(event.eventobjid, 3402, 1)
+
+        print(result)
+        Chat:sendSystemMsg(result)
 
     end
     -- 调用监听事件
