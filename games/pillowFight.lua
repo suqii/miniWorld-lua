@@ -691,7 +691,7 @@ return (function()
     -- 清除玩家叠加状态
     function clearPlayerState(playerId)
         -- 玩家可被击退
-        local re1 = Creature:addModAttrib(playerId, 26, 0.1)
+        -- local re1 = Creature:addModAttrib(playerId, 26, 0.1)
         --  玩家可移动
         local re2 = Player:setActionAttrState(playerId, 1, true)
         --  移动方式变为默认
@@ -1086,7 +1086,9 @@ return (function()
                                         props["armor"].desc, true)
             end
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
-            Creature:addModAttrib(event.eventobjid, 26, 1)
+            -- Creature:addModAttrib(event.eventobjid, 26, 1)
+            -- 增加披风附魔值
+            Actor:addEnchant(event.eventobjid,4,23,5)
             Player:setActionAttrState(event.eventobjid, 1, false)
         elseif (name == props["superShield"].name) then
             print('获得超级遁甲技能')
@@ -1115,7 +1117,9 @@ return (function()
             end
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
-            Creature:addModAttrib(event.eventobjid, 26, 1)
+            -- Creature:addModAttrib(event.eventobjid, 26, 1)
+            -- 增加披风附魔值
+            Actor:addEnchant(event.eventobjid,4,23,5)
         elseif (name == props["shield15"].name) then
             print('获得15s护盾技能1')
             Chat:sendSystemMsg('获得15s护盾技能')
@@ -1142,7 +1146,9 @@ return (function()
                                         props["shield15"].desc, true)
             end
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
-            Creature:addModAttrib(event.eventobjid, 26, 1)
+            -- Creature:addModAttrib(event.eventobjid, 26, 1)
+            -- 增加披风附魔值
+            Actor:addEnchant(event.eventobjid,4,23,5)
         end
 
     end
@@ -1165,7 +1171,7 @@ return (function()
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
             print(arg)
-            Chat:sendSystemMsg('计时器结束')
+            -- Chat:sendSystemMsg('计时器结束')
 
             local timerInfo = boomerang.timerPool[arg.timerid]
             if (timerInfo) then -- 是计时器池里面的计时器
@@ -1216,7 +1222,7 @@ return (function()
                     -- 销毁装备
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
-                    Creature:addModAttrib(playerId, 26, 0)
+                    -- Creature:addModAttrib(playerId, 26, 0)
                     --  玩家可移动
                     Player:setActionAttrState(playerId, 1, true)
                     -- 停止特效
@@ -1230,7 +1236,7 @@ return (function()
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
                     -- 玩家可被击退
-                    Creature:addModAttrib(playerId, 26, 0)
+                    -- Creature:addModAttrib(playerId, 26, 0)
                     -- 停止特效
                     stopEffect(playerId, effects["superShield"].particleId)
 
@@ -1241,7 +1247,7 @@ return (function()
                     local result = Backpack:actDestructEquip(playerId, 4)
                     print(result)
                     -- 玩家可被击退
-                    Creature:addModAttrib(playerId, 26, 0)
+                    -- Creature:addModAttrib(playerId, 26, 0)
                     -- 停止特效
                     stopEffect(playerId, effects["shield15"].particleId)
                 elseif (arg.timername == "featherTimer" .. timerInfo[3]) then
