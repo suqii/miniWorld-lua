@@ -10,37 +10,12 @@ return (function()
     local playAreaId = 0
     -- 换装flag
     local changeSkin = true
-
-    -- ItemID数据
-    local Items = {
-        waterId = 4, -- 水方块ID
-        treatId = 8, -- 加血方块ID
-        floorId = 104, -- 地板方块ID
-
-        fishCnt = 4, -- 灯笼鱼
-        fishIdx = 3600, -- 灯笼鱼ID
-        starCnt = 12, -- 闪星数量
-        starIdx = 997, -- 闪星方块
-        rewardCnt = 15, -- 肘子数量
-        rewardIdx = 12526, -- 大肘子ID
-
-        redFlagId = 919, -- 红旗ID
-        blueFlagId = 920, -- 蓝旗ID
-
-        mobsCnt = 7, -- 怪物数量/ID组
-        mobsIdx = {3132, 3132, 3407},
-
-        -- 测试方块trigger事件 --
-        trigger_tx = 11311, -- 动物肥料
-        trigger_x1 = 256, -- 桃花树苗
-        trigger_ty = 11055, -- 点火器
-        trigger_y1 = 881, -- 喷花烟花
-        trigger_y2 = 931 -- 蜡烛台
-    }
-    -- 系统相关数据
-    local Sys = {
-        chatType = 1 -- 公告类型 1:系统公告
-    }
+    -- 是否开局增加道具
+    local propsFlag = false
+    -- 是否初始化游戏道具
+    local gainPropsFlag = false
+    -- 是否开启皮肤
+    skinFlag = true
 
     -- 本地玩家Id
     local Players = {}
@@ -73,16 +48,9 @@ return (function()
         isRuleInit = false -- 游戏是否初始化
     }
 
-    -- 游戏怪物数据
-    local Mobs = {
-        objIds = {}, -- 怪物objId
-        gensCnt = 0, -- 攻击手数量
-        deadCnt = 0 -- 已死量数量
-    }
     -- 玩家初始皮肤
     local iniSkin = "mob_8"
-    -- 是否开启皮肤
-    skinFlag = true
+    
     -- 皮肤
     local skin = {
         -- skin1 = {name = "凛冬", skinId = 7, id = 4102},
@@ -97,7 +65,7 @@ return (function()
         skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
         skin11 = {name = "叮叮当", skinId = 17, id = 4112},
         skin12 = {name = "羽姬", skinId = 18, id = 4113},
-        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114}
+        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
         -- skin14 = {name = "秋果", skinId = 125, id = 4220},
         -- skin15 = {name = "凌美琪", skinId = 126, id = 4221},
         -- skin16 = {name = "游乐王子", skinId = 127, id = 4222},
@@ -128,8 +96,7 @@ return (function()
     }
     -- 装备标识
     local isWare = false
-    -- 是否开局增加道具
-    local propsFlag = true
+    
     -- 游戏道具数据
     local props = {
         bigJetBackpack = {
@@ -169,6 +136,7 @@ return (function()
             desc = '超级遁甲剩余时间:'
         }
     }
+    
     -- 初始道具
     local gainProps = {
         -- 羽毛
@@ -610,41 +578,44 @@ return (function()
     -- 初始玩家道具
     function GainItems(playerId)
         -- -- 基础
-        -- for i, v in pairs(gainProps) do
-        --     -- print(gainProps[i].name)
-        --     -- 检测是否有空间
-        --     local ret = Backpack:enoughSpaceForItem(playerId,
-        --                                             gainProps[i].itemId,
-        --                                             gainProps[i].itemCnt)
-        --     if ret == ErrorCode.OK then
-        --         Player:gainItems(playerId, gainProps[i].itemId,
-        --                          gainProps[i].itemCnt, gainProps[i].prioritytype)
-        --     end
-        -- end
+        if gainPropsFlag then
+            for i, v in pairs(gainProps) do
+                -- print(gainProps[i].name)
+                -- 检测是否有空间
+                local ret = Backpack:enoughSpaceForItem(playerId,
+                                                        gainProps[i].itemId,
+                                                        gainProps[i].itemCnt)
+                if ret == ErrorCode.OK then
+                    Player:gainItems(playerId, gainProps[i].itemId,
+                                     gainProps[i].itemCnt,
+                                     gainProps[i].prioritytype)
+                end
+            end
+        end
 
         -- -- 道具测试
-        -- if propsFlag then
-        --     for i, v in pairs(props) do
-        --         -- print(props[i].name)
-        --         -- 检测是否有空间
-        --         local ret = Backpack:enoughSpaceForItem(playerId,
-        --                                                 props[i].propId, 1)
-        --         if ret == ErrorCode.OK then
-        --             Player:gainItems(playerId, props[i].propId, 1, 1)
-        --         end
-        --     end
-        -- end
+        if propsFlag then
+            for i, v in pairs(props) do
+                -- print(props[i].name)
+                -- 检测是否有空间
+                local ret = Backpack:enoughSpaceForItem(playerId,
+                                                        props[i].propId, 1)
+                if ret == ErrorCode.OK then
+                    Player:gainItems(playerId, props[i].propId, 1, 1)
+                end
+            end
+        end
         -- -- 皮肤测试
-        -- if skinFlag then
-        --     for i, v in pairs(skin) do
-        --         print(skin[i].name)
-        --         -- 检测是否有空间
-        --         local ret = Backpack:enoughSpaceForItem(playerId, skin[i].id, 1)
-        --         if ret == ErrorCode.OK then
-        --             Player:gainItems(playerId, skin[i].id, 1, 1)
-        --         end
-        --     end
-        -- end
+        if skinFlag then
+            for i, v in pairs(skin) do
+                print(skin[i].name)
+                -- 检测是否有空间
+                local ret = Backpack:enoughSpaceForItem(playerId, skin[i].id, 1)
+                if ret == ErrorCode.OK then
+                    Player:gainItems(playerId, skin[i].id, 1, 1)
+                end
+            end
+        end
         getUserData(playerId)
     end
     -- 初始化玩家信息
@@ -692,6 +663,9 @@ return (function()
     function clearPlayerState(playerId)
         -- 玩家可被击退
         -- local re1 = Creature:addModAttrib(playerId, 26, 0.1)
+        -- 下降玩家位置
+        local result,x,y,z=Actor:getPosition(playerId)
+        local re1 = Actor:setPosition(playerId,x,7,z)
         --  玩家可移动
         local re2 = Player:setActionAttrState(playerId, 1, true)
         --  移动方式变为默认
@@ -746,7 +720,8 @@ return (function()
             Actor:addEnchant(eventobjid, 5, 11, 1)
             -- 在聊天框显示
             Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
-        elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕') then
+        elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕' or
+            pName == '鳄鱼枕头') then
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 2)
             -- 在聊天框显示
@@ -796,13 +771,13 @@ return (function()
         local teamAddScore = {}
         for i, v in ipairs(rank) do
             if (v == 1) then
-                teamAddScore[i] = 0
+                teamAddScore[i] = 2
             elseif (v == 2) then
-                teamAddScore[i] = 5
+                teamAddScore[i] = 4
             elseif (v == 3) then
-                teamAddScore[i] = 10
+                teamAddScore[i] = 6
             elseif (v == 4) then
-                teamAddScore[i] = 15
+                teamAddScore[i] = 8
 
             end
 
@@ -907,7 +882,7 @@ return (function()
         -- print(event)
 
         local result3, itemid = Item:getItemId(event.itemid)
-        -- print(itemid)
+        -- print(event.itemid)
         local result, name = Item:getItemName(event.itemid)
         -- 如果是装备
         -- jetBackpack  shield15  armor
@@ -924,6 +899,7 @@ return (function()
         elseif (LInclude(event.itemid, getAllSkinId()) and changeSkin) then
             print("开始切换皮肤")
             local result12, name = Actor:getActorFacade(event.eventobjid)
+            -- print("切换皮肤结果：",result12)
             print("name=", name)
             if (name == "mob_" .. getSkinId(event.itemid)) then
                 -- local test = Actor:recoverinitialModel(event.eventobjid)
@@ -948,9 +924,9 @@ return (function()
             local timerid = boomerang:getTimer("featherTimer" ..
                                                    event.eventobjid,
                                                event.eventobjid)
-            MiniTimer:startBackwardTimer(timerid, 5)
+            MiniTimer:startBackwardTimer(timerid, 4)
             MiniTimer:showTimerTips({0}, timerid,
-                                    "5秒后即将产生羽毛：", true)
+                                    "4秒后即将产生羽毛：", true)
         elseif (event.areaid == playAreaId) then
             print("进入战斗区")
             -- Chat:sendSystemMsg("进入战斗区")
@@ -1088,7 +1064,7 @@ return (function()
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- Creature:addModAttrib(event.eventobjid, 26, 1)
             -- 增加披风附魔值
-            Actor:addEnchant(event.eventobjid,4,23,5)
+            Actor:addEnchant(event.eventobjid, 4, 23, 5)
             Player:setActionAttrState(event.eventobjid, 1, false)
         elseif (name == props["superShield"].name) then
             print('获得超级遁甲技能')
@@ -1119,7 +1095,7 @@ return (function()
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- Creature:addModAttrib(event.eventobjid, 26, 1)
             -- 增加披风附魔值
-            Actor:addEnchant(event.eventobjid,4,23,5)
+            Actor:addEnchant(event.eventobjid, 4, 23, 5)
         elseif (name == props["shield15"].name) then
             print('获得15s护盾技能1')
             Chat:sendSystemMsg('获得15s护盾技能')
@@ -1148,7 +1124,7 @@ return (function()
             -- 击退概率抵抗值, 0.2表示有20%概率不被击退
             -- Creature:addModAttrib(event.eventobjid, 26, 1)
             -- 增加披风附魔值
-            Actor:addEnchant(event.eventobjid,4,23,5)
+            Actor:addEnchant(event.eventobjid, 4, 23, 5)
         end
 
     end
@@ -1312,7 +1288,7 @@ return (function()
     end
     -- 游戏结束
     Game_GameOver = function(e)
-      print("游戏结束")
+        print("游戏结束")
         -- 获取排名加分
         local rankS = rankScore()
         for i, v in ipairs(playerPool) do
@@ -1356,7 +1332,6 @@ return (function()
         --         for i, v in ipairs(playerPool) do
         --           print("玩家",i,"id",v)
         --       end
-        
 
     end
     -- 调用监听事件
