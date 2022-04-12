@@ -1,5 +1,9 @@
 return (function()
 
+    -- 变量库名称
+    local libname = "data"
+    -- 玩家池
+    local playerPool = {}
     -- 道具区域id
     local propAreaId = 0
     -- 准备区域id
@@ -81,24 +85,24 @@ return (function()
     skinFlag = true
     -- 皮肤
     local skin = {
-        skin1 = {name = "凛冬", skinId = 7, id = 4102},
+        -- skin1 = {name = "凛冬", skinId = 7, id = 4102},
         -- skin2 = {name = "胖哒", skinId = 8, id = 4103},
-        skin3 = {name = "兔美美", skinId = 9, id = 4104},
-        skin4 = {name = "齐天小圣", skinId = 10, id = 4105},
-        skin5 = {name = "迷斯拉", skinId = 11, id = 4106},
-        skin6 = {name = "琉璃酱", skinId = 12, id = 4107},
-        skin7 = {name = "乔治", skinId = 13, id = 4108},
-        skin8 = {name = "安妮", skinId = 14, id = 4109},
-        skin9 = {name = "墨家小飞", skinId = 15, id = 4110},
+        -- skin3 = {name = "兔美美", skinId = 9, id = 4104},
+        -- skin4 = {name = "齐天小圣", skinId = 10, id = 4105},
+        -- skin5 = {name = "迷斯拉", skinId = 11, id = 4106},
+        -- skin6 = {name = "琉璃酱", skinId = 12, id = 4107},
+        -- skin7 = {name = "乔治", skinId = 13, id = 4108},
+        -- skin8 = {name = "安妮", skinId = 14, id = 4109},
+        -- skin9 = {name = "墨家小飞", skinId = 15, id = 4110},
         skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
         skin11 = {name = "叮叮当", skinId = 17, id = 4112},
         skin12 = {name = "羽姬", skinId = 18, id = 4113},
-        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
-        skin14 = {name = "秋果", skinId = 125, id = 4220},
-        skin15 = {name = "凌美琪", skinId = 126, id = 4221},
-        skin16 = {name = "游乐王子", skinId = 127, id = 4222},
-        skin17 = {name = "殷小敏", skinId = 128, id = 4223},
-        skin18 = {name = "施巧灵", skinId = 129, id = 4224}
+        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114}
+        -- skin14 = {name = "秋果", skinId = 125, id = 4220},
+        -- skin15 = {name = "凌美琪", skinId = 126, id = 4221},
+        -- skin16 = {name = "游乐王子", skinId = 127, id = 4222},
+        -- skin17 = {name = "殷小敏", skinId = 128, id = 4223},
+        -- skin18 = {name = "施巧灵", skinId = 129, id = 4224}
 
     }
     -- 特效
@@ -125,7 +129,7 @@ return (function()
     -- 装备标识
     local isWare = false
     -- 是否开局增加道具
-    local propsFlag = false
+    local propsFlag = true
     -- 游戏道具数据
     local props = {
         bigJetBackpack = {
@@ -403,6 +407,187 @@ return (function()
     end
 
     -------------------------------自定义方法-------------------------------
+    -- 获取玩家当前所有道具
+    function getPlayerProps(playerId)
+        -- 参数0为背包栏物品格id，0为储存栏的第一格：0-29储存栏 1000-1007快捷栏 8000-8004装备栏
+
+        local baseProps = {
+            -- 羽毛
+            [11303] = {id = 11303, num = 0},
+            -- 无敌装甲
+            [4225] = {id = 4225, num = 0},
+            -- 喷射背包(大)
+            [4226] = {id = 4226, num = 0},
+            -- 基础枕头
+            [4228] = {id = 4228, num = 0},
+            -- 中型枕头
+            [4229] = {id = 4229, num = 0},
+            -- 哈士奇狗头枕头
+            [4230] = {id = 4230, num = 0},
+            -- 大枕头炸弹
+            [4231] = {id = 4231, num = 0},
+            -- 小枕头炸弹
+            [4232] = {id = 4232, num = 0},
+            -- 小熊枕头
+            [4233] = {id = 4233, num = 0},
+            -- 鸡腿枕头
+            [4234] = {id = 4234, num = 0},
+            -- 葱鸭枕头
+            [4235] = {id = 4235, num = 0},
+            -- 小兔子枕头
+            [4236] = {id = 4236, num = 0},
+            -- 咸鱼枕头
+            [4237] = {id = 4237, num = 0},
+            -- 书包枕头
+            [4238] = {id = 4238, num = 0},
+            -- 鳄鱼枕头
+            [4239] = {id = 4239, num = 0},
+            -- 小花枕头
+            [4240] = {id = 4240, num = 0},
+            -- 饼干枕头
+            [4241] = {id = 4241, num = 0},
+            -- 玲娜贝儿抱枕
+            [4242] = {id = 4242, num = 0},
+            -- 计时器
+            [4243] = {id = 4243, num = 0},
+            -- 15秒防护盾
+            [4244] = {id = 4244, num = 0},
+            -- 库洛米抱枕
+            [4245] = {id = 4245, num = 0},
+            -- 喷射背包(小)
+            [4246] = {id = 4246, num = 0},
+            -- 喷射背包(中)
+            [4247] = {id = 4247, num = 0},
+            -- 超级遁甲
+            [4248] = {id = 4248, num = 0},
+            -- 皮肤
+            [4111] = {id = 4111, num = 0},
+            [4112] = {id = 4112, num = 0},
+            [4113] = {id = 4113, num = 0},
+            [4114] = {id = 4114, num = 0}
+
+        }
+        -- 0-29储存栏
+        for i = 0, 29 do
+            local result, itemid, num = Backpack:getGridItemID(playerId, i)
+            if result == 0 then -- 如果获取成功
+                -- print("背包储存栏的第", i + 1, "格物品id为：",
+                --       itemid, "，数量为：", num)
+                -- 如果num大于0
+                if (num > 0 and itemid > 0) then
+                    baseProps[itemid].num = baseProps[itemid].num + num
+                end
+            end
+        end
+
+        -- 1000-1007快捷栏
+        for i = 1000, 1007 do
+            local result, itemid, num = Backpack:getGridItemID(playerId, i)
+            if result == 0 then -- 如果获取成功
+                -- print("快捷栏的第", i - 999, "格物品id为：", itemid,
+                --       "，数量为：", num)
+                if (num > 0 and itemid > 0) then
+                    baseProps[itemid].num = baseProps[itemid].num + num
+                end
+            end
+        end
+        -- 8000-8004装备栏
+        for i = 8000, 8004 do
+            local result, itemid, num = Backpack:getGridItemID(playerId, i)
+            if result == 0 then -- 如果获取成功
+                -- print("装备栏的第", i - 7999, "格物品id为：", itemid,
+                --       "，数量为：", num)
+                if (num > 0 and itemid > 0) then
+                    baseProps[itemid].num = baseProps[itemid].num + num
+                end
+            end
+        end
+
+        -- 获取baseProps里num大于0的数据
+        local props = {}
+        for k, v in pairs(baseProps) do
+            if (v.num > 0 or v.id == 11303) then
+                table.insert(props, v)
+            end
+        end
+        -- print(props)
+        return props
+
+    end
+    -- 获取table长度
+    function table_leng(t)
+        local leng = 0
+        for k, v in pairs(t) do leng = leng + 1 end
+        return leng;
+    end
+    -- 获取云端玩家数据
+    function getUserData(playerId)
+        print("获取云端玩家数据")
+        local userData = {props = {}}
+        local function initGamer()
+            CloudSever:setDataListBykey(libvarname, tostring(playerId), userData)
+            -- 初始化玩家道具
+            -- Player:gainItems(playerId, 4228, 1, 1)
+        end
+        local ret = CloudSever:getDataListByKey(libvarname, playerId,
+                                                function(ret2, k, v, ix)
+
+            -- if ret ~= 0 or ret2 ~= true then -- 由于数据是云端的，所以要判断玩家是否初始化过，没有则初始化
+            if ret2 ~= true then -- 由于数据是云端的，所以要判断玩家是否初始化过，没有则初始化
+                print('返回表数据失败')
+                initGamer()
+            else
+                -- print("v.skins = ", v.skins)
+                -- print("v.props = ", v.props)
+                -- 初始化玩家道具
+                local gainProps = v.props
+                if (table_leng(gainProps) ~= 0) then
+                    for i, v in pairs(gainProps) do
+                        print("增加道具id=", gainProps[i].id, "的数量=",
+                              gainProps[i].num)
+                        -- 实例化玩家道具
+                        -- 检测是否有空间
+                        local ret = Backpack:enoughSpaceForItem(playerId,
+                                                                gainProps[i].id,
+                                                                gainProps[i].num)
+                        if ret == ErrorCode.OK then
+                            Player:gainItems(playerId, gainProps[i].id,
+                                             gainProps[i].num, 1)
+                        end
+                    end
+                else
+                    Player:gainItems(playerId, 4228, 1, 1)
+                end
+
+            end
+        end) -- 获取key1的分数
+
+        if ret == ErrorCode.OK then
+            print('请求test表数据成功')
+
+        else
+            print("请求test表数据失败")
+            Player:gainItems(playerId, 4228, 1, 1)
+        end
+    end
+    -- 将玩家信息保存到云库
+    function savePlayerData(playerId, addFeatherNum)
+        -- 获取玩家拥有的道具列表，参数为玩家id
+        local playerProps = getPlayerProps(playerId)
+        -- print("playerProps = ", playerProps)
+        for i, v in pairs(playerProps) do
+            if v.id == 11303 then v.num = v.num + addFeatherNum end
+        end
+        print("playerProps = ", playerProps)
+        -- playerProps[11303].num = playerProps[11303].num + addFeatherNum
+        local data = {props = playerProps}
+        local ret = CloudSever:setDataListBykey(libname, playerId, data)
+        if ret == ErrorCode.OK then
+            print('设置data表值成功 k = ', playerId, ',v = {....}')
+        else
+            print('设置data表值失败')
+        end
+    end
     -- 游戏规则
     function InitGameRule()
         Data.isRuleInit = true
@@ -424,43 +609,43 @@ return (function()
     end
     -- 初始玩家道具
     function GainItems(playerId)
-        -- 基础
-        for i, v in pairs(gainProps) do
-            -- print(gainProps[i].name)
-            -- 检测是否有空间
-            local ret = Backpack:enoughSpaceForItem(playerId,
-                                                    gainProps[i].itemId,
-                                                    gainProps[i].itemCnt)
-            if ret == ErrorCode.OK then
-                Player:gainItems(playerId, gainProps[i].itemId,
-                                 gainProps[i].itemCnt, gainProps[i].prioritytype)
-            end
-        end
+        -- -- 基础
+        -- for i, v in pairs(gainProps) do
+        --     -- print(gainProps[i].name)
+        --     -- 检测是否有空间
+        --     local ret = Backpack:enoughSpaceForItem(playerId,
+        --                                             gainProps[i].itemId,
+        --                                             gainProps[i].itemCnt)
+        --     if ret == ErrorCode.OK then
+        --         Player:gainItems(playerId, gainProps[i].itemId,
+        --                          gainProps[i].itemCnt, gainProps[i].prioritytype)
+        --     end
+        -- end
 
-        -- 道具测试
-        if propsFlag then
-            for i, v in pairs(props) do
-                -- print(props[i].name)
-                -- 检测是否有空间
-                local ret = Backpack:enoughSpaceForItem(playerId,
-                                                        props[i].propId, 1)
-                if ret == ErrorCode.OK then
-                    Player:gainItems(playerId, props[i].propId, 1, 1)
-                end
-            end
-        end
-        -- 皮肤测试
-        if skinFlag then
-            for i, v in pairs(skin) do
-                print(skin[i].name)
-                -- 检测是否有空间
-                local ret = Backpack:enoughSpaceForItem(playerId, skin[i].id, 1)
-                if ret == ErrorCode.OK then
-                    Player:gainItems(playerId, skin[i].id, 1, 1)
-                end
-            end
-        end
-
+        -- -- 道具测试
+        -- if propsFlag then
+        --     for i, v in pairs(props) do
+        --         -- print(props[i].name)
+        --         -- 检测是否有空间
+        --         local ret = Backpack:enoughSpaceForItem(playerId,
+        --                                                 props[i].propId, 1)
+        --         if ret == ErrorCode.OK then
+        --             Player:gainItems(playerId, props[i].propId, 1, 1)
+        --         end
+        --     end
+        -- end
+        -- -- 皮肤测试
+        -- if skinFlag then
+        --     for i, v in pairs(skin) do
+        --         print(skin[i].name)
+        --         -- 检测是否有空间
+        --         local ret = Backpack:enoughSpaceForItem(playerId, skin[i].id, 1)
+        --         if ret == ErrorCode.OK then
+        --             Player:gainItems(playerId, skin[i].id, 1, 1)
+        --         end
+        --     end
+        -- end
+        getUserData(playerId)
     end
     -- 初始化玩家信息
     function InitGamePlayer(playerId)
@@ -593,6 +778,48 @@ return (function()
         end
         return Id
     end
+    -- 根据得分返回排名加分
+    function getAddScore(score)
+        local function sortScore(score)
+            local t = {}
+            for k, v in pairs(score) do table.insert(t, v) end
+            table.sort(t)
+            local rank = {}
+            for i, v in ipairs(t) do
+                for k, v2 in pairs(score) do
+                    if v == v2 then rank[k] = i end
+                end
+            end
+            return rank
+        end
+        local rank = sortScore(score)
+        local teamAddScore = {}
+        for i, v in ipairs(rank) do
+            if (v == 1) then
+                teamAddScore[i] = 0
+            elseif (v == 2) then
+                teamAddScore[i] = 5
+            elseif (v == 3) then
+                teamAddScore[i] = 10
+            elseif (v == 4) then
+                teamAddScore[i] = 15
+
+            end
+
+        end
+        return (teamAddScore)
+    end
+
+    -- 获取排名加分
+    function rankScore()
+        local Score = {[1] = 10, [2] = 0, [3] = 0, [4] = 50}
+        for i = 1, 4 do
+            local result, score = Team:getTeamScore(i)
+            Score[i] = score
+        end
+        return getAddScore(Score)
+    end
+
     -------------------------------游戏事件-------------------------------
 
     Game_StartGame = function()
@@ -604,7 +831,7 @@ return (function()
         local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
                                                           {x = 8, y = 8, z = 3})
         propAreaId = areaid
-        
+
         -- 初始战斗区
         local result, areaid = Area:createAreaRectByRange({
             x = -7,
@@ -734,7 +961,7 @@ return (function()
     -- 玩家离开区域
     Player_AreaOut = function(event)
 
-        print("离开的区域id", event.areaid)
+        -- print("离开的区域id", event.areaid)
 
         if (event.areaid == propAreaId) then
             -- print('玩家离开道具区域：', event)
@@ -1041,6 +1268,8 @@ return (function()
         -- Chat:sendSystemMsg("玩家进入游戏")
         -- 初始化玩家信息
         InitGamePlayer(event.eventobjid)
+        -- 将玩家id添加到玩家列表
+        playerPool[#playerPool + 1] = event.eventobjid
 
     end
     -- 投掷物命中
@@ -1077,36 +1306,51 @@ return (function()
     end
     -- 游戏结束
     Game_GameOver = function(e)
-        -- -- 获取队伍的分数，参数为队伍id
-        -- local result, score = Team:getTeamScore(1)
-        -- -- 在聊天框显示
-        -- Chat:sendSystemMsg("第一个队伍的游戏分数为" .. score)
-        -- -- 获取第一个队伍的玩家数量和列表
-        -- -- 第一个参数为队伍id
-        -- -- 第二个参数：0为当前队伍的死亡玩家数量 1为存活 2为全部
-        -- local result, num, array = Team:getTeamPlayers(1, 2)
-        -- -- 在聊天框显示数量
-        -- Chat:sendSystemMsg("第一个队伍的玩家总数为：" .. num)
-        -- for i, a in ipairs(array) do
-        --     -- 在聊天框显示列表
-        --     Chat:sendSystemMsg("第" .. i .. "个：" .. a)
-        -- end
-        -- 获取队伍是否获胜，参数为队伍id
-        local result, teamresult = Team:getTeamResults(1)
-        print(teamresult)
-        -- 在聊天框显示
-        Chat:sendSystemMsg(
-            "队伍1当前获胜状态为(1:获胜 2:失败)：" .. teamresult)
+      print("游戏结束")
+        -- 获取排名加分
+        local rankS = rankScore()
+        for i, v in ipairs(playerPool) do
+            print(v)
+            -- 获取玩家队伍
+            local ret, teamId = Player:getTeam(v)
+            savePlayerData(v, rankS[teamId])
+        end
     end
     -- 玩家移动一格
     Player_MoveOneBlockSize = function(event)
         print('玩家移动一格')
         Chat:sendSystemMsg('玩家移动一格')
-        local result = Actor:changeCustomModel(event.eventobjid, "mob_129")
-        -- -- local result = Creature:replaceActor(event.eventobjid, 3402, 1)
+        -- local result = Actor:changeCustomModel(event.eventobjid, "mob_129")
+        -- -- -- local result = Creature:replaceActor(event.eventobjid, 3402, 1)
 
-        print(result)
-        Chat:sendSystemMsg(result)
+        -- print(result)
+        -- Chat:sendSystemMsg(result)
+        -- local ret, teamId = Player:getTeam(event.eventobjid)
+        -- print("队伍Id:", teamId)
+        -- -- 获取属于第一个队伍的生物列表，参数为队伍id
+        -- local result, array = Team:getTeamCreatures(1)
+        -- if #array == 0 then -- 如果没有生物
+        --     -- 在聊天框显示
+        --     Chat:sendSystemMsg("没有动物或怪物属于第一个队伍")
+        -- else -- 如果有生物
+        --     for i, a in ipairs(array) do
+        --         -- 在聊天框显示生物列表
+        --         print(i)
+        --         print(a)
+        --         Chat:sendSystemMsg("属于第一个队伍的生物id，" .. i ..
+        --                                "：" .. a)
+        --     end
+        -- end
+        -- 获取玩家拥有的道具列表，参数为玩家id
+        -- local playerProps = getPlayerProps(event.eventobjid)
+        -- print(playerProps)
+        -- savePlayerData(event.eventobjid)
+        -- 获取队伍的分数，参数为队伍id
+        -- local result,score=Team:getTeamScore(1)
+        --         for i, v in ipairs(playerPool) do
+        --           print("玩家",i,"id",v)
+        --       end
+        
 
     end
     -- 调用监听事件
