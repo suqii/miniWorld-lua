@@ -6,6 +6,8 @@ return (function()
     local playerPool = {}
     -- 道具区域id
     local propAreaId = 0
+    -- 道具特效id
+    local propParticleId = 1297
     -- 道具区文字版id
     local graphId = 0
     -- 准备区域id
@@ -13,11 +15,11 @@ return (function()
     -- 换装flag
     local changeSkin = true
     -- 是否开局增加道具
-    local propsFlag = true
+    local propsFlag = false
     -- 是否初始化游戏道具
-    local gainPropsFlag = true
+    local gainPropsFlag = false
     -- 是否开启皮肤
-    skinFlag = true
+    skinFlag = false
 
     -- 本地玩家Id
     local Players = {}
@@ -92,9 +94,9 @@ return (function()
             particleId = 1194,
             scale = 1
         },
-        shield15 = {name = '15秒防护盾', particleId = 1028, scale = 1},
+        shield15 = {name = '15秒防护盾', particleId = 1468, scale = 1},
         armor = {name = '无敌装甲', particleId = 1185, scale = 1},
-        superShield = {name = '超级遁甲', particleId = 1278, scale = 2}
+        superShield = {name = '超级遁甲', particleId = 1231, scale = 1}
     }
     -- 装备标识
     local isWare = false
@@ -562,7 +564,7 @@ return (function()
     function InitGameRule()
         Data.isRuleInit = true
         GameRule.EndTime = 10 -- 游戏时长
-        GameRule.BgMusicMode = 2 -- 背景音乐
+        GameRule.BgMusicMode = 4 -- 背景音乐
         -- GameRule.CurTime = 17.9 -- 当前时间
         -- GameRule.LifeNum = 9 -- 玩家生命
         -- GameRule.TeamNum = 2
@@ -819,7 +821,7 @@ return (function()
         playAreaId = areaid
 
         -- 在此位置播放特效
-        World:playParticalEffect(8, 6, 3, 1001, 1)
+        World:playParticalEffect(8, 6, 3, propParticleId, 1)
         -- 创建一个文字板
         local title = "#R 道具区" -- 文字内容
         local font = 16 -- 字体大小
