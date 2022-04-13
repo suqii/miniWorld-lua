@@ -6,14 +6,16 @@ return (function()
     local playerPool = {}
     -- 道具区域id
     local propAreaId = 0
+    -- 道具区文字版id
+    local graphId = 0
     -- 准备区域id
     local playAreaId = 0
     -- 换装flag
     local changeSkin = true
     -- 是否开局增加道具
-    local propsFlag = false
+    local propsFlag = true
     -- 是否初始化游戏道具
-    local gainPropsFlag = false
+    local gainPropsFlag = true
     -- 是否开启皮肤
     skinFlag = true
 
@@ -50,7 +52,7 @@ return (function()
 
     -- 玩家初始皮肤
     local iniSkin = "mob_8"
-    
+
     -- 皮肤
     local skin = {
         -- skin1 = {name = "凛冬", skinId = 7, id = 4102},
@@ -65,7 +67,7 @@ return (function()
         skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
         skin11 = {name = "叮叮当", skinId = 17, id = 4112},
         skin12 = {name = "羽姬", skinId = 18, id = 4113},
-        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
+        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114}
         -- skin14 = {name = "秋果", skinId = 125, id = 4220},
         -- skin15 = {name = "凌美琪", skinId = 126, id = 4221},
         -- skin16 = {name = "游乐王子", skinId = 127, id = 4222},
@@ -96,7 +98,7 @@ return (function()
     }
     -- 装备标识
     local isWare = false
-    
+
     -- 游戏道具数据
     local props = {
         bigJetBackpack = {
@@ -136,16 +138,16 @@ return (function()
             desc = '超级遁甲剩余时间:'
         }
     }
-    
+
     -- 初始道具
     local gainProps = {
         -- 羽毛
-        -- feather = {
-        --     name = '羽毛',
-        --     itemId = 11303,
-        --     itemCnt = 60,
-        --     prioritytype = 1
-        -- },
+        feather = {
+            name = '羽毛',
+            itemId = 11303,
+            itemCnt = 60,
+            prioritytype = 1
+        },
         -- 基础枕头
         basePillow = {
             name = '枕头',
@@ -154,19 +156,19 @@ return (function()
             prioritytype = 1
         },
         -- -- 哈士奇狗头枕头
-        -- haskiPillow = {
-        --     name = '哈士奇狗头枕头',
-        --     itemId = 4230,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        haskiPillow = {
+            name = '哈士奇狗头枕头',
+            itemId = 4230,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- 大枕头炸弹
-        -- bigBomb = {
-        --     name = '大枕头炸弹',
-        --     itemId = 4231,
-        --     itemCnt = 10,
-        --     prioritytype = 1
-        -- },
+        bigBomb = {
+            name = '大枕头炸弹',
+            itemId = 4231,
+            itemCnt = 30,
+            prioritytype = 1
+        },
 
         -- 小枕头炸弹
         smallBomb = {
@@ -176,75 +178,75 @@ return (function()
             prioritytype = 1
         },
         -- -- 小熊枕头
-        -- bearPillow = {
-        --     name = '小熊枕头',
-        --     itemId = 4233,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 小熊枕头
-        -- bearPillow = {
-        --     name = '小熊枕头',
-        --     itemId = 4233,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 鸡腿枕头
-        -- chickenPillow = {
-        --     name = '鸡腿枕头',
-        --     itemId = 4234,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 葱鸭枕头
-        -- duckPillow = {
-        --     name = '葱鸭枕头',
-        --     itemId = 4235,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 葱鸭枕头
-        -- rabbitPillow = {
-        --     name = '小兔子枕头',
-        --     itemId = 4236,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 咸鱼枕头
-        -- fishPillow = {
-        --     name = '咸鱼枕头',
-        --     itemId = 4237,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 书包枕头
-        -- bagPillow = {
-        --     name = '书包枕头',
-        --     itemId = 4238,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 鳄鱼枕头
-        -- crocodilePillow = {
-        --     name = '鳄鱼枕头',
-        --     itemId = 4239,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 小花枕头
-        -- crocodilePillow = {
-        --     name = '小花枕头',
-        --     itemId = 4240,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 饼干枕头
-        -- crocodilePillow = {
-        --     name = '饼干枕头',
-        --     itemId = 4241,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        bearPillow = {
+            name = '小熊枕头',
+            itemId = 4233,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 小熊枕头
+        bearPillow = {
+            name = '小熊枕头',
+            itemId = 4233,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 鸡腿枕头
+        chickenPillow = {
+            name = '鸡腿枕头',
+            itemId = 4234,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 葱鸭枕头
+        duckPillow = {
+            name = '葱鸭枕头',
+            itemId = 4235,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 葱鸭枕头
+        rabbitPillow = {
+            name = '小兔子枕头',
+            itemId = 4236,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 咸鱼枕头
+        fishPillow = {
+            name = '咸鱼枕头',
+            itemId = 4237,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 书包枕头
+        bagPillow = {
+            name = '书包枕头',
+            itemId = 4238,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 鳄鱼枕头
+        crocodilePillow = {
+            name = '鳄鱼枕头',
+            itemId = 4239,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 小花枕头
+        crocodilePillow = {
+            name = '小花枕头',
+            itemId = 4240,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 饼干枕头
+        crocodilePillow = {
+            name = '饼干枕头',
+            itemId = 4241,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- -- 玲娜贝儿抱枕
         linaBellPillow = {
             name = '玲娜贝儿抱枕',
@@ -560,8 +562,9 @@ return (function()
     function InitGameRule()
         Data.isRuleInit = true
         GameRule.EndTime = 10 -- 游戏时长
+        GameRule.BgMusicMode = 2 -- 背景音乐
         -- GameRule.CurTime = 17.9 -- 当前时间
-        GameRule.LifeNum = 9 -- 玩家生命
+        -- GameRule.LifeNum = 9 -- 玩家生命
         -- GameRule.TeamNum = 2
         GameRule.MaxPlayers = 12
         GameRule.CameraDir = 1 -- 1:正视角
@@ -664,8 +667,8 @@ return (function()
         -- 玩家可被击退
         -- local re1 = Creature:addModAttrib(playerId, 26, 0.1)
         -- 下降玩家位置
-        local result,x,y,z=Actor:getPosition(playerId)
-        local re1 = Actor:setPosition(playerId,x,7,z)
+        local result, x, y, z = Actor:getPosition(playerId)
+        local re1 = Actor:setPosition(playerId, x, 7, z)
         --  玩家可移动
         local re2 = Player:setActionAttrState(playerId, 1, true)
         --  移动方式变为默认
@@ -816,7 +819,7 @@ return (function()
         playAreaId = areaid
 
         -- 在此位置播放特效
-        World:playParticalEffect(8, 7, 3, 1001, 1)
+        World:playParticalEffect(8, 6, 3, 1001, 1)
         -- 创建一个文字板
         local title = "#R 道具区" -- 文字内容
         local font = 16 -- 字体大小
@@ -925,8 +928,8 @@ return (function()
                                                    event.eventobjid,
                                                event.eventobjid)
             MiniTimer:startBackwardTimer(timerid, 4)
-            MiniTimer:showTimerTips({0}, timerid,
-                                    "4秒后即将产生羽毛：", true)
+            -- MiniTimer:showTimerTips({0}, timerid, "生成羽毛剩余时间：",
+            --                         true)
         elseif (event.areaid == playAreaId) then
             print("进入战斗区")
             -- Chat:sendSystemMsg("进入战斗区")
@@ -944,6 +947,8 @@ return (function()
             local id = boomerang:getTimer2("featherTimer" .. event.eventobjid,
                                            event.eventobjid)
             -- print("道具区域计时器id:", id)
+            -- 删除文字板
+            local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
             -- 删除计时器
             MiniTimer:deleteTimer(id)
             -- 将上一个道具区域计时器id移除
@@ -1139,11 +1144,31 @@ return (function()
     end
     -- timerid, timername
     minitimerChange = function(arg)
-        -- print(arg)
+        -- print(arg.timertime)
+        
         -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
         local result, second = MiniTimer:getTimerTime(arg.timerid)
         -- print('time:', second)
         -- Chat:sendSystemMsg('time:' .. second)
+        -- 如果是羽毛计时器
+        if (string.find(arg.timername, "featherTimer") ~= nil) then
+          -- -- 删除文字板
+          -- local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+          -- print("文字板删除结果：", re)
+          -- 创建一个文字板
+          local title = "#B生成羽毛倒计时：" .. second -- 文字内容
+          local font = 16 -- 字体大小
+          local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+          local itype = 1 -- 文字板编号
+          -- 创建一个文字板信息，存到graphicsInfo中
+          local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                         itype)
+          local re,graphid = Graphics:createGraphicsTxtByPos(8, 9, 3, graphicsInfo, 0,
+                                                     0)
+                                                     graphId = graphid
+          print("文字信息：", re)
+          print("graphId：", graphId)
+      end
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
             print(arg)
@@ -1232,6 +1257,10 @@ return (function()
                     MiniTimer:deleteTimer(arg.timerid)
                     -- 生成羽毛
                     local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
+                    -- 删除文字板
+	                 local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+                  
+                   
 
                 end
                 -- 将boomerang.timerPool[arg.timerid]移除
