@@ -157,6 +157,13 @@ return (function()
             itemCnt = 1,
             prioritytype = 1
         },
+        -- 中型枕头
+        midPillow = {
+            name = '中型枕头',
+            itemId = 4229,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- -- 哈士奇狗头枕头
         haskiPillow = {
             name = '哈士奇狗头枕头',
@@ -236,14 +243,14 @@ return (function()
             prioritytype = 1
         },
         -- 小花枕头
-        crocodilePillow = {
+        flowerPillow = {
             name = '小花枕头',
             itemId = 4240,
             itemCnt = 1,
             prioritytype = 1
         },
         -- 饼干枕头
-        crocodilePillow = {
+        cookiesPillow = {
             name = '饼干枕头',
             itemId = 4241,
             itemCnt = 1,
@@ -724,13 +731,13 @@ return (function()
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 1)
             -- 在聊天框显示
-            Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+            -- Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
         elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕' or
             pName == '鳄鱼枕头') then
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 2)
             -- 在聊天框显示
-            Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
+            -- Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
         end
 
     end
