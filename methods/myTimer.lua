@@ -1,3 +1,13 @@
+-- how to use
+-- -- 创建计时器(玩家id,计时器名称,是否显示计时器,显示计时器的文字,显示计时器的对象)
+-- local re = Timer:setTimer(event.eventobjid, "test", 10, true, "计时器：",
+--                           event.eventobjid)
+-- -- 暂停计时器(玩家id,计时器名称,是否显示计时器,显示计时器的文字,显示计时器的对象)
+-- local re = Timer:pauseTimer(event.eventobjid, "test", true, "暂停计时器:",
+--                             event.eventobjid)
+-- -- 删除计时器(玩家id,计时器名称)
+-- local re = Timer:delTimer(event.eventobjid, "test")
+
 -- 计时器类
 Timer = {
     timerPool = {} -- 计时器池 
@@ -70,6 +80,7 @@ function Timer:resumeTimer(playerId, timerName, showTimer, showTxt, showObj)
         else
             MiniTimer:showTimerTips({showObj}, TimerId, showTxt, false)
         end
+        self.timerPool[TimerId][3] = false
         result = ErrorCode.OK
     else
         result = ErrorCode.FAILED
@@ -77,8 +88,7 @@ function Timer:resumeTimer(playerId, timerName, showTimer, showTxt, showObj)
     return result
 end
 -- 设置计时器
-function Timer:setTimer(playerId, timerName, timerId, time, showTimer, showTxt,
-                        showObj)
+function Timer:setTimer(playerId, timerName, time, showTimer, showTxt, showObj)
     local PlayerId = playerId or ""
     local TimerName = timerName or "default"
     local TimerId = self:getTimer(PlayerId, TimerName)
