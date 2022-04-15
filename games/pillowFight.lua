@@ -39,6 +39,41 @@ return (function()
         cz = 0,
         cr = 0 -- 雾圈原点/半径
     }
+    -- Areas
+    local Areas = {born_send1 = nil, born_send2 = nil}
+    -- 出生传送点
+    local born_send1 = {
+        -- 替换的目标方块
+        blockid = 8,
+        -- 位置
+        pos = {x = 29, y = 12, z = 7},
+        -- 特效
+        effect = {show = true, id = 1250, scale = 1},
+        -- 文字板
+        txt = {
+            show = true,
+            title = "#R 赛场传送点", -- 文字内容
+            font = 16, -- 字体大小
+            alpha = 0, -- 背景透明度(0:完全透明 100:不透明)
+            itype = 1 -- 文字板编号
+        }
+    }
+    local born_send2 = {
+        -- 替换的目标方块
+        blockid = 8,
+        -- 位置
+        pos = {x = -14, y = 12, z = 0},
+        -- 特效
+        effect = {show = true, id = 1250, scale = 1},
+        -- 文字板
+        txt = {
+            show = true,
+            title = "#R 赛场传送点", -- 文字内容
+            font = 16, -- 字体大小
+            alpha = 0, -- 背景透明度(0:完全透明 100:不透明)
+            itype = 8 -- 文字板编号
+        }
+    }
 
     -- 游戏数据
     local Data = { -- 随游戏逻辑变更
@@ -630,9 +665,49 @@ return (function()
         end
         getUserData(playerId)
     end
+    -- 得到一个真实的随机数
+    function GetTrueRandom(min, max)
+        -- 得到时间字符串
+        local strTime = tostring(os.time())
+        -- 得到一个反转字符串
+        local strRev = string.reverse(strTime)
+        -- 得到前6位
+        local strRandomTime = string.sub(strRev, 1, 6)
+
+        -- 设置时间种子
+        math.randomseed(strRandomTime)
+        -- 输出随机数
+        -- print("#随机数=",math.random(min, max))
+        -- return math.random(min, max)
+        -- 输出随机数
+        print("min = ", min, ",max = ", max)
+    if (min < 0 or max < 0) then
+      min = -min
+      max = -max
+      print("min = ", min, ",max = ", max)
+        return math.random(min, max)
+    else
+        return math.random(min, max)
+    end
+    end
+    -- 随机重生点
+    function GetRandomPoint()
+        local x1 = GetTrueRandom(26, 29)
+        local y1 = GetTrueRandom(1, 7)
+        local x2 = GetTrueRandom(-14, -10)
+        local y2 = GetTrueRandom(1, 7)
+        local flag = GetTrueRandom(1, 2)
+        if flag == 1 then
+            return x1, y1
+        else
+            return x2, y2
+        end
+    end
     -- 初始化玩家信息
     function InitGamePlayer(playerId)
-
+        -- 初始化玩家视角
+        --第二个参数为视角模式：0主视角 1背视角 2正视角 3俯视角 4俯视角 5自定义视角
+        Player:changeViewMode(playerId,1,false)
         -- 清空玩家的所有物品
         Backpack:clearAllPack(playerId)
         -- 可移动
@@ -656,6 +731,11 @@ return (function()
         -- Players[#Players + 1] = playerId
 
         Actor:changeCustomModel(playerId, iniSkin)
+        --  -- 初始化玩家重生点
+        -- local x, y z= GetRandomPoint()
+        -- print("adsasas")
+        local re = Player:setRevivePoint(playerId, 26, 13, 7)
+        print("初始化玩家重生点结果:",  re)
 
         -- 默认给玩家的道具
         GainItems(playerId)
@@ -741,6 +821,35 @@ return (function()
         end
 
     end
+    -- 赛场传送门
+    function portalArea(data)
+        local blockid = data.blockid or 1
+        local x = data.pos.x or 0
+        local y = data.pos.y or 0
+        local z = data.pos.z or 0
+        local particleId = data.effect.id or 0
+        local scale = data.effect.scale or 1
+        local effect_show = data.effect.show or false
+        local txt_show = data.txt.show or false
+        local txt_title = data.txt.title or "传送点"
+        local txt_font = data.txt.font or 16
+        local txt_alpha = data.txt.alpha or 0
+        local txt_itype = data.txt.itype or 1
+        -- 生成方块
+        Block:placeBlock(blockid, x, y, z)
+
+        if effect_show then
+            -- 在此位置播放特效
+            World:playParticalEffect(x, y, z, particleId, scale)
+        end
+        if txt_show then
+            -- 创建文字板
+            local graphicsInfo = Graphics:makeGraphicsText(txt_title, txt_font,
+                                                           txt_alpha, txt_itype)
+            local re = Graphics:createGraphicsTxtByPos(x, y + 3, z,
+                                                       graphicsInfo, 0, 0)
+        end
+    end
     -- LInclude方法
     function LInclude(id, table)
         local flag = false
@@ -806,6 +915,34 @@ return (function()
         end
         return getAddScore(Score)
     end
+    -- 传送玩家到对应队伍的战斗点
+    function teleportToBattlePoint(playerId)
+        -- 获取玩家队伍
+        local ret, teamId = Player:getTeam(playerId)
+        print('玩家队伍', teamId)
+        -- 红队
+        if (teamId == 1) then
+            -- local x = GetTrueRandom(7, 9)
+            -- local y = GetTrueRandom(13, 14)
+            -- Player:setPosition(playerId, x, 7, y)
+            Player:setPosition(playerId, 8, 7, 14)
+        elseif (teamId == 2) then
+            -- local x = GetTrueRandom(-2, -3)
+            -- local y = GetTrueRandom(2, 4)
+            -- Player:setPosition(playerId, x, 7, y)
+            Player:setPosition(playerId, -3, 7, 3)
+        elseif (teamId == 3) then
+            -- local x = GetTrueRandom(7, 9)
+            -- local y = GetTrueRandom(-7, -8)
+            -- Player:setPosition(playerId, x, 7, y)
+            Player:setPosition(playerId, 8, 7, -8)
+        elseif (teamId == 4) then
+            -- local x = GetTrueRandom(18, 19)
+            -- local y = GetTrueRandom(2, 4)
+            -- Player:setPosition(playerId, x, 7, y)
+            Player:setPosition(playerId, 19, 7, 3)
+        end
+    end
 
     -------------------------------游戏事件-------------------------------
 
@@ -847,6 +984,30 @@ return (function()
 
         -- 初始化玩家信息
         -- InitGamePlayer(isTestMode)
+        -- 初始化传送门
+        portalArea(born_send1)
+        portalArea(born_send2)
+        -- 初始化传送门区域
+        local result, areaid = Area:createAreaRectByRange({
+            x = born_send1.pos.x,
+            y = born_send1.pos.y,
+            z = born_send1.pos.z
+        }, {
+            x = born_send1.pos.x,
+            y = born_send1.pos.y + 2,
+            z = born_send1.pos.z
+        })
+        Areas.born_send1 = areaid
+        local result, areaid = Area:createAreaRectByRange({
+            x = born_send2.pos.x,
+            y = born_send2.pos.y,
+            z = born_send2.pos.z
+        }, {
+            x = born_send2.pos.x,
+            y = born_send2.pos.y + 2,
+            z = born_send2.pos.z
+        })
+        Areas.born_send2 = areaid
 
     end
     -- 玩家死亡
@@ -943,6 +1104,12 @@ return (function()
             print("进入战斗区")
             -- Chat:sendSystemMsg("进入战斗区")
             changeSkin = false
+        elseif (event.areaid == Areas.born_send1 or event.areaid ==
+            Areas.born_send2) then
+            print("进入战斗区传送门")
+            Chat:sendSystemMsg("进入战斗区传送门")
+            teleportToBattlePoint(event.eventobjid)
+
         end
 
     end
@@ -957,7 +1124,7 @@ return (function()
                                            event.eventobjid)
             -- print("道具区域计时器id:", id)
             -- 删除文字板
-            local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+            local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
             -- 删除计时器
             MiniTimer:deleteTimer(id)
             -- 将上一个道具区域计时器id移除
@@ -1154,30 +1321,31 @@ return (function()
     -- timerid, timername
     minitimerChange = function(arg)
         -- print(arg.timertime)
-        
+
         -- 计时器池中的计时器倒计时为0时，销毁关联的投掷物，并创建返回的投掷物
         local result, second = MiniTimer:getTimerTime(arg.timerid)
         -- print('time:', second)
         -- Chat:sendSystemMsg('time:' .. second)
         -- 如果是羽毛计时器
         if (string.find(arg.timername, "featherTimer") ~= nil) then
-          -- -- 删除文字板
-          -- local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
-          -- print("文字板删除结果：", re)
-          -- 创建一个文字板
-          local title = "#B生成羽毛倒计时：" .. second -- 文字内容
-          local font = 16 -- 字体大小
-          local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
-          local itype = 1 -- 文字板编号
-          -- 创建一个文字板信息，存到graphicsInfo中
-          local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
-                                                         itype)
-          local re,graphid = Graphics:createGraphicsTxtByPos(8, 9, 3, graphicsInfo, 0,
-                                                     0)
-                                                     graphId = graphid
-          print("文字信息：", re)
-          print("graphId：", graphId)
-      end
+            -- -- 删除文字板
+            -- local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+            -- print("文字板删除结果：", re)
+            -- 创建一个文字板
+            local title = "#B生成羽毛倒计时：" .. second -- 文字内容
+            local font = 16 -- 字体大小
+            local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+            local itype = 1 -- 文字板编号
+            -- 创建一个文字板信息，存到graphicsInfo中
+            local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                           itype)
+            local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
+                                                                graphicsInfo, 0,
+                                                                0)
+            graphId = graphid
+            print("文字信息：", re)
+            print("graphId：", graphId)
+        end
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
             print(arg)
@@ -1267,9 +1435,7 @@ return (function()
                     -- 生成羽毛
                     local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
                     -- 删除文字板
-	                 local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
-                  
-                   
+                    local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
 
                 end
                 -- 将boomerang.timerPool[arg.timerid]移除
