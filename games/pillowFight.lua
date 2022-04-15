@@ -15,11 +15,23 @@ return (function()
     -- 换装flag
     local changeSkin = true
     -- 是否开局增加道具
-    local propsFlag = false
+    local propsFlag = true
     -- 是否初始化游戏道具
     local gainPropsFlag = false
     -- 是否开启皮肤
     skinFlag = false
+    -- 空气墙
+    local ariWall = {
+        top = {
+            startPoint = {x = -6, y = 19, z = -10},
+            endPoint = {x = 22, y = 19, z = 16}
+        },
+        left = {
+            startPoint = {x = 22, y = 19, z = 16},
+            endPoint = {x = -6, y = -6, z = 15}
+
+        }
+    }
 
     -- 本地玩家Id
     local Players = {}
@@ -322,6 +334,30 @@ return (function()
         missileids = {}, -- 代码创建的投掷物
         timerPool = {} -- 计时器池 { timerid = { isOver, missileInfo } }
     }
+    -- 生成空气墙
+    function fillAreaBlock(blockid, position)
+        -- 起点
+        local start_x = position.startPoint.x
+        local start_y = position.startPoint.y
+        local start_z = position.startPoint.z
+        -- 终点
+        local end_x = position.endPoint.x
+        local end_y = position.endPoint.y
+        local end_z = position.endPoint.z
+        -- 创建一个区域
+        print("start_x", start_x, "start_y", start_y, "start_z", start_z)
+        print("end_x", end_x, "end_y", end_y, "end_z", end_z)
+        local result, areaid = Area:createAreaRectByRange({
+            x = start_x,
+            y = start_y,
+            z = start_z
+        }, {x = end_x, y = end_y, z = end_z})
+        -- 清空区域方块
+        Area:clearAllBlock(areaid, blockid)
+        -- 填充方块
+        -- Area:fillBlock(areaid, blockid, 0)
+
+    end
     -- 获得一个计时器id
     function boomerang:getTimer(timerName, playerId)
         print("开始检测是否有重复")
@@ -681,14 +717,14 @@ return (function()
         -- return math.random(min, max)
         -- 输出随机数
         print("min = ", min, ",max = ", max)
-    if (min < 0 or max < 0) then
-      min = -min
-      max = -max
-      print("min = ", min, ",max = ", max)
-        return math.random(min, max)
-    else
-        return math.random(min, max)
-    end
+        if (min < 0 or max < 0) then
+            min = -min
+            max = -max
+            print("min = ", min, ",max = ", max)
+            return math.random(min, max)
+        else
+            return math.random(min, max)
+        end
     end
     -- 随机重生点
     function GetRandomPoint()
@@ -706,8 +742,8 @@ return (function()
     -- 初始化玩家信息
     function InitGamePlayer(playerId)
         -- 初始化玩家视角
-        --第二个参数为视角模式：0主视角 1背视角 2正视角 3俯视角 4俯视角 5自定义视角
-        Player:changeViewMode(playerId,1,false)
+        -- 第二个参数为视角模式：0主视角 1背视角 2正视角 3俯视角 4俯视角 5自定义视角
+        Player:changeViewMode(playerId, 1, false)
         -- 清空玩家的所有物品
         Backpack:clearAllPack(playerId)
         -- 可移动
@@ -735,7 +771,7 @@ return (function()
         -- local x, y z= GetRandomPoint()
         -- print("adsasas")
         local re = Player:setRevivePoint(playerId, 26, 13, 7)
-        print("初始化玩家重生点结果:",  re)
+        print("初始化玩家重生点结果:", re)
 
         -- 默认给玩家的道具
         GainItems(playerId)
@@ -948,13 +984,18 @@ return (function()
 
     Game_StartGame = function()
         Chat:sendSystemMsg("游戏开始")
+        -- fillAreaBlock(1081, ariWall.top)
+        -- fillAreaBlock(1081, ariWall.left)
+
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
         -- 初始化生成道具区域
         -- 通过起点终点坐标创建区域
-        local result, areaid = Area:createAreaRectByRange({x = 8, y = 6, z = 3},
-                                                          {x = 8, y = 8, z = 3})
+        local result, areaid = Area:createAreaRectByRange({x = 9, y = 6, z = 2},
+                                                          {x = 7, y = 8, z = 4})
         propAreaId = areaid
+        -- 在此位置播放特效
+        World:playParticalEffect(8, 6, 3, propParticleId, 3)
 
         -- 初始战斗区
         local result, areaid = Area:createAreaRectByRange({
@@ -964,10 +1005,8 @@ return (function()
         }, {x = 22, y = 15, z = -9})
         playAreaId = areaid
 
-        -- 在此位置播放特效
-        World:playParticalEffect(8, 6, 3, propParticleId, 1)
         -- 创建一个文字板
-        local title = "#R 道具区" -- 文字内容
+        local title = " 道具区" -- 文字内容
         local font = 16 -- 字体大小
         local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
         local itype = 1 -- 文字板编号
@@ -1053,6 +1092,7 @@ return (function()
     -- 玩家选择快捷栏
     Player_SelectShortcut = function(event)
         -- print(event)
+        Chat:sendSystemMsg('选择快捷栏')
 
         local result3, itemid = Item:getItemId(event.itemid)
         -- print(event.itemid)
@@ -1097,7 +1137,7 @@ return (function()
             local timerid = boomerang:getTimer("featherTimer" ..
                                                    event.eventobjid,
                                                event.eventobjid)
-            MiniTimer:startBackwardTimer(timerid, 4)
+            MiniTimer:startBackwardTimer(timerid, 1)
             -- MiniTimer:showTimerTips({0}, timerid, "生成羽毛剩余时间：",
             --                         true)
         elseif (event.areaid == playAreaId) then
@@ -1332,9 +1372,13 @@ return (function()
             -- local re =  Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
             -- print("文字板删除结果：", re)
             -- 创建一个文字板
-            local title = "#B生成羽毛倒计时：" .. second -- 文字内容
-            local font = 16 -- 字体大小
-            local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+            -- 如果second是偶数
+            if (second % 2 == 0) then
+              print("偶数")
+                -- local title = "#cFF33FF 生成羽毛倒计时：" .. second -- 文字内容
+                local title = "#cFF33FF 羽毛＋1，获得＋1分" 
+                local font = 16 -- 字体大小
+                local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
             local itype = 1 -- 文字板编号
             -- 创建一个文字板信息，存到graphicsInfo中
             local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
@@ -1345,6 +1389,26 @@ return (function()
             graphId = graphid
             print("文字信息：", re)
             print("graphId：", graphId)
+            else
+              print("奇数")
+                -- local title = "#cFF33CC 生成羽毛倒计时：" .. second -- 文字内容
+                local title = "#cFF33CC 羽毛＋1，获得＋1分" 
+                local font = 14 -- 字体大小
+                local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+            local itype = 1 -- 文字板编号
+            -- 创建一个文字板信息，存到graphicsInfo中
+            local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                           itype)
+            local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
+                                                                graphicsInfo, 0,
+                                                                0)
+            graphId = graphid
+            print("文字信息：", re)
+            print("graphId：", graphId)
+            end
+           
+
+            
         end
         if (second == 0) then -- 倒计时为0
             print('计时器结束')
@@ -1436,6 +1500,12 @@ return (function()
                     local result, objid = World:spawnItem(8, 7, 3, 11303, 5)
                     -- 删除文字板
                     local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+                    boomerang.timerPool[arg.timerid] = nil
+                    -- 再开启一个计时器
+                    local timerid = boomerang:getTimer("featherTimer" ..
+                                                   playerId,
+                                               playerId)
+            MiniTimer:startBackwardTimer(timerid, 1)
 
                 end
                 -- 将boomerang.timerPool[arg.timerid]移除
