@@ -12,10 +12,11 @@ Timer = {
     timerPool = {} -- 计时器池 
 }
 -- 初始化一个计时器
-function Timer:getTimer(playerId, timerName, fun)
+function Timer:getTimer(playerId, timerName, fun,param)
     local playerid = playerId or ""
     local timername = timerName or "default"
     local fnc = fun or function() end
+    local param = param or {}
     local timerid
     -- 查找是否有该计时器
     for k, v in pairs(self.timerPool) do
@@ -29,7 +30,7 @@ function Timer:getTimer(playerId, timerName, fun)
         local result
         result, timerid =
             MiniTimer:createTimer(playerid .. timername, nil, true)
-        self.timerPool[timerid] = {timername, playerid, false, fnc}
+        self.timerPool[timerid] = {timername, playerid, false, fnc,param}
     end
     return timerid
 end
@@ -89,10 +90,10 @@ function Timer:resumeTimer(playerId, timerName, showTimer, showTxt, showObj)
 end
 -- 设置计时器
 function Timer:setTimer(playerId, timerName, time, showTimer, showTxt, showObj,
-                        fun)
+                        fun,param)
     local PlayerId = playerId or ""
     local TimerName = timerName or "default"
-    local TimerId = self:getTimer(PlayerId, TimerName, fun)
+    local TimerId = self:getTimer(PlayerId, TimerName, fun,param)
     local TimerId2 = self:checkTimer(PlayerId, TimerName)
     local result
     if (TimerId > -1) then
@@ -165,7 +166,7 @@ minitimerChange = function(arg)
     if (second == 0) then
         MiniTimer:deleteTimer(arg.timerid)
         -- 执行回调函数
-        if timerInfo[4] then timerInfo[4]() end
+        if timerInfo[4] then timerInfo[4](timerInfo[5]) end
 
         -- 清除计时器池中的计时器
         Timer.timerPool[arg.timerid] = nil
