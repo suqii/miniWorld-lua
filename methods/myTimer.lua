@@ -165,11 +165,12 @@ minitimerChange = function(arg)
     local timerInfo = Timer.timerPool[arg.timerid]
     if (second == 0) then
         MiniTimer:deleteTimer(arg.timerid)
+        -- 清除计时器池中的计时器
+        Timer.timerPool[arg.timerid] = nil
         -- 执行回调函数
         if timerInfo[4] then timerInfo[4](timerInfo[5]) end
 
-        -- 清除计时器池中的计时器
-        Timer.timerPool[arg.timerid] = nil
+        
 
     end
 end
