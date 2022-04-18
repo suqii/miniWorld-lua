@@ -818,8 +818,8 @@ return (function()
                 playScore = math.max(0, playScore)
             end
             Player:setGameScore(playerId, playScore)
-            print('add score', playScore)
-            Chat:sendSystemMsg('add score' .. playScore)
+            -- print('add score', playScore)
+            -- Chat:sendSystemMsg('add score' .. playScore)
         end
 
         local ret, teamId = Player:getTeam(playerId)
@@ -1020,6 +1020,14 @@ return (function()
 
         -- 初始化玩家信息
         -- InitGamePlayer(isTestMode)
+        
+
+    end
+    -- 玩家死亡
+    Player_Dead = function(trigger_obj)
+      
+        print(trigger_obj)
+        print('player die')
         -- 初始化传送门
         portalArea(born_send1)
         portalArea(born_send2)
@@ -1044,12 +1052,6 @@ return (function()
             z = born_send2.pos.z
         })
         Areas.born_send2 = areaid
-
-    end
-    -- 玩家死亡
-    Player_Dead = function(trigger_obj)
-        print(trigger_obj)
-        print('player die')
         -- Chat:sendSystemMsg('player ' .. 'die')
         -- 他杀
         if (trigger_obj['toobjid']) then
@@ -1136,9 +1138,11 @@ return (function()
                 local result, objid = World:spawnItem(8, 7, 3, 11303, 1)
                 -- 删除文字板
                 local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+                -- 玩家加分
+                PlayerAddScore(playerId,1)
 
                 -- 再开启一个计时器
-                -- 设置计时器
+                
                 print("再开启一个羽毛计时器")
                 print("playerId=", playerId)
                 local re = Timer:setTimer(playerId, "featherTimer", 1,
@@ -1157,7 +1161,7 @@ return (function()
         elseif (event.areaid == Areas.born_send1 or event.areaid ==
             Areas.born_send2) then
             print("进入战斗区传送门")
-            Chat:sendSystemMsg("进入战斗区传送门")
+            -- Chat:sendSystemMsg("进入战斗区传送门")
             teleportToBattlePoint(event.eventobjid)
 
         end
@@ -1341,7 +1345,7 @@ return (function()
             if (second % 2 == 0) then
                 -- print("偶数")
                
-                local title = "#cFF33FF 羽毛＋1，获得＋1分"
+                local title = "#cFF33FF 羽毛＋1，得分＋1"
                 local font = 16 -- 字体大小
                 local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
                 local itype = 1 -- 文字板编号
@@ -1356,7 +1360,7 @@ return (function()
             else
                 -- print("奇数")
                 -- local title = "#cFF33CC 生成羽毛倒计时：" .. second -- 文字内容
-                local title = "#cFF33CC 羽毛＋1，获得＋1分"
+                local title = "#cFF33CC 羽毛＋1，得分＋1"
                 local font = 14 -- 字体大小
                 local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
                 local itype = 1 -- 文字板编号
