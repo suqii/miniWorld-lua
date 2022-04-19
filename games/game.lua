@@ -12,29 +12,21 @@ return (function()
     local graphId = 0
     -- 准备区域id
     local playAreaId = 0
+    -- 是否处于战斗区
+    local playAreaFlag = false
     -- 换装flag
     local changeSkin = true
     -- 是否开局增加道具
     local propsFlag = true
     -- 是否初始化游戏道具
-    local gainPropsFlag = false
+    local gainPropsFlag = true
     -- 是否开启皮肤
-    skinFlag = false
-    -- 空气墙
-    local ariWall = {
-        top = {
-            startPoint = {x = -6, y = 19, z = -10},
-            endPoint = {x = 22, y = 19, z = 16}
-        },
-        left = {
-            startPoint = {x = 22, y = 19, z = 16},
-            endPoint = {x = -6, y = -6, z = 15}
-
-        }
-    }
+    skinFlag = true
 
     -- 本地玩家Id
     local Players = {}
+    -- 玩家二次选择
+    local playersChoose = {}
     -- 游戏队伍
     local Teams = {red = 1, blue = 2, yellow = 3, green = 4}
     -- 战斗结果
@@ -191,9 +183,15 @@ return (function()
     -- 初始道具
     local gainProps = {
         -- 羽毛
+        -- feather = {
+        --     name = '羽毛',
+        --     itemId = 4249,
+        --     itemCnt = 60,
+        --     prioritytype = 1
+        -- },
         feather = {
             name = '羽毛',
-            itemId = 11303,
+            itemId = 4249,
             itemCnt = 60,
             prioritytype = 1
         },
@@ -327,92 +325,6 @@ return (function()
 
     }
 
-    -- 计时器池
-    local boomerang = {
-        itemid = 4098, -- 回旋镖投掷物道具id，不同地图需要改变该值
-        countdown = 6, -- 倒计时2秒
-        missileids = {}, -- 代码创建的投掷物
-        timerPool = {} -- 计时器池 { timerid = { isOver, missileInfo } }
-    }
-    -- 生成空气墙
-    function fillAreaBlock(blockid, position)
-        -- 起点
-        local start_x = position.startPoint.x
-        local start_y = position.startPoint.y
-        local start_z = position.startPoint.z
-        -- 终点
-        local end_x = position.endPoint.x
-        local end_y = position.endPoint.y
-        local end_z = position.endPoint.z
-        -- 创建一个区域
-        print("start_x", start_x, "start_y", start_y, "start_z", start_z)
-        print("end_x", end_x, "end_y", end_y, "end_z", end_z)
-        local result, areaid = Area:createAreaRectByRange({
-            x = start_x,
-            y = start_y,
-            z = start_z
-        }, {x = end_x, y = end_y, z = end_z})
-        -- 清空区域方块
-        Area:clearAllBlock(areaid, blockid)
-        -- 填充方块
-        -- Area:fillBlock(areaid, blockid, 0)
-
-    end
-    -- 获得一个计时器id
-    function boomerang:getTimer(timerName, playerId)
-        print("开始检测是否有重复")
-        -- print(timerName)
-        timername = timerName or 'default'
-        local timerid
-        -- 查找一个停止的计时器
-        for k, v in pairs(self.timerPool) do
-            print("v1", v[1])
-            print("v2", v[2])
-            if (v[2] == timername) then
-                v[1] = true -- 设置计时器开始工作标识isOver
-
-                print("当前时间池", self.timerPool)
-                print("计时器重复", k)
-
-                timerid = -1
-                -- 恢复计时器
-                -- MiniTimer:resumeTimer(k)
-                break
-            end
-        end
-        -- 没找到则创建一个计时器，并加入计时器池中
-        if (not (timerid)) then
-            local result
-            result, timerid = MiniTimer:createTimer(timername, nil, true)
-            self.timerPool[timerid] = {false, timername, playerId}
-        end
-        print("return的计时器id", timerid)
-        return timerid
-    end
-    function boomerang:getTimer2(timerName, playerId)
-        -- print("开始检测是否有重复")
-        -- print(timerName)
-        timername = timerName or 'default'
-        local timerid
-        -- 查找一个停止的计时器
-        for k, v in pairs(self.timerPool) do
-            -- print("v1", v[1])
-            -- print("v2", v[2])
-            if (v[2] == timername) then
-                v[1] = true -- 设置计时器开始工作标识isOver
-
-                -- print("当前时间池", self.timerPool)
-                -- print("计时器重复", k)
-                timerid = k
-                -- 恢复计时器
-                -- MiniTimer:resumeTimer(k)
-                break
-            end
-        end
-
-        return timerid
-    end
-
     -- 监听事件
     function ListenEvents_MiniDemo()
         -- 游戏事件---
@@ -420,7 +332,7 @@ return (function()
         -- 玩家死亡
         ScriptSupportEvent:registerEvent([=[Player.Die]=], Player_Dead)
         -- 玩家复活
-        -- ScriptSupportEvent:registerEvent([=[Player.Revive]=], Player_Revive)
+        ScriptSupportEvent:registerEvent([=[Player.Revive]=], Player_Revive)
         -- 方块被破坏
         ScriptSupportEvent:registerEvent([=[Block.DestroyBy]=], Block_DestroyBy)
 
@@ -434,7 +346,7 @@ return (function()
 
         --  玩家穿上装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOn]=], Player_EquipOn)
-        
+
         -- 任意计时器发生变化事件
         ScriptSupportEvent:registerEvent([=[minitimer.change]=], minitimerChange)
         -- 玩家受到伤害
@@ -442,7 +354,7 @@ return (function()
         -- 任一玩家进入游戏	
         ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.EnterGame]=],
                                          Game_AnyPlayer_EnterGame)
-        
+
         -- 玩家脱下装备
         ScriptSupportEvent:registerEvent([=[Player.EquipOff]=], Player_EquipOff)
         -- 游戏结束
@@ -460,7 +372,7 @@ return (function()
 
         local baseProps = {
             -- 羽毛
-            [11303] = {id = 11303, num = 0},
+            [4249] = {id = 4249, num = 0},
             -- 无敌装甲
             [4225] = {id = 4225, num = 0},
             -- 喷射背包(大)
@@ -553,7 +465,7 @@ return (function()
         -- 获取baseProps里num大于0的数据
         local props = {}
         for k, v in pairs(baseProps) do
-            if (v.num > 0 or v.id == 11303) then
+            if (v.num > 0 or v.id == 4249) then
                 table.insert(props, v)
             end
         end
@@ -623,10 +535,10 @@ return (function()
         local playerProps = getPlayerProps(playerId)
         -- print("playerProps = ", playerProps)
         for i, v in pairs(playerProps) do
-            if v.id == 11303 then v.num = v.num + addFeatherNum end
+            if v.id == 4249 then v.num = v.num + addFeatherNum end
         end
         print("playerProps = ", playerProps)
-        -- playerProps[11303].num = playerProps[11303].num + addFeatherNum
+        -- playerProps[4249].num = playerProps[4249].num + addFeatherNum
         local data = {props = playerProps}
         local ret = CloudSever:setDataListBykey(libname, playerId, data)
         if ret == ErrorCode.OK then
@@ -744,8 +656,9 @@ return (function()
         -- 清空玩家的所有物品
         Backpack:clearAllPack(playerId)
         -- 可移动
-        -- Player:setActionAttrState(playerId, 1, false)
-        Actor:setActionAttrState(3402, 1, false)
+        local re = Player:setActionAttrState(playerId, 1, false)
+        -- print("设置不可移动结果：",re)
+        -- Actor:setActionAttrState(3402, 1, false)
         -- 可摆放方块
         Player:setActionAttrState(playerId, 2, false)
         -- 可操作方块
@@ -757,6 +670,8 @@ return (function()
         -- 可丢弃道具
         -- Player:setActionAttrState(playerId, 2048, false)
         Player:setItemAttAction(playerId, 4226, 1, false)
+        -- 可使用道具
+        Player:setActionAttrState(playerId, 16, false)
 
         -- 玩家移动方式
         -- Player:changPlayerMoveType(playerId, 1)
@@ -981,8 +896,6 @@ return (function()
 
     Game_StartGame = function()
         Chat:sendSystemMsg("游戏开始")
-        -- fillAreaBlock(1081, ariWall.top)
-        -- fillAreaBlock(1081, ariWall.left)
 
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
@@ -1020,12 +933,11 @@ return (function()
 
         -- 初始化玩家信息
         -- InitGamePlayer(isTestMode)
-        
 
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
-      
+
         print(trigger_obj)
         print('player die')
         -- 初始化传送门
@@ -1081,7 +993,11 @@ return (function()
     Player_Revive = function(event)
         print('玩家复活')
         print(event)
-        Chat:sendSystemMsg('玩家复活')
+        -- Chat:sendSystemMsg('玩家复活')
+        Actor:setActionAttrState(event.eventobjid, 16, false)
+        Actor:setActionAttrState(event.eventobjid, 2, false)
+        Actor:setActionAttrState(event.eventobjid, 4, false)
+        Actor:setActionAttrState(event.eventobjid, 32, false)
 
     end
     -- 方块被破坏
@@ -1091,64 +1007,100 @@ return (function()
     -- 玩家选择快捷栏
     Player_SelectShortcut = function(event)
         -- print(event)
-        Chat:sendSystemMsg('选择快捷栏')
+        -- Chat:sendSystemMsg('选择快捷栏')
+        print('是否处于战斗区：', playAreaFlag)
 
-        local result3, itemid = Item:getItemId(event.itemid)
-        -- print(event.itemid)
-        local result, name = Item:getItemName(event.itemid)
-        -- 如果是装备
-        -- jetBackpack  shield15  armor
-        if (event.itemid == props["smallJetBackpack"].propId or event.itemid ==
-            props["midJetBackpack"].propId or event.itemid ==
-            props["bigJetBackpack"].propId or event.itemid ==
-            props["shield15"].propId or event.itemid == props["armor"].propId or
-            event.itemid == props["superShield"].propId) then
-            -- 将玩家现装备的装备脱下
-            local re = Backpack:actEquipOffByEquipID(event.eventobjid, 4)
-            print("脱下装备返回状态", re)
-            Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
-            -- elseif (event.itemid == skin["skin11"].id) then
-        elseif (LInclude(event.itemid, getAllSkinId()) and changeSkin) then
-            print("开始切换皮肤")
-            local result12, name = Actor:getActorFacade(event.eventobjid)
-            -- print("切换皮肤结果：",result12)
-            print("name=", name)
-            if (name == "mob_" .. getSkinId(event.itemid)) then
-                -- local test = Actor:recoverinitialModel(event.eventobjid)
-                local test = Actor:changeCustomModel(event.eventobjid, iniSkin)
-                print("恢复外观=", test)
-            else
-                Actor:changeCustomModel(event.eventobjid,
-                                        "mob_" .. getSkinId(event.itemid))
-            end
-
+        local itemid = event.itemid
+        local playerId = event.eventobjid
+        -- 如果是生物蛋关闭交互
+        if (playAreaFlag == false or LInclude(event.itemid, getAllSkinId())) then
+            Actor:setActionAttrState(event.eventobjid, 16, false)
+            Actor:setActionAttrState(event.eventobjid, 2, false)
+            Actor:setActionAttrState(event.eventobjid, 4, false)
+            Actor:setActionAttrState(event.eventobjid, 32, false)
         else
-            Prop_Add(event.eventobjid, name)
+            Actor:setActionAttrState(event.eventobjid, 16, true)
+            Actor:setActionAttrState(event.eventobjid, 2, true)
+            Actor:setActionAttrState(event.eventobjid, 4, true)
+            Actor:setActionAttrState(event.eventobjid, 32, true)
         end
+        -- 获取玩家当前选中的快捷栏位置
+        local result, scutIdx = Player:getCurShotcut(playerId)
+        if (result == 0) then
+            if (itemid == playersChoose[playerId].itemid and scutIdx ==
+                playersChoose[playerId].scutIdx) then
+                -- print('成功选择', itemid, "与", scutIdx)
+                -- Chat:sendSystemMsg('成功选择' .. itemid .. "与" .. scutIdx)
+                local result3, itemid = Item:getItemId(event.itemid)
+                -- print(event.itemid)
+                local result, name = Item:getItemName(event.itemid)
+                -- 如果是装备
+                -- jetBackpack  shield15  armor
+                if (event.itemid == props["smallJetBackpack"].propId or
+                    event.itemid == props["midJetBackpack"].propId or
+                    event.itemid == props["bigJetBackpack"].propId or
+                    event.itemid == props["shield15"].propId or event.itemid ==
+                    props["armor"].propId or event.itemid ==
+                    props["superShield"].propId) then
+                    -- 如果是战斗区
+                    if (playAreaFlag == true) then
+                        -- 将玩家现装备的装备脱下
+                        local re = Backpack:actEquipOffByEquipID(
+                                       event.eventobjid, 4)
+                        print("脱下装备返回状态", re)
+                        Backpack:actEquipUpByResID(event.eventobjid,
+                                                   event.itemid)
+                    end
+
+                    -- elseif (event.itemid == skin["skin11"].id) then
+                elseif (LInclude(event.itemid, getAllSkinId()) and changeSkin) then
+                    print("开始切换皮肤")
+                    local result12, name =
+                        Actor:getActorFacade(event.eventobjid)
+                    -- print("切换皮肤结果：",result12)
+                    print("name=", name)
+                    if (name == "mob_" .. getSkinId(event.itemid)) then
+                        -- local test = Actor:recoverinitialModel(event.eventobjid)
+                        local test = Actor:changeCustomModel(event.eventobjid,
+                                                             iniSkin)
+                        print("恢复外观=", test)
+                    else
+                        Actor:changeCustomModel(event.eventobjid, "mob_" ..
+                                                    getSkinId(event.itemid))
+                    end
+
+                else
+                    Prop_Add(event.eventobjid, name)
+                end
+            else
+                playersChoose[playerId].itemid = itemid
+                playersChoose[playerId].scutIdx = scutIdx
+            end
+        end
+
     end
     -- 玩家进入区域
     Player_AreaIn = function(event)
         -- print('玩家进入区域', event)
         -- Chat:sendSystemMsg("发生事件：玩家进入区域")
-        
+
         if (event.areaid == propAreaId) then
-            
+
             function featherTimer(playerId)
                 -- 生成羽毛
-                local result, objid = World:spawnItem(8, 7, 3, 11303, 1)
+                local result, objid = World:spawnItem(8, 7, 3, 4249, 1)
                 -- 删除文字板
                 local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
                 -- 玩家加分
-                PlayerAddScore(playerId,1)
+                PlayerAddScore(playerId, 1)
 
-                -- 再开启一个计时器
-                
+                -- 再开启一个计时器`
+
                 print("再开启一个羽毛计时器")
                 print("playerId=", playerId)
-                local re = Timer:setTimer(playerId, "featherTimer", 1,
-                                          false, "", playerId,
-                                          featherTimer, playerId)
-                                        print("设置计时器结果：", re)
+                local re = Timer:setTimer(playerId, "featherTimer", 1, false,
+                                          "", playerId, featherTimer, playerId)
+                print("设置计时器结果：", re)
             end
             -- 设置计时器
             local re = Timer:setTimer(event.eventobjid, "featherTimer", 1,
@@ -1157,7 +1109,10 @@ return (function()
         elseif (event.areaid == playAreaId) then
             print("进入战斗区")
             -- Chat:sendSystemMsg("进入战斗区")
-            changeSkin = false
+            -- 可使用道具
+            Actor:setActionAttrState(event.eventobjid, 16, true)
+            playAreaFlag = true
+            -- changeSkin = false
         elseif (event.areaid == Areas.born_send1 or event.areaid ==
             Areas.born_send2) then
             print("进入战斗区传送门")
@@ -1174,208 +1129,204 @@ return (function()
             local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
             -- 删除计时器
             local re = Timer:delTimer(event.eventobjid, "featherTimer")
+        elseif (event.areaid == playAreaId) then
+            -- print("离开战斗区")
+            -- Chat:sendSystemMsg("离开战斗区")
+            playAreaFlag = false
+
         end
     end
     -- 玩家穿上装备
     Player_EquipOn = function(event)
-        local result, name = Item:getItemName(event.itemid)
-        -- print('获得装备' .. name)
-        -- Chat:sendSystemMsg('获得装备' .. name)
-        -- 判断道具类型
-        if (name == props["smallJetBackpack"].name) then
-            print('获得飞行技能')
-            Chat:sendSystemMsg('获得飞行技能')
-            -- 播放特效
-            playEffect(event.eventobjid, effects["smallJetBackpack"].particleId,
-                       effects["smallJetBackpack"].scale)
-            function smallJetBackpack(playerId)
-                --  移动方式变为默认
-                Player:changPlayerMoveType(playerId, 0)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-                -- 停止特效
-                stopEffect(playerId, effects["smallJetBackpack"].particleId)
-               
-            end
-            -- 设置计时器
-            local re = Timer:setTimer(event.eventobjid,
-                                      props["smallJetBackpack"].name,
-                                      props["smallJetBackpack"].duration, true,
-                                      props["smallJetBackpack"].desc,
-                                      event.eventobjid, smallJetBackpack,
-                                      event.eventobjid)
 
-            Player:changPlayerMoveType(event.eventobjid, 1)
-        elseif (name == props["midJetBackpack"].name) then
-            print('获得飞行技能')
-            Chat:sendSystemMsg('获得飞行技能')
-            -- 播放特效
-            playEffect(event.eventobjid, effects["midJetBackpack"].particleId,
-                       effects["midJetBackpack"].scale)
-            function midJetBackpack(playerId)
-                --  移动方式变为默认
-                Player:changPlayerMoveType(playerId, 0)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-               
-                -- 停止特效
-                stopEffect(playerId, effects["midJetBackpack"].particleId)
-            end
-            -- 设置计时器
-            local re = Timer:setTimer(event.eventobjid,
-                                      props["midJetBackpack"].name,
-                                      props["midJetBackpack"].duration, true,
-                                      props["midJetBackpack"].desc,
-                                      event.eventobjid, midJetBackpack,
-                                      event.eventobjid)
-            Player:changPlayerMoveType(event.eventobjid, 1)
-        elseif (name == props["bigJetBackpack"].name) then
-            print('获得飞行技能')
-            Chat:sendSystemMsg('获得飞行技能')
-            -- 播放特效
-            playEffect(event.eventobjid, effects["bigJetBackpack"].particleId,
-                       effects["bigJetBackpack"].scale)
-            function bigJetBackpack(playerId)
-                --  移动方式变为默认
-                Player:changPlayerMoveType(playerId, 0)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-                
-                -- 停止特效
-                stopEffect(playerId, effects["bigJetBackpack"].particleId)
-            end
-            -- 设置计时器
-            local re = Timer:setTimer(event.eventobjid,
-                                      props["bigJetBackpack"].name,
-                                      props["bigJetBackpack"].duration, true,
-                                      props["bigJetBackpack"].desc,
-                                      event.eventobjid, bigJetBackpack,
-                                      event.eventobjid)
+        -- 如果在准备区则脱下装备
+        if (playAreaFlag == false) then
+            -- 将玩家现装备的装备脱下
+            local re = Backpack:actEquipOffByEquipID(event.eventobjid, 4)
+        else
+            local result, name = Item:getItemName(event.itemid)
+            -- print('获得装备' .. name)
+            -- Chat:sendSystemMsg('获得装备' .. name)
 
-            Player:changPlayerMoveType(event.eventobjid, 1)
-        elseif (name == props["armor"].name) then
-            print('获得无法击飞技能')
-            Chat:sendSystemMsg('获得无法击飞技能')
-            -- 播放特效
-            playEffect(event.eventobjid, effects["armor"].particleId,
-                       effects["armor"].scale)
-            -- 技能结束函数
-            function armor(playerId)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-                
-                --  玩家可移动
-                Player:setActionAttrState(playerId, 1, true)
-                -- 停止特效
-                stopEffect(playerId, effects["armor"].particleId)
+            -- 判断道具类型
+            if (name == props["smallJetBackpack"].name) then
+                -- print('获得飞行技能')
+                -- Chat:sendSystemMsg('获得飞行技能')
+                -- 播放特效
+                playEffect(event.eventobjid,
+                           effects["smallJetBackpack"].particleId,
+                           effects["smallJetBackpack"].scale)
+                function smallJetBackpack(playerId)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    -- 停止特效
+                    stopEffect(playerId, effects["smallJetBackpack"].particleId)
+
+                end
+                -- 设置计时器
+                local re = Timer:setTimer(event.eventobjid,
+                                          props["smallJetBackpack"].name,
+                                          props["smallJetBackpack"].duration,
+                                          true, props["smallJetBackpack"].desc,
+                                          event.eventobjid, smallJetBackpack,
+                                          event.eventobjid)
+
+                Player:changPlayerMoveType(event.eventobjid, 1)
+            elseif (name == props["midJetBackpack"].name) then
+                -- print('获得飞行技能')
+                -- Chat:sendSystemMsg('获得飞行技能')
+                -- 播放特效
+                playEffect(event.eventobjid,
+                           effects["midJetBackpack"].particleId,
+                           effects["midJetBackpack"].scale)
+                function midJetBackpack(playerId)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+
+                    -- 停止特效
+                    stopEffect(playerId, effects["midJetBackpack"].particleId)
+                end
+                -- 设置计时器
+                local re = Timer:setTimer(event.eventobjid,
+                                          props["midJetBackpack"].name,
+                                          props["midJetBackpack"].duration,
+                                          true, props["midJetBackpack"].desc,
+                                          event.eventobjid, midJetBackpack,
+                                          event.eventobjid)
+                Player:changPlayerMoveType(event.eventobjid, 1)
+            elseif (name == props["bigJetBackpack"].name) then
+                -- print('获得飞行技能')
+                -- Chat:sendSystemMsg('获得飞行技能')
+                -- 播放特效
+                playEffect(event.eventobjid,
+                           effects["bigJetBackpack"].particleId,
+                           effects["bigJetBackpack"].scale)
+                function bigJetBackpack(playerId)
+                    --  移动方式变为默认
+                    Player:changPlayerMoveType(playerId, 0)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+
+                    -- 停止特效
+                    stopEffect(playerId, effects["bigJetBackpack"].particleId)
+                end
+                -- 设置计时器
+                local re = Timer:setTimer(event.eventobjid,
+                                          props["bigJetBackpack"].name,
+                                          props["bigJetBackpack"].duration,
+                                          true, props["bigJetBackpack"].desc,
+                                          event.eventobjid, bigJetBackpack,
+                                          event.eventobjid)
+
+                Player:changPlayerMoveType(event.eventobjid, 1)
+            elseif (name == props["armor"].name) then
+                -- print('获得无法击飞技能')
+                -- Chat:sendSystemMsg('获得无法击飞技能')
+                -- 播放特效
+                playEffect(event.eventobjid, effects["armor"].particleId,
+                           effects["armor"].scale)
+                -- 技能结束函数
+                function armor(playerId)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+
+                    --  玩家可移动
+                    Player:setActionAttrState(playerId, 1, true)
+                    -- 停止特效
+                    stopEffect(playerId, effects["armor"].particleId)
+                end
+                -- 设置计时器
+                local re = Timer:setTimer(event.eventobjid, props["armor"].name,
+                                          props["armor"].duration, true,
+                                          props["armor"].desc, event.eventobjid,
+                                          armor, event.eventobjid)
+
+                -- 增加披风附魔值
+                Actor:addEnchant(event.eventobjid, 4, 23, 5)
+                Player:setActionAttrState(event.eventobjid, 1, false)
+
+            elseif (name == props["superShield"].name) then
+                -- print('获得超级遁甲技能')
+                -- Chat:sendSystemMsg('获得超级遁甲技能')
+                -- 播放特效
+                playEffect(event.eventobjid, effects["superShield"].particleId,
+                           effects["superShield"].scale)
+                -- 技能结束函数
+                function superShield(playerId)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+
+                    -- 停止特效
+                    stopEffect(playerId, effects["superShield"].particleId)
+                end
+                -- 设置计时器
+                local re = Timer:setTimer(event.eventobjid,
+                                          props["superShield"].name,
+                                          props["superShield"].duration, true,
+                                          props["superShield"].desc,
+                                          event.eventobjid, superShield,
+                                          event.eventobjid)
+
+                -- 增加披风附魔值
+                Actor:addEnchant(event.eventobjid, 4, 23, 5)
+            elseif (name == props["shield15"].name) then
+                -- print('获得15s护盾技能1')
+                -- Chat:sendSystemMsg('获得15s护盾技能')
+                -- 播放特效
+                playEffect(event.eventobjid, effects["shield15"].particleId,
+                           effects["shield15"].scale)
+                -- 技能结束函数
+                function shield15(playerId)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+                    -- 销毁装备
+                    local result = Backpack:actDestructEquip(playerId, 4)
+
+                    -- 停止特效
+                    stopEffect(playerId, effects["shield15"].particleId)
+                end
+                -- 设置计时器
+                local re = Timer:setTimer(event.eventobjid,
+                                          props["shield15"].name,
+                                          props["shield15"].duration, true,
+                                          props["shield15"].desc,
+                                          event.eventobjid, shield15,
+                                          event.eventobjid)
+
+                -- 增加披风附魔值
+                Actor:addEnchant(event.eventobjid, 4, 23, 5)
             end
-            -- 设置计时器
-            local re = Timer:setTimer(event.eventobjid, props["armor"].name,
-                                      props["armor"].duration, true,
-                                      props["armor"].desc, event.eventobjid,
-                                      armor, event.eventobjid)
-            
-            -- 增加披风附魔值
-            Actor:addEnchant(event.eventobjid, 4, 23, 5)
-            Player:setActionAttrState(event.eventobjid, 1, false)
-        elseif (name == props["superShield"].name) then
-            print('获得超级遁甲技能')
-            Chat:sendSystemMsg('获得超级遁甲技能')
-            -- 播放特效
-            playEffect(event.eventobjid, effects["superShield"].particleId,
-                       effects["superShield"].scale)
-            -- 技能结束函数
-            function superShield(playerId)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-               
-                
-                -- 停止特效
-                stopEffect(playerId, effects["superShield"].particleId)
-            end
-            -- 设置计时器
-            local re = Timer:setTimer(event.eventobjid,
-                                      props["superShield"].name,
-                                      props["superShield"].duration, true,
-                                      props["superShield"].desc,
-                                      event.eventobjid, superShield,
-                                      event.eventobjid)
-            
-            -- 增加披风附魔值
-            Actor:addEnchant(event.eventobjid, 4, 23, 5)
-        elseif (name == props["shield15"].name) then
-            print('获得15s护盾技能1')
-            Chat:sendSystemMsg('获得15s护盾技能')
-            -- 播放特效
-            playEffect(event.eventobjid, effects["shield15"].particleId,
-                       effects["shield15"].scale)
-            -- 技能结束函数
-            function shield15(playerId)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-                -- 销毁装备
-                local result = Backpack:actDestructEquip(playerId, 4)
-                
-                -- 停止特效
-                stopEffect(playerId, effects["shield15"].particleId)
-            end
-            -- 设置计时器
-            local re = Timer:setTimer(event.eventobjid, props["shield15"].name,
-                                      props["shield15"].duration, true,
-                                      props["shield15"].desc, event.eventobjid,
-                                      shield15, event.eventobjid)
-            
-            -- 增加披风附魔值
-            Actor:addEnchant(event.eventobjid, 4, 23, 5)
         end
 
     end
 
- 
     -- 计时器改变
     minitimerChange = function(arg)
-        
+
         local result, second = MiniTimer:getTimerTime(arg.timerid)
-        
+
         -- 如果是羽毛计时器
         if (string.find(arg.timername, "featherTimer") ~= nil) then
-            
+
             -- 创建一个文字板
-            -- 如果second是偶数
-            if (second % 2 == 0) then
-                -- print("偶数")
-               
-                local title = "#cFF33FF 羽毛＋1，得分＋1"
-                local font = 16 -- 字体大小
-                local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
-                local itype = 1 -- 文字板编号
-                -- 创建一个文字板信息，存到graphicsInfo中
-                local graphicsInfo = Graphics:makeGraphicsText(title, font,
-                                                               alpha, itype)
-                local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
-                                                                    graphicsInfo,
-                                                                    0, 0)
-                graphId = graphid
-              
-            else
-                -- print("奇数")
-                -- local title = "#cFF33CC 生成羽毛倒计时：" .. second -- 文字内容
-                local title = "#cFF33CC 羽毛＋1，得分＋1"
-                local font = 14 -- 字体大小
-                local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
-                local itype = 1 -- 文字板编号
-                -- 创建一个文字板信息，存到graphicsInfo中
-                local graphicsInfo = Graphics:makeGraphicsText(title, font,
-                                                               alpha, itype)
-                local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
-                                                                    graphicsInfo,
-                                                                    0, 0)
-                graphId = graphid
-               
-            end
+            local title = "#cFF33CC 羽毛＋1，得分＋1"
+            local font = 14 -- 字体大小
+            local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+            local itype = 1 -- 文字板编号
+            -- 创建一个文字板信息，存到graphicsInfo中
+            local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                           itype)
+            local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
+                                                                graphicsInfo, 0,
+                                                                0)
+            graphId = graphid
 
         end
-        
+
     end
     -- 玩家受到伤害
     Player_BeHurt = function(event)
@@ -1390,12 +1341,13 @@ return (function()
         InitGamePlayer(event.eventobjid)
         -- 将玩家id添加到玩家列表
         playerPool[#playerPool + 1] = event.eventobjid
+        -- 加入玩家选择组
+        playersChoose[event.eventobjid] = {itemid = 0, scutIdx = 0}
 
     end
 
     -- 玩家脱下装备
     Player_EquipOff = function(e)
-        print("脱下装备时的时间池：", boomerang.timerPool)
         local name = ""
         for k, v in pairs(props) do
             if v.propId == e.itemid then
@@ -1403,15 +1355,16 @@ return (function()
                 name = v.name
             end
         end
-      
-        local re = Timer:pauseTimer(e.eventobjid, name, true,
-                                    "暂停计时器:", e.eventobjid)
-        
-        -- 清楚玩家叠加状态
-        clearPlayerState(e.eventobjid)
-        -- 清除所有特效
-        initEffect(e.eventobjid)
 
+        local re = Timer:pauseTimer(e.eventobjid, name, false,
+                                    "暂停计时器:", e.eventobjid)
+
+        if (playAreaFlag) then
+            -- 清楚玩家叠加状态
+            clearPlayerState(e.eventobjid)
+            -- 清除所有特效
+            initEffect(e.eventobjid)
+        end
 
     end
     -- 游戏结束
@@ -1426,7 +1379,7 @@ return (function()
             savePlayerData(v, rankS[teamId])
         end
     end
-   
+
     -- 调用监听事件
     ListenEvents_MiniDemo();
 
