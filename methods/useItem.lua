@@ -92,5 +92,5 @@ Player_UseItem = function(event)
     useItem(playerId, itemId)
 
 end
--- 任意计时器发生变化事件
+-- 玩家使用道具
 ScriptSupportEvent:registerEvent([=[Player.UseItem]=], Player_UseItem)

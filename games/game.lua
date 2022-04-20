@@ -191,125 +191,125 @@ return (function()
         --     itemCnt = 60,
         --     prioritytype = 1
         -- },
-        feather = {
-            name = '羽毛',
-            itemId = 4249,
-            itemCnt = 60,
-            prioritytype = 1
-        },
-        -- 基础枕头
-        basePillow = {
-            name = '枕头',
-            itemId = 4228,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 中型枕头
-        midPillow = {
-            name = '中型枕头',
-            itemId = 4229,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- -- 哈士奇狗头枕头
-        haskiPillow = {
-            name = '哈士奇狗头枕头',
-            itemId = 4230,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 大枕头炸弹
-        bigBomb = {
-            name = '大枕头炸弹',
-            itemId = 4231,
-            itemCnt = 30,
-            prioritytype = 1
-        },
+        -- feather = {
+        --     name = '羽毛',
+        --     itemId = 4249,
+        --     itemCnt = 60,
+        --     prioritytype = 1
+        -- },
+        -- -- 基础枕头
+        -- basePillow = {
+        --     name = '枕头',
+        --     itemId = 4228,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 中型枕头
+        -- midPillow = {
+        --     name = '中型枕头',
+        --     itemId = 4229,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- -- 哈士奇狗头枕头
+        -- haskiPillow = {
+        --     name = '哈士奇狗头枕头',
+        --     itemId = 4230,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 大枕头炸弹
+        -- bigBomb = {
+        --     name = '大枕头炸弹',
+        --     itemId = 4231,
+        --     itemCnt = 30,
+        --     prioritytype = 1
+        -- },
 
-        -- 小枕头炸弹
-        smallBomb = {
-            name = '小枕头炸弹',
-            itemId = 4232,
-            itemCnt = 30,
-            prioritytype = 1
-        },
+        -- -- 小枕头炸弹
+        -- smallBomb = {
+        --     name = '小枕头炸弹',
+        --     itemId = 4232,
+        --     itemCnt = 30,
+        --     prioritytype = 1
+        -- },
+        -- -- -- 小熊枕头
+        -- bearPillow = {
+        --     name = '小熊枕头',
+        --     itemId = 4233,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
         -- -- 小熊枕头
-        bearPillow = {
-            name = '小熊枕头',
-            itemId = 4233,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 小熊枕头
-        bearPillow = {
-            name = '小熊枕头',
-            itemId = 4233,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 鸡腿枕头
-        chickenPillow = {
-            name = '鸡腿枕头',
-            itemId = 4234,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 葱鸭枕头
-        duckPillow = {
-            name = '葱鸭枕头',
-            itemId = 4235,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 葱鸭枕头
-        rabbitPillow = {
-            name = '小兔子枕头',
-            itemId = 4236,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 咸鱼枕头
-        fishPillow = {
-            name = '咸鱼枕头',
-            itemId = 4237,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 书包枕头
-        bagPillow = {
-            name = '书包枕头',
-            itemId = 4238,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 鳄鱼枕头
-        crocodilePillow = {
-            name = '鳄鱼枕头',
-            itemId = 4239,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 小花枕头
-        flowerPillow = {
-            name = '小花枕头',
-            itemId = 4240,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- 饼干枕头
-        cookiesPillow = {
-            name = '饼干枕头',
-            itemId = 4241,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        -- -- 玲娜贝儿抱枕
-        linaBellPillow = {
-            name = '玲娜贝儿抱枕',
-            itemId = 4242,
-            itemCnt = 1,
-            prioritytype = 1
-        },
+        -- bearPillow = {
+        --     name = '小熊枕头',
+        --     itemId = 4233,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 鸡腿枕头
+        -- chickenPillow = {
+        --     name = '鸡腿枕头',
+        --     itemId = 4234,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 葱鸭枕头
+        -- duckPillow = {
+        --     name = '葱鸭枕头',
+        --     itemId = 4235,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 葱鸭枕头
+        -- rabbitPillow = {
+        --     name = '小兔子枕头',
+        --     itemId = 4236,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 咸鱼枕头
+        -- fishPillow = {
+        --     name = '咸鱼枕头',
+        --     itemId = 4237,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 书包枕头
+        -- bagPillow = {
+        --     name = '书包枕头',
+        --     itemId = 4238,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 鳄鱼枕头
+        -- crocodilePillow = {
+        --     name = '鳄鱼枕头',
+        --     itemId = 4239,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 小花枕头
+        -- flowerPillow = {
+        --     name = '小花枕头',
+        --     itemId = 4240,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- 饼干枕头
+        -- cookiesPillow = {
+        --     name = '饼干枕头',
+        --     itemId = 4241,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- -- -- 玲娜贝儿抱枕
+        -- linaBellPillow = {
+        --     name = '玲娜贝儿抱枕',
+        --     itemId = 4242,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
         -- 计时器
         -- crocodilePillow = {
         --     name = '计时器',
@@ -318,9 +318,15 @@ return (function()
         --     prioritytype = 1
         -- },
         -- 库洛米抱枕q
+        -- kuromiPillow = {
+        --     name = '库洛米抱枕',
+        --     itemId = 4245,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
         kuromiPillow = {
             name = '库洛米抱枕',
-            itemId = 4245,
+            itemId = 4250,
             itemCnt = 1,
             prioritytype = 1
         }
