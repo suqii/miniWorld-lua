@@ -12,6 +12,8 @@ return (function()
     local graphId = 0
     -- 准备区域id
     local playAreaId = 0
+    -- 传送门开启标识
+    local sendDoor = false
     -- 是否处于战斗区
     local playAreaFlag = false
     -- 换装flag
@@ -21,7 +23,7 @@ return (function()
     -- 是否初始化游戏道具
     local gainPropsFlag = true
     -- 是否开启皮肤
-    skinFlag = true
+    local skinFlag = false
 
     -- 本地玩家Id
     local Players = {}
@@ -106,14 +108,14 @@ return (function()
         -- skin8 = {name = "安妮", skinId = 14, id = 4109},
         -- skin9 = {name = "墨家小飞", skinId = 15, id = 4110},
         skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
-        skin11 = {name = "叮叮当", skinId = 17, id = 4112},
-        skin12 = {name = "羽姬", skinId = 18, id = 4113},
-        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114}
+        -- skin11 = {name = "叮叮当", skinId = 17, id = 4112},
+        -- skin12 = {name = "羽姬", skinId = 18, id = 4113},
+        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
         -- skin14 = {name = "秋果", skinId = 125, id = 4220},
-        -- skin15 = {name = "凌美琪", skinId = 126, id = 4221},
-        -- skin16 = {name = "游乐王子", skinId = 127, id = 4222},
-        -- skin17 = {name = "殷小敏", skinId = 128, id = 4223},
-        -- skin18 = {name = "施巧灵", skinId = 129, id = 4224}
+        skin15 = {name = "凌美琪", skinId = 126, id = 4221},
+        skin16 = {name = "游乐王子", skinId = 127, id = 4222},
+        skin17 = {name = "殷小敏", skinId = 128, id = 4223},
+        skin18 = {name = "施巧灵", skinId = 129, id = 4224}
 
     }
     -- 特效
@@ -332,7 +334,7 @@ return (function()
         -- 玩家死亡
         ScriptSupportEvent:registerEvent([=[Player.Die]=], Player_Dead)
         -- 玩家复活
-        ScriptSupportEvent:registerEvent([=[Player.Revive]=], Player_Revive)
+        -- ScriptSupportEvent:registerEvent([=[Player.Revive]=], Player_Revive)
         -- 方块被破坏
         ScriptSupportEvent:registerEvent([=[Block.DestroyBy]=], Block_DestroyBy)
 
@@ -625,12 +627,12 @@ return (function()
         -- print("#随机数=",math.random(min, max))
         -- return math.random(min, max)
         -- 输出随机数
-        print("min = ", min, ",max = ", max)
+        -- print("min = ", min, ",max = ", max)
         if (min < 0 or max < 0) then
             min = -min
             max = -max
-            print("min = ", min, ",max = ", max)
-            return math.random(min, max)
+            -- print("min = ", min, ",max = ", max)
+            return math.random(max, min)
         else
             return math.random(min, max)
         end
@@ -638,14 +640,15 @@ return (function()
     -- 随机重生点
     function GetRandomPoint()
         local x1 = GetTrueRandom(26, 29)
-        local y1 = GetTrueRandom(1, 7)
+        local z1 = GetTrueRandom(1, 7)
         local x2 = GetTrueRandom(-14, -10)
-        local y2 = GetTrueRandom(1, 7)
+        local z2 = GetTrueRandom(1, 7)
         local flag = GetTrueRandom(1, 2)
+        -- print("flag",flag)
         if flag == 1 then
-            return x1, y1
+            return x1, z1
         else
-            return x2, y2
+            return -x2, z2
         end
     end
     -- 初始化玩家信息
@@ -656,32 +659,35 @@ return (function()
         -- 清空玩家的所有物品
         Backpack:clearAllPack(playerId)
         -- 可移动
-        local re = Player:setActionAttrState(playerId, 1, false)
+        -- local re = Player:setActionAttrState(playerId, 1, false)
         -- print("设置不可移动结果：",re)
         -- Actor:setActionAttrState(3402, 1, false)
         -- 可摆放方块
-        Player:setActionAttrState(playerId, 2, false)
+        -- Player:setActionAttrState(playerId, 2, false)
         -- 可操作方块
-        Player:setActionAttrState(playerId, 4, false)
+        -- Player:setActionAttrState(playerId, 4, false)
         -- 可破坏方块
-        Player:setActionAttrState(playerId, 8, false)
+        Actor:setActionAttrState(playerId, 8, false)
         -- 可被攻击
-        Player:setActionAttrState(playerId, 64, true)
+        -- Player:setActionAttrState(playerId, 64, true)
         -- 可丢弃道具
         -- Player:setActionAttrState(playerId, 2048, false)
-        Player:setItemAttAction(playerId, 4226, 1, false)
         -- 可使用道具
-        Player:setActionAttrState(playerId, 16, false)
+        Actor:setActionAttrState(playerId, 16, false)
 
         -- 玩家移动方式
         -- Player:changPlayerMoveType(playerId, 1)
         -- 加入玩家id组
         -- Players[#Players + 1] = playerId
-
+        -- 初始化玩家皮肤
         Actor:changeCustomModel(playerId, iniSkin)
         --  -- 初始化玩家重生点
-        -- local x, y z= GetRandomPoint()
+        -- local x, z = GetRandomPoint()
+        -- print("x", x)
+        -- print("z", z)
+        -- local result,x,y,z=Actor:getPosition(playerId)
         -- print("adsasas")
+        -- local re = Player:setRevivePoint(playerId, x, 13, z)
         local re = Player:setRevivePoint(playerId, 26, 13, 7)
         print("初始化玩家重生点结果:", re)
 
@@ -704,10 +710,10 @@ return (function()
         -- 玩家可被击退
         -- local re1 = Creature:addModAttrib(playerId, 26, 0.1)
         -- 下降玩家位置
-        local result, x, y, z = Actor:getPosition(playerId)
-        local re1 = Actor:setPosition(playerId, x, 7, z)
+        -- local result, x, y, z = Actor:getPosition(playerId)
+        -- local re1 = Actor:setPosition(playerId, x, 7, z)
         --  玩家可移动
-        local re2 = Player:setActionAttrState(playerId, 1, true)
+        local re2 = Actor:setActionAttrState(playerId, 1, true)
         --  移动方式变为默认
         local re3 = Player:changPlayerMoveType(playerId, 0)
         print("清除状态：", re1, re2, re3)
@@ -874,21 +880,32 @@ return (function()
             -- local y = GetTrueRandom(13, 14)
             -- Player:setPosition(playerId, x, 7, y)
             Player:setPosition(playerId, 8, 7, 14)
+            -- Actor:setPosition(playerId, 8, 7, 14)
+                    -- 设置生物朝向
+            local re = Actor:setFaceYaw(playerId,0)
+--             print("生物朝向设置结果：",re)
+--             local result,yaw=Actor:getFaceYaw(playerId)
+-- --在聊天框显示
+-- Chat:sendSystemMsg("房主的朝向偏转角度为"..yaw)
+-- print("房主的朝向偏转角度为",yaw)
         elseif (teamId == 2) then
             -- local x = GetTrueRandom(-2, -3)
             -- local y = GetTrueRandom(2, 4)
             -- Player:setPosition(playerId, x, 7, y)
             Player:setPosition(playerId, -3, 7, 3)
+            -- Actor:setPosition(playerId, -3, 7, 3)
         elseif (teamId == 3) then
             -- local x = GetTrueRandom(7, 9)
             -- local y = GetTrueRandom(-7, -8)
             -- Player:setPosition(playerId, x, 7, y)
             Player:setPosition(playerId, 8, 7, -8)
+            -- Actor:setPosition(playerId, 8, 7, -8)
         elseif (teamId == 4) then
             -- local x = GetTrueRandom(18, 19)
             -- local y = GetTrueRandom(2, 4)
             -- Player:setPosition(playerId, x, 7, y)
             Player:setPosition(playerId, 19, 7, 3)
+            -- Actor:setPosition(playerId, 19, 7, 3)
         end
     end
 
@@ -940,30 +957,34 @@ return (function()
 
         print(trigger_obj)
         print('player die')
-        -- 初始化传送门
-        portalArea(born_send1)
-        portalArea(born_send2)
-        -- 初始化传送门区域
-        local result, areaid = Area:createAreaRectByRange({
-            x = born_send1.pos.x,
-            y = born_send1.pos.y,
-            z = born_send1.pos.z
-        }, {
-            x = born_send1.pos.x,
-            y = born_send1.pos.y + 2,
-            z = born_send1.pos.z
-        })
-        Areas.born_send1 = areaid
-        local result, areaid = Area:createAreaRectByRange({
-            x = born_send2.pos.x,
-            y = born_send2.pos.y,
-            z = born_send2.pos.z
-        }, {
-            x = born_send2.pos.x,
-            y = born_send2.pos.y + 2,
-            z = born_send2.pos.z
-        })
-        Areas.born_send2 = areaid
+        if (sendDoor == false) then
+            -- 初始化传送门
+            portalArea(born_send1)
+            portalArea(born_send2)
+            -- 初始化传送门区域
+            local result, areaid = Area:createAreaRectByRange({
+                x = born_send1.pos.x,
+                y = born_send1.pos.y,
+                z = born_send1.pos.z
+            }, {
+                x = born_send1.pos.x,
+                y = born_send1.pos.y + 2,
+                z = born_send1.pos.z
+            })
+            Areas.born_send1 = areaid
+            local result, areaid = Area:createAreaRectByRange({
+                x = born_send2.pos.x,
+                y = born_send2.pos.y,
+                z = born_send2.pos.z
+            }, {
+                x = born_send2.pos.x,
+                y = born_send2.pos.y + 2,
+                z = born_send2.pos.z
+            })
+            Areas.born_send2 = areaid
+            sendDoor = true
+        end
+
         -- Chat:sendSystemMsg('player ' .. 'die')
         -- 他杀
         if (trigger_obj['toobjid']) then
@@ -1075,6 +1096,8 @@ return (function()
             else
                 playersChoose[playerId].itemid = itemid
                 playersChoose[playerId].scutIdx = scutIdx
+                local result, name = Item:getItemName(event.itemid)
+                Prop_Add(event.eventobjid, name)
             end
         end
 
@@ -1111,11 +1134,13 @@ return (function()
             -- Chat:sendSystemMsg("进入战斗区")
             -- 可使用道具
             Actor:setActionAttrState(event.eventobjid, 16, true)
+            Actor:setActionAttrState(event.eventobjid, 32, true)
             playAreaFlag = true
+    
             -- changeSkin = false
         elseif (event.areaid == Areas.born_send1 or event.areaid ==
             Areas.born_send2) then
-            print("进入战斗区传送门")
+            -- print("进入战斗区传送门")
             -- Chat:sendSystemMsg("进入战斗区传送门")
             teleportToBattlePoint(event.eventobjid)
 
@@ -1133,6 +1158,8 @@ return (function()
             -- print("离开战斗区")
             -- Chat:sendSystemMsg("离开战斗区")
             playAreaFlag = false
+            Actor:setActionAttrState(event.eventobjid, 16, false)
+            Actor:setActionAttrState(event.eventobjid, 32, false)
 
         end
     end
@@ -1163,6 +1190,7 @@ return (function()
                     local result = Backpack:actDestructEquip(playerId, 4)
                     -- 停止特效
                     stopEffect(playerId, effects["smallJetBackpack"].particleId)
+                    
 
                 end
                 -- 设置计时器
@@ -1235,7 +1263,7 @@ return (function()
                     local result = Backpack:actDestructEquip(playerId, 4)
 
                     --  玩家可移动
-                    Player:setActionAttrState(playerId, 1, true)
+                    Actor:setActionAttrState(playerId, 1, true)
                     -- 停止特效
                     stopEffect(playerId, effects["armor"].particleId)
                 end
@@ -1247,7 +1275,7 @@ return (function()
 
                 -- 增加披风附魔值
                 Actor:addEnchant(event.eventobjid, 4, 23, 5)
-                Player:setActionAttrState(event.eventobjid, 1, false)
+                Actor:setActionAttrState(event.eventobjid, 1, false)
 
             elseif (name == props["superShield"].name) then
                 -- print('获得超级遁甲技能')
@@ -1365,6 +1393,9 @@ return (function()
             -- 清除所有特效
             initEffect(e.eventobjid)
         end
+        -- 下降玩家位置
+        local result, x, y, z = Actor:getPosition(e.eventobjid)
+        local re1 = Actor:setPosition(e.eventobjid, x, 7, z)
 
     end
     -- 游戏结束
