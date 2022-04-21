@@ -76,7 +76,7 @@ return (function()
         isGameEnd = false, -- 是否已结束
         isRuleInit = false, -- 游戏是否初始化
         notChooseTwice = true, -- 不需要二次选择
-        deadFlag = false, -- 死亡标记
+        deadFlag = false -- 死亡标记
     }
 
     -- 皮肤
@@ -180,12 +180,12 @@ return (function()
         --     itemCnt = 60,
         --     prioritytype = 1
         -- },
-        -- feather = {
-        --     name = '羽毛',
-        --     itemId = 4249,
-        --     itemCnt = 60,
-        --     prioritytype = 1
-        -- },
+        feather = {
+            name = '羽毛',
+            itemId = 4249,
+            itemCnt = 60,
+            prioritytype = 1
+        }
         -- -- 基础枕头
         -- basePillow = {
         --     name = '枕头',
@@ -208,20 +208,20 @@ return (function()
         --     prioritytype = 1
         -- },
         -- -- 大枕头炸弹
-        bigBomb = {
-            name = '大枕头炸弹',
-            itemId = 4231,
-            itemCnt = 30,
-            prioritytype = 1
-        },
+        -- bigBomb = {
+        --     name = '大枕头炸弹',
+        --     itemId = 4231,
+        --     itemCnt = 30,
+        --     prioritytype = 1
+        -- },
 
-        -- 小枕头炸弹
-        smallBomb = {
-            name = '小枕头炸弹',
-            itemId = 4232,
-            itemCnt = 30,
-            prioritytype = 1
-        },
+        -- -- 小枕头炸弹
+        -- smallBomb = {
+        --     name = '小枕头炸弹',
+        --     itemId = 4232,
+        --     itemCnt = 30,
+        --     prioritytype = 1
+        -- },
         -- -- -- 小熊枕头
         -- bearPillow = {
         --     name = '小熊枕头',
@@ -313,42 +313,42 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        bigJetBackpack = {
-            name = '喷射背包(大)',
-            itemId = 4250,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        midJetBackpack = {
-            name = '喷射背包(中)',
-            itemId = 4251,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        smallJetBackpack = {
-            name = '喷射背包(小)',
-            itemId = 4252,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        armor = {
-            name = '无敌装甲',
-            itemId = 4253,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        shield15 = {
-            name = '15秒防护盾',
-            itemId = 4254,
-            itemCnt = 1,
-            prioritytype = 1
-        },
-        superShield = {
-            name = '超级遁甲',
-            itemId = 4255,
-            itemCnt = 1,
-            prioritytype = 1
-        }
+        -- bigJetBackpack = {
+        --     name = '喷射背包(大)',
+        --     itemId = 4250,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- midJetBackpack = {
+        --     name = '喷射背包(中)',
+        --     itemId = 4251,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- smallJetBackpack = {
+        --     name = '喷射背包(小)',
+        --     itemId = 4252,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- armor = {
+        --     name = '无敌装甲',
+        --     itemId = 4253,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- shield15 = {
+        --     name = '15秒防护盾',
+        --     itemId = 4254,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- },
+        -- superShield = {
+        --     name = '超级遁甲',
+        --     itemId = 4255,
+        --     itemCnt = 1,
+        --     prioritytype = 1
+        -- }
 
     }
     -- 道具
@@ -871,20 +871,23 @@ return (function()
                 -- 新增装备对应的道具
                 local equipId = getItemsKey(playersChoose[playerId].wareId)
                 Player:gainItems(playerId, equipId, 1, 1)
-            end
-            -- 移除玩家背包里的物品
-            local re = Player:removeBackpackItem(playerId, itemId, 1)
-            -- print("移除玩家背包里的物品结果：", re)
-            -- 检测是否有空间
-            local ret = Backpack:enoughSpaceForItem(playerId, equipId, 1)
-            -- 背包新增道具对应的装备
-            if ret == ErrorCode.OK then
-                local re = Player:gainItems(playerId, equipId, 1, 2)
-                if re == ErrorCode.OK then
-                    -- 穿上装备
-                    local re1 = Backpack:actEquipUpByResID(playerId, equipId)
-                    -- print("穿上装备返回状态", re1)
+            else
+                -- 移除玩家背包里的物品
+                local re = Player:removeBackpackItem(playerId, itemId, 1)
+                print("移除玩家背包里的物品结果：", re)
+                -- 检测是否有空间
+                local ret = Backpack:enoughSpaceForItem(playerId, equipId, 1)
+                -- 背包新增道具对应的装备
+                if ret == ErrorCode.OK then
+                    local re = Player:gainItems(playerId, equipId, 1, 2)
+                    if re == ErrorCode.OK then
+                        -- 穿上装备
+                        local re1 =
+                            Backpack:actEquipUpByResID(playerId, equipId)
+                        -- print("穿上装备返回状态", re1)
+                    end
                 end
+                playersChoose[playerId].wareId = 0
             end
 
         end
@@ -972,7 +975,7 @@ return (function()
         -- 玩家新增道具
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
         -- 玩家加入队伍
-        ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], Player_JoinTeam)
+        -- ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], Player_JoinTeam)
 
     end
 
@@ -1000,34 +1003,34 @@ return (function()
         local graphicsInfo =
             Graphics:makeGraphicsText(title, font, alpha, itype)
         local re = Graphics:createGraphicsTxtByPos(8, 8, 3, graphicsInfo, 0, 0)
-        
+
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
-      
-      if(Data.deadFlag == false) then
-        -- 创建进入赛场传送门文字
-        -- 红队
-        createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
-                       Graph.redTeam.pos.z)
-        -- 蓝队
-        createDoorText(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
-                       Graph.blueTeam.pos.z)
-        -- 绿队
-        createDoorText(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y,
-                       Graph.greenTeam.pos.z)
-        -- 黄队
-        createDoorText(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
-                       Graph.yellowTeam.pos.z)
 
-        -- 初始化玩家信息
-        -- InitGamePlayer(isTestMode)
-        -- 初始化npc商店生物状态
-        initNpcShop()
-        -- 初始传送门能源
-        replacePowerBlock()
-        Data.deadFlag = true
-      end
+        if (Data.deadFlag == false) then
+            -- 创建进入赛场传送门文字
+            -- 红队
+            createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
+                           Graph.redTeam.pos.z)
+            -- 蓝队
+            createDoorText(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
+                           Graph.blueTeam.pos.z)
+            -- 绿队
+            createDoorText(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y,
+                           Graph.greenTeam.pos.z)
+            -- 黄队
+            createDoorText(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
+                           Graph.yellowTeam.pos.z)
+
+            -- 初始化玩家信息
+            -- InitGamePlayer(isTestMode)
+            -- 初始化npc商店生物状态
+            initNpcShop()
+            -- 初始传送门能源
+            replacePowerBlock()
+            Data.deadFlag = true
+        end
 
         -- 他杀
         if (trigger_obj['toobjid']) then
@@ -1430,7 +1433,7 @@ return (function()
         local playerId = event.eventobjid
         -- 道具id
         local itemId = event.itemid
-        -- print('玩家使用道具:', itemId)
+        print('玩家使用道具:', itemId)
         -- Chat:sendSystemMsg('玩家使用道具' .. itemId)
         -- 获取items的key
         local allItemsKey = {}
@@ -1443,7 +1446,7 @@ return (function()
         local playerId = event.eventobjid
         -- 道具id
         local itemId = event.itemid
-        -- print('增加道具itemId=', itemId)
+        print('增加道具itemId=', itemId)
         -- print('playersChoose[playerId].wareId=', playersChoose[playerId].wareId)
         -- Chat:sendSystemMsg('玩家新增道具' .. itemId)
         if (playersChoose[playerId].wareId == itemId) then
@@ -1460,8 +1463,8 @@ return (function()
     end
     -- 玩家加入队伍
     Player_JoinTeam = function(e)
-      print('玩家加入队伍',e)
-      Chat:sendSystemMsg('玩家加入队伍')
+        print('玩家加入队伍', e)
+        Chat:sendSystemMsg('玩家加入队伍')
     end
 
     -- 调用监听事件
