@@ -17,12 +17,12 @@ return (function()
     -- 是否处于战斗区
     local playAreaFlag = false
 
-    -- 是否开局增加道具
-    local propsFlag = false
+    -- 装备
+    local propsFlag = false -- 停用
     -- 是否初始化游戏道具
-    local gainPropsFlag = false
+    local gainPropsFlag = true
     -- 是否开启皮肤
-    local skinFlag = true
+    local skinFlag = false
 
     -- 本地玩家Id
     local Players = {}
@@ -75,7 +75,8 @@ return (function()
         isTimeout = false, -- 是否超时
         isGameEnd = false, -- 是否已结束
         isRuleInit = false, -- 游戏是否初始化
-        notChooseTwice = false -- 是否二次选择
+        notChooseTwice = true, -- 不需要二次选择
+        deadFlag = false, -- 死亡标记
     }
 
     -- 皮肤
@@ -95,18 +96,18 @@ return (function()
         -- skin4 = {name = "齐天小圣", skinId = 10, id = 4105},
         -- skin5 = {name = "迷斯拉", skinId = 11, id = 4106},
         -- skin6 = {name = "琉璃酱", skinId = 12, id = 4107},
-        -- skin7 = {name = "乔治", skinId = 13, id = 4108},
-        -- skin8 = {name = "安妮", skinId = 14, id = 4109},
-        -- skin9 = {name = "墨家小飞", skinId = 15, id = 4110},
-        skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
+        skin7 = {name = "乔治", skinId = 13, id = 4108},
+        skin8 = {name = "安妮", skinId = 14, id = 4109},
+        skin9 = {name = "墨家小飞", skinId = 15, id = 4110}
+        -- skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
         -- skin11 = {name = "叮叮当", skinId = 17, id = 4112},
         -- skin12 = {name = "羽姬", skinId = 18, id = 4113},
-        skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
+        -- skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
         -- skin14 = {name = "秋果", skinId = 125, id = 4220},
-        skin15 = {name = "凌美琪", skinId = 126, id = 4221},
-        skin16 = {name = "游乐王子", skinId = 127, id = 4222},
-        skin17 = {name = "殷小敏", skinId = 128, id = 4223},
-        skin18 = {name = "施巧灵", skinId = 129, id = 4224}
+        -- skin15 = {name = "凌美琪", skinId = 126, id = 4221},
+        -- skin16 = {name = "游乐王子", skinId = 127, id = 4222},
+        -- skin17 = {name = "殷小敏", skinId = 128, id = 4223},
+        -- skin18 = {name = "施巧灵", skinId = 129, id = 4224},
 
     }
     -- 特效
@@ -427,6 +428,19 @@ return (function()
             [4247] = {id = 4247, num = 0},
             -- 超级遁甲
             [4248] = {id = 4248, num = 0},
+            -- 喷射背包(大)
+            [4250] = {id = 4250, num = 0},
+            -- 喷射背包(中)
+            [4251] = {id = 4251, num = 0},
+            -- 喷射背包(小)
+            [4252] = {id = 4252, num = 0},
+            -- 无敌装甲
+            [4253] = {id = 4253, num = 0},
+            -- 15秒防护盾
+            [4254] = {id = 4254, num = 0},
+            -- 超级遁甲
+            [4255] = {id = 4255, num = 0},
+
             -- 皮肤
             [4111] = {id = 4111, num = 0},
             [4112] = {id = 4112, num = 0},
@@ -905,6 +919,19 @@ return (function()
         end
 
     end
+    -- 替换准备区星能块
+    function replacePowerBlock()
+        -- 星能块id 415
+        -- 冰块id 123
+        Block:placeBlock(415, Graph.redTeam.pos.x, Graph.redTeam.pos.y - 4,
+                         Graph.redTeam.pos.z, 0)
+        Block:placeBlock(415, Graph.blueTeam.pos.x, Graph.blueTeam.pos.y - 4,
+                         Graph.blueTeam.pos.z, 0)
+        Block:placeBlock(415, Graph.greenTeam.pos.x, Graph.greenTeam.pos.y - 4,
+                         Graph.greenTeam.pos.z, 0)
+        Block:placeBlock(415, Graph.yellowTeam.pos.x,
+                         Graph.yellowTeam.pos.y - 4, Graph.yellowTeam.pos.z, 0)
+    end
 
     -- 监听事件
     function ListenEvents_MiniDemo()
@@ -944,6 +971,8 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.UseItem]=], Player_UseItem)
         -- 玩家新增道具
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
+        -- 玩家加入队伍
+        ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], Player_JoinTeam)
 
     end
 
@@ -957,7 +986,7 @@ return (function()
         -- 初始化生成道具区域
         -- 通过起点终点坐标创建区域
         local result, areaid = Area:createAreaRectByRange({x = 9, y = 6, z = 2},
-                                                          {x = 7, y = 8, z = 4})
+                                                          {x = 7, y = 11, z = 4})
         propAreaId = areaid
         -- 在此位置播放特效
         World:playParticalEffect(8, 6, 3, propParticleId, 3)
@@ -971,6 +1000,12 @@ return (function()
         local graphicsInfo =
             Graphics:makeGraphicsText(title, font, alpha, itype)
         local re = Graphics:createGraphicsTxtByPos(8, 8, 3, graphicsInfo, 0, 0)
+        
+    end
+    -- 玩家死亡
+    Player_Dead = function(trigger_obj)
+      
+      if(Data.deadFlag == false) then
         -- 创建进入赛场传送门文字
         -- 红队
         createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
@@ -989,9 +1024,10 @@ return (function()
         -- InitGamePlayer(isTestMode)
         -- 初始化npc商店生物状态
         initNpcShop()
-    end
-    -- 玩家死亡
-    Player_Dead = function(trigger_obj)
+        -- 初始传送门能源
+        replacePowerBlock()
+        Data.deadFlag = true
+      end
 
         -- 他杀
         if (trigger_obj['toobjid']) then
@@ -1097,7 +1133,7 @@ return (function()
     -- 玩家进入区域
     Player_AreaIn = function(event)
 
-        if (event.areaid == propAreaId and Data.isGameEnd == false) then
+        if (event.areaid == propAreaId) then
 
             function featherTimer(playerId)
                 -- 生成羽毛
@@ -1107,13 +1143,16 @@ return (function()
                 -- 玩家加分
                 PlayerAddScore(playerId, 1)
 
-                -- 再开启一个计时器`
+                -- 再开启一个计时器
 
-                -- print("再开启一个羽毛计时器")
-                -- print("playerId=", playerId)
-                local re = Timer:setTimer(playerId, "featherTimer", 1, false,
-                                          "", playerId, featherTimer, playerId)
-                -- print("设置计时器结果：", re)
+                if Data.isGameEnd == false then
+                    -- print("再开启一个羽毛计时器")
+                    -- print("playerId=", playerId)
+                    local re = Timer:setTimer(playerId, "featherTimer", 1,
+                                              false, "", playerId, featherTimer,
+                                              playerId)
+                    -- print("设置计时器结果：", re)
+                end
             end
             -- 设置计时器
             local re = Timer:setTimer(event.eventobjid, "featherTimer", 1,
@@ -1418,6 +1457,11 @@ return (function()
             playersChoose[playerId].wareId = 0
         end
 
+    end
+    -- 玩家加入队伍
+    Player_JoinTeam = function(e)
+      print('玩家加入队伍',e)
+      Chat:sendSystemMsg('玩家加入队伍')
     end
 
     -- 调用监听事件
