@@ -185,7 +185,7 @@ return (function()
             itemId = 4249,
             itemCnt = 60,
             prioritytype = 1
-        }
+        },
         -- -- 基础枕头
         -- basePillow = {
         --     name = '枕头',
@@ -337,18 +337,18 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        -- shield15 = {
-        --     name = '15秒防护盾',
-        --     itemId = 4254,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- superShield = {
-        --     name = '超级遁甲',
-        --     itemId = 4255,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- }
+        shield15 = {
+            name = '15秒防护盾',
+            itemId = 4254,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        superShield = {
+            name = '超级遁甲',
+            itemId = 4255,
+            itemCnt = 1,
+            prioritytype = 1
+        }
 
     }
     -- 道具
@@ -874,7 +874,7 @@ return (function()
             else
                 -- 移除玩家背包里的物品
                 local re = Player:removeBackpackItem(playerId, itemId, 1)
-                print("移除玩家背包里的物品结果：", re)
+                -- print("移除玩家背包里的物品结果：", re)
                 -- 检测是否有空间
                 local ret = Backpack:enoughSpaceForItem(playerId, equipId, 1)
                 -- 背包新增道具对应的装备
@@ -1409,7 +1409,7 @@ return (function()
         -- end
         local playerId = e.eventobjid
         local itemId = e.itemid
-        -- print("脱了",itemId)
+        print("脱了",itemId)
         --- 删除脱下的装备
         --  Player:removeBackpackItem(playerId, itemId, 1)
         playersChoose[playerId].wareId = itemId
@@ -1433,7 +1433,7 @@ return (function()
         local playerId = event.eventobjid
         -- 道具id
         local itemId = event.itemid
-        print('玩家使用道具:', itemId)
+        -- print('玩家使用道具:', itemId)
         -- Chat:sendSystemMsg('玩家使用道具' .. itemId)
         -- 获取items的key
         local allItemsKey = {}
@@ -1446,7 +1446,7 @@ return (function()
         local playerId = event.eventobjid
         -- 道具id
         local itemId = event.itemid
-        print('增加道具itemId=', itemId)
+        -- print('增加道具itemId=', itemId)
         -- print('playersChoose[playerId].wareId=', playersChoose[playerId].wareId)
         -- Chat:sendSystemMsg('玩家新增道具' .. itemId)
         if (playersChoose[playerId].wareId == itemId) then
