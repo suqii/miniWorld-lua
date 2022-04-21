@@ -923,16 +923,17 @@ return (function()
 
     end
     -- 替换准备区星能块
-    function replacePowerBlock()
+    function replacePowerBlock(blockid)
+        local blockid = blockid or 415
         -- 星能块id 415
         -- 冰块id 123
-        Block:placeBlock(415, Graph.redTeam.pos.x, Graph.redTeam.pos.y - 4,
+        Block:placeBlock(blockid, Graph.redTeam.pos.x, Graph.redTeam.pos.y - 4,
                          Graph.redTeam.pos.z, 0)
-        Block:placeBlock(415, Graph.blueTeam.pos.x, Graph.blueTeam.pos.y - 4,
-                         Graph.blueTeam.pos.z, 0)
-        Block:placeBlock(415, Graph.greenTeam.pos.x, Graph.greenTeam.pos.y - 4,
-                         Graph.greenTeam.pos.z, 0)
-        Block:placeBlock(415, Graph.yellowTeam.pos.x,
+        Block:placeBlock(blockid, Graph.blueTeam.pos.x,
+                         Graph.blueTeam.pos.y - 4, Graph.blueTeam.pos.z, 0)
+        Block:placeBlock(blockid, Graph.greenTeam.pos.x,
+                         Graph.greenTeam.pos.y - 4, Graph.greenTeam.pos.z, 0)
+        Block:placeBlock(blockid, Graph.yellowTeam.pos.x,
                          Graph.yellowTeam.pos.y - 4, Graph.yellowTeam.pos.z, 0)
     end
 
@@ -1010,6 +1011,8 @@ return (function()
             z = 16
         }, {x = 22, y = 15, z = -9})
         playAreaId = areaid
+        -- 初始化传送点方块
+        replacePowerBlock(123)
 
     end
     -- 玩家死亡
@@ -1035,7 +1038,7 @@ return (function()
             -- 初始化npc商店生物状态
             initNpcShop()
             -- 初始传送门能源
-            replacePowerBlock()
+            replacePowerBlock(415)
             Data.deadFlag = true
         end
 
@@ -1155,11 +1158,11 @@ return (function()
                 local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
                 local itype = 1 -- 文字板编号
                 -- 创建一个文字板信息，存到graphicsInfo中
-                local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
-                                                               itype)
+                local graphicsInfo = Graphics:makeGraphicsText(title, font,
+                                                               alpha, itype)
                 local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
-                                                                    graphicsInfo, 0,
-                                                                    0)
+                                                                    graphicsInfo,
+                                                                    0, 0)
                 graphId = graphid
                 -- 玩家加分
                 PlayerAddScore(playerId, 1)
@@ -1179,7 +1182,7 @@ return (function()
             local re = Timer:setTimer(event.eventobjid, "featherTimer", 1,
                                       false, "", event.eventobjid, featherTimer,
                                       event.eventobjid)
-                                       -- 创建一个文字板
+            -- 创建一个文字板
             local title = "#cFF33CC 羽毛＋1，得分＋1"
             local font = 14 -- 字体大小
             local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
