@@ -1150,6 +1150,17 @@ return (function()
                 local result, objid = World:spawnItem(8, 7, 3, 4249, 1)
                 -- 删除文字板
                 local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+                local title = "#cFF33CC 羽毛＋1，得分＋1"
+                local font = 14 -- 字体大小
+                local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+                local itype = 1 -- 文字板编号
+                -- 创建一个文字板信息，存到graphicsInfo中
+                local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                               itype)
+                local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
+                                                                    graphicsInfo, 0,
+                                                                    0)
+                graphId = graphid
                 -- 玩家加分
                 PlayerAddScore(playerId, 1)
 
@@ -1168,6 +1179,18 @@ return (function()
             local re = Timer:setTimer(event.eventobjid, "featherTimer", 1,
                                       false, "", event.eventobjid, featherTimer,
                                       event.eventobjid)
+                                       -- 创建一个文字板
+            local title = "#cFF33CC 羽毛＋1，得分＋1"
+            local font = 14 -- 字体大小
+            local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+            local itype = 1 -- 文字板编号
+            -- 创建一个文字板信息，存到graphicsInfo中
+            local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                           itype)
+            local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
+                                                                graphicsInfo, 0,
+                                                                0)
+            graphId = graphid
         elseif (event.areaid == playAreaId) then
             -- print("进入战斗区")
             -- Chat:sendSystemMsg("进入战斗区")
@@ -1350,32 +1373,32 @@ return (function()
 
     end
 
-    -- 计时器改变
-    minitimerChange = function(arg)
+    -- -- 计时器改变
+    -- minitimerChange = function(arg)
 
-        local result, second = MiniTimer:getTimerTime(arg.timerid)
-        -- 删除文字板
-        local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
+    --     local result, second = MiniTimer:getTimerTime(arg.timerid)
+    --     -- 删除文字板
+    --     local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
 
-        -- 如果是羽毛计时器
-        if (string.find(arg.timername, "featherTimer") ~= nil) then
+    --     -- 如果是羽毛计时器
+    --     if (string.find(arg.timername, "featherTimer") ~= nil) then
 
-            -- 创建一个文字板
-            local title = "#cFF33CC 羽毛＋1，得分＋1"
-            local font = 14 -- 字体大小
-            local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
-            local itype = 1 -- 文字板编号
-            -- 创建一个文字板信息，存到graphicsInfo中
-            local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
-                                                           itype)
-            local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
-                                                                graphicsInfo, 0,
-                                                                0)
-            graphId = graphid
+    --         -- 创建一个文字板
+    --         local title = "#cFF33CC 羽毛＋1，得分＋1"
+    --         local font = 14 -- 字体大小
+    --         local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+    --         local itype = 1 -- 文字板编号
+    --         -- 创建一个文字板信息，存到graphicsInfo中
+    --         local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+    --                                                        itype)
+    --         local re, graphid = Graphics:createGraphicsTxtByPos(8, 9, 3,
+    --                                                             graphicsInfo, 0,
+    --                                                             0)
+    --         graphId = graphid
 
-        end
+    --     end
 
-    end
+    -- end
     -- 玩家受到伤害
     Player_BeHurt = function(event)
         -- 加血
