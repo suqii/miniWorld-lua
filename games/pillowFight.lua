@@ -21,9 +21,9 @@ return (function()
     -- 是否开局增加道具
     local propsFlag = false
     -- 是否初始化游戏道具
-    local gainPropsFlag = true
+    local gainPropsFlag = false
     -- 是否开启皮肤
-    local skinFlag = false
+    local skinFlag = true
 
     -- 本地玩家Id
     local Players = {}
@@ -75,7 +75,8 @@ return (function()
         markRadius = 100, -- 地图标记半径
         isTimeout = false, -- 是否超时
         isGameEnd = false, -- 是否已结束
-        isRuleInit = false -- 游戏是否初始化
+        isRuleInit = false, -- 游戏是否初始化
+        notChooseTwice = false -- 是否二次选择
     }
 
     -- 皮肤
@@ -1046,7 +1047,7 @@ return (function()
         local result, scutIdx = Player:getCurShotcut(playerId)
         if (result == 0) then
             if (itemid == playersChoose[playerId].itemid and scutIdx ==
-                playersChoose[playerId].scutIdx) then
+                playersChoose[playerId].scutIdx or Data.notChooseTwice) then
                 -- print('成功选择', itemid, "与", scutIdx)
                 -- Chat:sendSystemMsg('成功选择' .. itemid .. "与" .. scutIdx)
                 local result3, itemid = Item:getItemId(event.itemid)
