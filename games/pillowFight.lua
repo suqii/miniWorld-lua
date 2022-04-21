@@ -1003,6 +1003,13 @@ return (function()
         local graphicsInfo =
             Graphics:makeGraphicsText(title, font, alpha, itype)
         local re = Graphics:createGraphicsTxtByPos(8, 8, 3, graphicsInfo, 0, 0)
+        -- 初始战斗区
+        local result, areaid = Area:createAreaRectByRange({
+            x = -7,
+            y = 0,
+            z = 16
+        }, {x = 22, y = 15, z = -9})
+        playAreaId = areaid
 
     end
     -- 玩家死亡
@@ -1161,6 +1168,11 @@ return (function()
             local re = Timer:setTimer(event.eventobjid, "featherTimer", 1,
                                       false, "", event.eventobjid, featherTimer,
                                       event.eventobjid)
+        elseif (event.areaid == playAreaId) then
+            -- print("进入战斗区")
+            -- Chat:sendSystemMsg("进入战斗区")
+
+            playAreaFlag = true
 
         end
 
@@ -1172,6 +1184,10 @@ return (function()
             local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
             -- 删除计时器
             local re = Timer:delTimer(event.eventobjid, "featherTimer")
+        elseif (event.areaid == playAreaId) then
+            -- print("离开战斗区")
+            -- Chat:sendSystemMsg("离开战斗区")
+            playAreaFlag = false
 
         end
     end
@@ -1395,8 +1411,13 @@ return (function()
         initEffect(e.eventobjid)
 
         -- 下降玩家位置
-        local result, x, y, z = Actor:getPosition(e.eventobjid)
-        local re1 = Actor:setPosition(e.eventobjid, x, 7, z)
+        if (playAreaFlag == false) then
+            local result, x, y, z = Actor:getPosition(e.eventobjid)
+            local re1 = Actor:setPosition(e.eventobjid, x, 15, z)
+        else
+            local result, x, y, z = Actor:getPosition(e.eventobjid)
+            local re1 = Actor:setPosition(e.eventobjid, x, 7, z)
+        end
         -- 如果是道具
         -- if (LInclude(e.itemid, getAllPropsId())) then
         --   print(e.eventobjid)
@@ -1409,7 +1430,7 @@ return (function()
         -- end
         local playerId = e.eventobjid
         local itemId = e.itemid
-        print("脱了",itemId)
+        print("脱了", itemId)
         --- 删除脱下的装备
         --  Player:removeBackpackItem(playerId, itemId, 1)
         playersChoose[playerId].wareId = itemId
