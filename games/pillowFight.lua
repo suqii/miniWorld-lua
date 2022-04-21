@@ -79,7 +79,12 @@ return (function()
     }
 
     -- 皮肤
-    local skinCfg = {goBack = false, iniSkin = "mob_8"}
+    local skinCfg = {
+        goBack = false,
+        iniSkin = "mob_8",
+        effectId = 1149,
+        effectScale = 1
+    }
     -- 皮肤
     local skin = {
         -- skin1 = {name = "凛冬", skinId = 7, id = 4102},
@@ -121,7 +126,7 @@ return (function()
         },
         shield15 = {name = '15秒防护盾', particleId = 1468, scale = 1},
         armor = {name = '无敌装甲', particleId = 1185, scale = 1},
-        superShield = {name = '超级遁甲', particleId = 1231, scale = 1}
+        superShield = {name = '超级遁甲', particleId = 1565, scale = 1}
     }
 
     -- 游戏装备数据
@@ -200,20 +205,20 @@ return (function()
         --     prioritytype = 1
         -- },
         -- -- 大枕头炸弹
-        -- bigBomb = {
-        --     name = '大枕头炸弹',
-        --     itemId = 4231,
-        --     itemCnt = 30,
-        --     prioritytype = 1
-        -- },
+        bigBomb = {
+            name = '大枕头炸弹',
+            itemId = 4231,
+            itemCnt = 30,
+            prioritytype = 1
+        },
 
-        -- -- 小枕头炸弹
-        -- smallBomb = {
-        --     name = '小枕头炸弹',
-        --     itemId = 4232,
-        --     itemCnt = 30,
-        --     prioritytype = 1
-        -- },
+        -- 小枕头炸弹
+        smallBomb = {
+            name = '小枕头炸弹',
+            itemId = 4232,
+            itemCnt = 30,
+            prioritytype = 1
+        },
         -- -- -- 小熊枕头
         -- bearPillow = {
         --     name = '小熊枕头',
@@ -357,6 +362,21 @@ return (function()
         [4254] = 4244,
         -- 超级遁甲
         [4255] = 4248
+    }
+    -- npc商店
+    local npcShop ={
+      red={
+        id=4319270112 
+      },
+      blue={
+        id=4319270111 
+      },
+      green={
+        id=4319270110 
+      },
+      yellow={
+        id=4319270113 
+      },
     }
 
     -------------------------------自定义方法-------------------------------
@@ -677,7 +697,8 @@ return (function()
     -- 给玩家播放特效
     function playEffect(playerId, particleId, scale)
         Scale = scale or 1
-        Actor:playBodyEffectById(playerId, particleId, Scale)
+        local re = Actor:playBodyEffectById(playerId, particleId, Scale)
+        -- print("播放特效结果=", re)
     end
     -- 停止玩家特效
     function stopEffect(playerId, particleId)
@@ -699,7 +720,7 @@ return (function()
         end
 
         local ret, teamId = Player:getTeam(playerId)
-        print("队伍Id:", teamId)
+        -- print("队伍Id:", teamId)
         if ret == ErrorCode.OK and teamId > 0 then
             local ret, teamScore = Team:getTeamScore(teamId)
             if addScore < 0 then -- 设置队伍分数
@@ -817,6 +838,7 @@ return (function()
         local isWare = Player:isEquipByResID(playerId, equipId)
         if (isSkin) then
             print("开始切换皮肤")
+
             local result12, name = Actor:getActorFacade(playerId)
             -- print("切换皮肤结果：",result12)
             -- print("name=", name)
@@ -861,7 +883,7 @@ return (function()
     end
     -- 生成赛场传送门文字
     function createDoorText(x, y, z)
-        print("生成赛场传送门文字", x, y, z)
+        -- print("生成赛场传送门文字", x, y, z)
         -- 创建一个文字板
         local title = "#R 进入赛场" -- 文字内容
         local font = 16 -- 字体大小
@@ -871,6 +893,23 @@ return (function()
         local graphicsInfo =
             Graphics:makeGraphicsText(title, font, alpha, itype)
         local re = Graphics:createGraphicsTxtByPos(x, y, z, graphicsInfo, 0, 0)
+    end
+    -- 初始npc商店生物
+    function initNpcShop()
+
+        for k, v in pairs(npcShop) do
+            -- 不可可被攻击
+            Actor:setActionAttrState(v.id, 64, false)
+            -- 不可移动
+            Actor:setActionAttrState(v.id, 1, false)
+            -- 不可被杀死
+            Actor:setActionAttrState(v.id, 128, false)
+            -- 附魔
+            -- Creature:addModAttrib(v.id, 26, 1)
+            -- Creature:addModAttrib(v.id, 21, 10)
+            -- Creature:addModAttrib(v.id, 25, 10)
+        end
+
     end
 
     -- 监听事件
@@ -954,7 +993,8 @@ return (function()
 
         -- 初始化玩家信息
         -- InitGamePlayer(isTestMode)
-
+        -- 初始化npc商店生物状态
+        initNpcShop()
     end
     -- 玩家死亡
     Player_Dead = function(trigger_obj)
@@ -972,9 +1012,21 @@ return (function()
 
         end
         -- 清除所有特效
-        initEffect(trigger_obj['eventobjid'])
+        -- initEffect(trigger_obj['eventobjid'])
         -- 清楚玩家叠加状态
-        clearPlayerState(trigger_obj['eventobjid'])
+        -- clearPlayerState(trigger_obj['eventobjid'])
+        -- 脱下装备
+        --  将玩家现装备的装备脱下
+        -- local re = Backpack:actEquipOffByEquipID(trigger_obj['eventobjid'], 4)
+        -- print("脱下装备返回状态", re)
+        --   if (re == 0) then
+        --     -- 删除脱下的装备
+        --     Player:removeBackpackItem(trigger_obj['eventobjid'],
+        --                               playersChoose[playerId].wareId, 1)
+        --     -- -- 新增装备对应的道具
+        --     -- local equipId = getItemsKey(playersChoose[playerId].wareId)
+        --     -- Player:gainItems(playerId, equipId, 1, 1)
+        -- end
     end
 
     -- 方块被破坏
@@ -1017,11 +1069,12 @@ return (function()
 
                     -- elseif (event.itemid == skin["skin11"].id) then
                 elseif (LInclude(event.itemid, getAllSkinId()) and changeSkin) then
-                    print("开始切换皮肤")
                     local result12, name =
                         Actor:getActorFacade(event.eventobjid)
                     -- print("切换皮肤结果：",result12)
-                    print("name=", name)
+                    print("开始切换皮肤=", name)
+                    
+
                     if (name == "mob_" .. getSkinId(event.itemid)) then
                         -- local test = Actor:recoverinitialModel(event.eventobjid)
                         local test = Actor:changeCustomModel(event.eventobjid,
@@ -1031,6 +1084,8 @@ return (function()
                         Actor:changeCustomModel(event.eventobjid, "mob_" ..
                                                     getSkinId(event.itemid))
                     end
+                    -- 播放特效
+                    playEffect(playerId, skinCfg.effectId, skinCfg.effectScale)
 
                 else
                     Prop_Add(event.eventobjid, name)
@@ -1047,7 +1102,7 @@ return (function()
     -- 玩家进入区域
     Player_AreaIn = function(event)
 
-        if (event.areaid == propAreaId) then
+        if (event.areaid == propAreaId and Data.isGameEnd == false) then
 
             function featherTimer(playerId)
                 -- 生成羽毛
@@ -1059,11 +1114,11 @@ return (function()
 
                 -- 再开启一个计时器`
 
-                print("再开启一个羽毛计时器")
-                print("playerId=", playerId)
+                -- print("再开启一个羽毛计时器")
+                -- print("playerId=", playerId)
                 local re = Timer:setTimer(playerId, "featherTimer", 1, false,
                                           "", playerId, featherTimer, playerId)
-                print("设置计时器结果：", re)
+                -- print("设置计时器结果：", re)
             end
             -- 设置计时器
             local re = Timer:setTimer(event.eventobjid, "featherTimer", 1,
@@ -1246,6 +1301,8 @@ return (function()
     minitimerChange = function(arg)
 
         local result, second = MiniTimer:getTimerTime(arg.timerid)
+        -- 删除文字板
+        local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
 
         -- 如果是羽毛计时器
         if (string.find(arg.timername, "featherTimer") ~= nil) then
@@ -1324,6 +1381,7 @@ return (function()
     -- 游戏结束
     Game_GameOver = function(e)
         print("游戏结束")
+        Data.isGameEnd = true
         -- 获取排名加分
         local rankS = rankScore()
         for i, v in ipairs(playerPool) do
@@ -1338,9 +1396,12 @@ return (function()
         local playerId = event.eventobjid
         -- 道具id
         local itemId = event.itemid
-        print('玩家使用道具:', itemId)
+        -- print('玩家使用道具:', itemId)
         -- Chat:sendSystemMsg('玩家使用道具' .. itemId)
-        useItem(playerId, itemId)
+        -- 获取items的key
+        local allItemsKey = {}
+        for k, v in pairs(items) do table.insert(allItemsKey, k) end
+        if (LInclude(itemId, allItemsKey)) then useItem(playerId, itemId) end
 
     end
     Player_AddItem = function(event)

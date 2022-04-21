@@ -24,8 +24,8 @@ function Init(pWid, pLen, pHei, p)
                 print("re:", re)
                 if re == 0 then
                     -- 放置方块
-                    -- local re1 = Block:placeBlock(1, xPos, yPos, zPos, 3)
-                    local re1 = Block:placeBlock(1081, xPos, yPos, zPos, 3)
+                    local re1 = Block:placeBlock(1, xPos, yPos, zPos, 3)
+                    -- local re1 = Block:placeBlock(1081, xPos, yPos, zPos, 3)
                     print("re1:", re1)
                 end
 
@@ -40,17 +40,37 @@ end
 -- InitT(5,1,3) -- N的左边
 
 -- N的右边延申(长：28，高：19)
-local pos1 = {ix = -6, iy = 15, iz = -13}
+local pos1 = {ix = -6, iy = 20, iz = -13}
 Init(29, 1, 19, pos1) 
 
-local pos2 = {ix = -6, iy = 15, iz = 19}
+local pos2 = {ix = -6, iy = 20, iz = 19}
 Init(29, 1, 19, pos2) 
 
 -- N方向(长：26，高：19)
-local pos3 = {ix = -7, iy = 15, iz = -13}
-Init(1, 33, 19, pos3)
-local pos4 = {ix = 23, iy = 15, iz = -13}
-Init(1, 33, 19, pos4)
+local pos3 = {ix = -7, iy = 20, iz = -13}
+Init(1, 2, 19, pos3)
+local pos3 = {ix = -7, iy = 20, iz = 1}
+Init(1, 5, 19, pos3)
+local pos3 = {ix = -7, iy = 20, iz = 18}
+Init(1, 3, 19, pos3)
+local pos3 = {ix = -7, iy = 12, iz = -11}
+Init(1, 14, 13, pos3)
+local pos3 = {ix = -7, iy = 12, iz = 6}
+Init(1, 14, 13, pos3)
+
+
+-- local pos4 = {ix = 23, iy = 12, iz = -13}
+-- Init(1, 34, 19, pos4)
+local pos3 = {ix = 23, iy = 20, iz = -13}
+Init(1, 2, 19, pos3)
+local pos3 = {ix = 23, iy = 20, iz = 1}
+Init(1, 5, 19, pos3)
+local pos3 = {ix = 23, iy = 20, iz = 18}
+Init(1, 3, 19, pos3)
+local pos3 = {ix = 23, iy = 12, iz = -11}
+Init(1, 14, 13, pos3)
+local pos3 = {ix = 23, iy = 12, iz = 6}
+Init(1, 14, 13, pos3)
 -- 顶部（N,N右,高）
-local pos5 = {ix = -7, iy = 16, iz = -13}
+local pos5 = {ix = -7, iy = 20, iz = -13}
 Init(30, 32, 1, pos5)
