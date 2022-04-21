@@ -16,8 +16,7 @@ return (function()
     local sendDoor = false
     -- 是否处于战斗区
     local playAreaFlag = false
-    -- 换装flag
-    local changeSkin = true
+
     -- 是否开局增加道具
     local propsFlag = false
     -- 是否初始化游戏道具
@@ -84,7 +83,9 @@ return (function()
         goBack = false,
         iniSkin = "mob_8",
         effectId = 1149,
-        effectScale = 1
+        effectScale = 1,
+        -- 换装flag
+        changeSkin = true
     }
     -- 皮肤
     local skin = {
@@ -365,19 +366,11 @@ return (function()
         [4255] = 4248
     }
     -- npc商店
-    local npcShop ={
-      red={
-        id=4319270112 
-      },
-      blue={
-        id=4319270111 
-      },
-      green={
-        id=4319270110 
-      },
-      yellow={
-        id=4319270113 
-      },
+    local npcShop = {
+        red = {id = 4319270112},
+        blue = {id = 4319270111},
+        green = {id = 4319270110},
+        yellow = {id = 4319270113}
     }
 
     -------------------------------自定义方法-------------------------------
@@ -1069,14 +1062,15 @@ return (function()
                     Backpack:actEquipUpByResID(event.eventobjid, event.itemid)
 
                     -- elseif (event.itemid == skin["skin11"].id) then
-                elseif (LInclude(event.itemid, getAllSkinId()) and changeSkin) then
+                elseif (LInclude(event.itemid, getAllSkinId()) and
+                    skinCfg.changeSkin) then
                     local result12, name =
                         Actor:getActorFacade(event.eventobjid)
                     -- print("切换皮肤结果：",result12)
                     print("开始切换皮肤=", name)
-                    
 
-                    if (name == "mob_" .. getSkinId(event.itemid)) then
+                    if (name == "mob_" .. getSkinId(event.itemid) and
+                        skinCfg.goBack) then
                         -- local test = Actor:recoverinitialModel(event.eventobjid)
                         local test = Actor:changeCustomModel(event.eventobjid,
                                                              skinCfg.iniSkin)
