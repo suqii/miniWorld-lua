@@ -45,22 +45,26 @@ return (function()
         -- 红队准备区
         redTeam = {
             -- 位置
-            pos = {x = 25, y = 15 + 2, z = 12}
+            pos = {x = 25, y = 15 + 2, z = 12},
+            pos2 = {x = 8, y = 7 - 2, z = 13}
         },
         -- 蓝队准备区
         blueTeam = {
             -- 位置
-            pos = {x = -9, y = 15 + 2, z = 12}
+            pos = {x = -9, y = 15 + 2, z = 12},
+            pos2 = {x = -2, y = 7 - 2, z = 3}
         },
         -- 黄队准备区
         yellowTeam = {
             -- 位置
-            pos = {x = 25, y = 15 + 2, z = -5}
+            pos = {x = 25, y = 15 + 2, z = -5},
+            pos2 = {x = 18, y = 7 - 2, z = 3}
         },
         -- 绿队准备区
         greenTeam = {
             -- 位置
-            pos = {x = -9, y = 15 + 2, z = -5}
+            pos = {x = -9, y = 15 + 2, z = -5},
+            pos2 = {x = 8, y = 7 - 2, z = -7}
         }
 
     }
@@ -313,30 +317,30 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        -- bigJetBackpack = {
-        --     name = '喷射背包(大)',
-        --     itemId = 4250,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- midJetBackpack = {
-        --     name = '喷射背包(中)',
-        --     itemId = 4251,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- smallJetBackpack = {
-        --     name = '喷射背包(小)',
-        --     itemId = 4252,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- armor = {
-        --     name = '无敌装甲',
-        --     itemId = 4253,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        bigJetBackpack = {
+            name = '喷射背包(大)',
+            itemId = 4250,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        midJetBackpack = {
+            name = '喷射背包(中)',
+            itemId = 4251,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        smallJetBackpack = {
+            name = '喷射背包(小)',
+            itemId = 4252,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        armor = {
+            name = '无敌装甲',
+            itemId = 4253,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         shield15 = {
             name = '15秒防护盾',
             itemId = 4254,
@@ -871,24 +875,22 @@ return (function()
                 -- 新增装备对应的道具
                 local equipId = getItemsKey(playersChoose[playerId].wareId)
                 Player:gainItems(playerId, equipId, 1, 1)
-            else
-                -- 移除玩家背包里的物品
-                local re = Player:removeBackpackItem(playerId, itemId, 1)
-                -- print("移除玩家背包里的物品结果：", re)
-                -- 检测是否有空间
-                local ret = Backpack:enoughSpaceForItem(playerId, equipId, 1)
-                -- 背包新增道具对应的装备
-                if ret == ErrorCode.OK then
-                    local re = Player:gainItems(playerId, equipId, 1, 2)
-                    if re == ErrorCode.OK then
-                        -- 穿上装备
-                        local re1 =
-                            Backpack:actEquipUpByResID(playerId, equipId)
-                        -- print("穿上装备返回状态", re1)
-                    end
-                end
-                playersChoose[playerId].wareId = 0
             end
+            -- 移除玩家背包里的物品
+            local re = Player:removeBackpackItem(playerId, itemId, 1)
+            -- print("移除玩家背包里的物品结果：", re)
+            -- 检测是否有空间
+            local ret = Backpack:enoughSpaceForItem(playerId, equipId, 1)
+            -- 背包新增道具对应的装备
+            if ret == ErrorCode.OK then
+                local re = Player:gainItems(playerId, equipId, 1, 2)
+                if re == ErrorCode.OK then
+                    -- 穿上装备
+                    local re1 = Backpack:actEquipUpByResID(playerId, equipId)
+                    -- print("穿上装备返回状态", re1)
+                end
+            end
+            playersChoose[playerId].wareId = 0
 
         end
     end
@@ -929,12 +931,23 @@ return (function()
         -- 冰块id 123
         Block:placeBlock(blockid, Graph.redTeam.pos.x, Graph.redTeam.pos.y - 4,
                          Graph.redTeam.pos.z, 0)
+        Block:placeBlock(blockid, Graph.redTeam.pos2.x, Graph.redTeam.pos2.y,
+                         Graph.redTeam.pos2.z, 0)
+
         Block:placeBlock(blockid, Graph.blueTeam.pos.x,
                          Graph.blueTeam.pos.y - 4, Graph.blueTeam.pos.z, 0)
+        Block:placeBlock(blockid, Graph.blueTeam.pos2.x, Graph.blueTeam.pos2.y,
+                         Graph.blueTeam.pos2.z, 0)
+
         Block:placeBlock(blockid, Graph.greenTeam.pos.x,
                          Graph.greenTeam.pos.y - 4, Graph.greenTeam.pos.z, 0)
+        Block:placeBlock(blockid, Graph.greenTeam.pos2.x,
+                         Graph.greenTeam.pos2.y, Graph.greenTeam.pos2.z, 0)
+
         Block:placeBlock(blockid, Graph.yellowTeam.pos.x,
                          Graph.yellowTeam.pos.y - 4, Graph.yellowTeam.pos.z, 0)
+        Block:placeBlock(blockid, Graph.yellowTeam.pos2.x,
+                         Graph.yellowTeam.pos2.y, Graph.yellowTeam.pos2.z, 0)
     end
 
     -- 监听事件
@@ -1199,6 +1212,7 @@ return (function()
             -- Chat:sendSystemMsg("进入战斗区")
 
             playAreaFlag = true
+            
 
         end
 
@@ -1437,13 +1451,13 @@ return (function()
         initEffect(e.eventobjid)
 
         -- 下降玩家位置
-        if (playAreaFlag == false) then
-            local result, x, y, z = Actor:getPosition(e.eventobjid)
-            local re1 = Actor:setPosition(e.eventobjid, x, 15, z)
-        else
-            local result, x, y, z = Actor:getPosition(e.eventobjid)
-            local re1 = Actor:setPosition(e.eventobjid, x, 7, z)
-        end
+        -- if (playAreaFlag == false) then
+        --     local result, x, y, z = Actor:getPosition(e.eventobjid)
+        --     local re1 = Actor:setPosition(e.eventobjid, x, 15, z)
+        -- else
+        --     local result, x, y, z = Actor:getPosition(e.eventobjid)
+        --     local re1 = Actor:setPosition(e.eventobjid, x, 7, z)
+        -- end
         -- 如果是道具
         -- if (LInclude(e.itemid, getAllPropsId())) then
         --   print(e.eventobjid)
