@@ -20,7 +20,7 @@ return (function()
     -- 装备
     local propsFlag = false -- 停用
     -- 是否初始化游戏道具
-    local gainPropsFlag = true
+    local gainPropsFlag = false
     -- 是否开启皮肤
     local skinFlag = false
 
@@ -46,7 +46,8 @@ return (function()
         redTeam = {
             -- 位置
             pos = {x = 25, y = 15 + 2, z = 12},
-            pos2 = {x = 8, y = 7 - 2, z = 13}
+            -- pos2 = {x = 8, y = 7 - 2, z = 13},
+            pos2 = {x = 10, y = 7 - 2, z = 13},
         },
         -- 蓝队准备区
         blueTeam = {
@@ -64,7 +65,8 @@ return (function()
         greenTeam = {
             -- 位置
             pos = {x = -9, y = 15 + 2, z = -5},
-            pos2 = {x = 8, y = 7 - 2, z = -7}
+            -- pos2 = {x = 8, y = 7 - 2, z = -7},
+            pos2 = {x = 9, y = 7 - 2, z = -7},
         }
 
     }
@@ -247,13 +249,13 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        -- -- 葱鸭枕头
-        -- duckPillow = {
-        --     name = '葱鸭枕头',
-        --     itemId = 4235,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        -- 葱鸭枕头
+        duckPillow = {
+            name = '葱鸭枕头',
+            itemId = 4235,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- -- 葱鸭枕头
         -- rabbitPillow = {
         --     name = '小兔子枕头',
@@ -261,13 +263,13 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        -- -- 咸鱼枕头
-        -- fishPillow = {
-        --     name = '咸鱼枕头',
-        --     itemId = 4237,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        -- 咸鱼枕头
+        fishPillow = {
+            name = '咸鱼枕头',
+            itemId = 4237,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- -- 书包枕头
         -- bagPillow = {
         --     name = '书包枕头',
@@ -275,13 +277,13 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        -- -- 鳄鱼枕头
-        -- crocodilePillow = {
-        --     name = '鳄鱼枕头',
-        --     itemId = 4239,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        -- 鳄鱼枕头
+        crocodilePillow = {
+            name = '鳄鱼枕头',
+            itemId = 4239,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- -- 小花枕头
         -- flowerPillow = {
         --     name = '小花枕头',
@@ -296,13 +298,13 @@ return (function()
         --     itemCnt = 1,
         --     prioritytype = 1
         -- },
-        -- -- -- 玲娜贝儿抱枕
-        -- linaBellPillow = {
-        --     name = '玲娜贝儿抱枕',
-        --     itemId = 4242,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        -- -- 玲娜贝儿抱枕
+        linaBellPillow = {
+            name = '玲娜贝儿抱枕',
+            itemId = 4242,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- 计时器
         -- crocodilePillow = {
         --     name = '计时器',
@@ -745,7 +747,7 @@ return (function()
     end
     -- 玩家道具附魔属性增加
     local function Prop_Add(eventobjid, pName)
-        -- print('玩家获得装备', pName)
+        print('玩家获得装备', pName)
 
         -- 击退附魔 “葱鸭”抱枕 咸鱼抱枕
         if (pName == '中型枕头' or pName == '“葱鸭”抱枕' or pName ==
@@ -753,13 +755,13 @@ return (function()
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 1)
             -- 在聊天框显示
-            -- Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+            Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
         elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕' or
-            pName == '鳄鱼枕头') then
+            pName == '鳄鱼抱枕') then
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 2)
             -- 在聊天框显示
-            -- Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
+            Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
         end
 
     end
@@ -996,7 +998,8 @@ return (function()
     -------------------------------游戏事件-------------------------------
 
     Game_StartGame = function()
-        Chat:sendSystemMsg("游戏开始")
+        -- Chat:sendSystemMsg("游戏开始")
+        
 
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
@@ -1026,12 +1029,9 @@ return (function()
         playAreaId = areaid
         -- 初始化传送点方块
         replacePowerBlock(123)
-
-    end
-    -- 玩家死亡
-    Player_Dead = function(trigger_obj)
-
-        if (Data.deadFlag == false) then
+        -- 计时器结束函数
+        function door(playerId)
+          if (Data.deadFlag == false) then
             -- 创建进入赛场传送门文字
             -- 红队
             createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
@@ -1054,6 +1054,41 @@ return (function()
             replacePowerBlock(415)
             Data.deadFlag = true
         end
+      end
+      -- 设置计时器
+      local re = Timer:setTimer(0, "door",
+                                30, true,
+                                "赛场传送门开启倒计时：", 0,
+                                door, 0)
+
+    end
+    -- 玩家死亡
+    Player_Dead = function(trigger_obj)
+
+        -- if (Data.deadFlag == false) then
+        --     -- 创建进入赛场传送门文字
+        --     -- 红队
+        --     createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
+        --                    Graph.redTeam.pos.z)
+        --     -- 蓝队
+        --     createDoorText(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
+        --                    Graph.blueTeam.pos.z)
+        --     -- 绿队
+        --     createDoorText(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y,
+        --                    Graph.greenTeam.pos.z)
+        --     -- 黄队
+        --     createDoorText(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
+        --                    Graph.yellowTeam.pos.z)
+
+        --     -- 初始化玩家信息
+        --     -- InitGamePlayer(isTestMode)
+        --     -- 初始化npc商店生物状态
+        --     initNpcShop()
+        --     -- 初始传送门能源
+        --     replacePowerBlock(415)
+        --     Data.deadFlag = true
+        -- end
+        
 
         -- 他杀
         if (trigger_obj['toobjid']) then
