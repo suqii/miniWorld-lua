@@ -755,13 +755,13 @@ return (function()
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 1)
             -- 在聊天框显示
-            Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
+            -- Chat:sendSystemMsg("手中的物品被添加了击退1的附魔")
         elseif (pName == '玲娜贝儿抱枕' or pName == '库洛米抱枕' or
             pName == '鳄鱼抱枕') then
             -- 击退附魔（11为附魔id,1-5个等级）
             Actor:addEnchant(eventobjid, 5, 11, 2)
             -- 在聊天框显示
-            Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
+            -- Chat:sendSystemMsg("手中的物品被添加了击退2的附魔")
         end
 
     end
