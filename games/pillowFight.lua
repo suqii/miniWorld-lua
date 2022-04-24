@@ -47,7 +47,7 @@ return (function()
             -- 位置
             pos = {x = 25, y = 15 + 2, z = 12},
             -- pos2 = {x = 8, y = 7 - 2, z = 13},
-            pos2 = {x = 10, y = 7 - 2, z = 13},
+            pos2 = {x = 10, y = 7 - 2, z = 13}
         },
         -- 蓝队准备区
         blueTeam = {
@@ -66,7 +66,7 @@ return (function()
             -- 位置
             pos = {x = -9, y = 15 + 2, z = -5},
             -- pos2 = {x = 8, y = 7 - 2, z = -7},
-            pos2 = {x = 9, y = 7 - 2, z = -7},
+            pos2 = {x = 9, y = 7 - 2, z = -7}
         }
 
     }
@@ -588,9 +588,9 @@ return (function()
         -- GameRule.CurTime = 17.9 -- 当前时间
         -- GameRule.LifeNum = 9 -- 玩家生命
         -- GameRule.TeamNum = 2
-        GameRule.MaxPlayers = 12
+        -- GameRule.MaxPlayers = 12
         GameRule.CameraDir = 1 -- 1:正视角
-        GameRule.StartMode = 0 -- 0:房主开启
+        -- GameRule.StartMode = 0 -- 0:房主开启
         GameRule.StartPlayers = 2
         -- GameRule.ScoreKillMob = 3 --击杀特定怪物+3分
         GameRule.ScoreKillPlayer = 5 -- 击杀玩家+5分
@@ -598,7 +598,7 @@ return (function()
         GameRule.DisplayScore = 1 -- 显示比分 1:true
         GameRule.ViewMode = 1 -- 开启失败观战 0:不开启 1:开启
         GameRule.BlockDestroy = 0 -- 是否可摧毁方块 0:否 1:是
-        GameRule.CountDown = 10
+        -- GameRule.CountDown = 10
     end
     -- 初始玩家道具
     function GainItems(playerId)
@@ -999,7 +999,6 @@ return (function()
 
     Game_StartGame = function()
         -- Chat:sendSystemMsg("游戏开始")
-        
 
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
@@ -1030,8 +1029,37 @@ return (function()
         -- 初始化传送点方块
         replacePowerBlock(123)
         -- 计时器结束函数
-        function door(playerId)
-          if (Data.deadFlag == false) then
+        --   function door(playerId)
+        --     if (Data.deadFlag == false) then
+        --       -- 创建进入赛场传送门文字
+        --       -- 红队
+        --       createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
+        --                      Graph.redTeam.pos.z)
+        --       -- 蓝队
+        --       createDoorText(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
+        --                      Graph.blueTeam.pos.z)
+        --       -- 绿队
+        --       createDoorText(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y,
+        --                      Graph.greenTeam.pos.z)
+        --       -- 黄队
+        --       createDoorText(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
+        --                      Graph.yellowTeam.pos.z)
+
+        --       -- 初始化玩家信息
+        --       -- InitGamePlayer(isTestMode)
+        --       -- 初始化npc商店生物状态
+        --       initNpcShop()
+        --       -- 初始传送门能源
+        --       replacePowerBlock(415)
+        --       Data.deadFlag = true
+        --   end
+        -- end
+        -- -- 设置计时器
+        -- local re = Timer:setTimer(0, "door",
+        --                           30, true,
+        --                           "赛场传送门开启倒计时：", 0,
+        --                           door, 0)
+        if (Data.deadFlag == false) then
             -- 创建进入赛场传送门文字
             -- 红队
             createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
@@ -1048,18 +1076,13 @@ return (function()
 
             -- 初始化玩家信息
             -- InitGamePlayer(isTestMode)
-            -- 初始化npc商店生物状态
-            initNpcShop()
+
             -- 初始传送门能源
             replacePowerBlock(415)
             Data.deadFlag = true
         end
-      end
-      -- 设置计时器
-      local re = Timer:setTimer(0, "door",
-                                30, true,
-                                "赛场传送门开启倒计时：", 0,
-                                door, 0)
+        -- 初始化npc商店生物状态
+        initNpcShop()
 
     end
     -- 玩家死亡
@@ -1088,7 +1111,6 @@ return (function()
         --     replacePowerBlock(415)
         --     Data.deadFlag = true
         -- end
-        
 
         -- 他杀
         if (trigger_obj['toobjid']) then
@@ -1201,7 +1223,7 @@ return (function()
                 local result, objid = World:spawnItem(8, 7, 3, 4249, 1)
                 -- 删除文字板
                 local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
-                local title = "#cFF33CC 羽毛＋1，得分＋1"
+                local title = "#cFF33CC 新羽毛出现，得分＋1"
                 local font = 14 -- 字体大小
                 local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
                 local itype = 1 -- 文字板编号
@@ -1231,7 +1253,7 @@ return (function()
                                       false, "", event.eventobjid, featherTimer,
                                       event.eventobjid)
             -- 创建一个文字板
-            local title = "#cFF33CC 羽毛＋1，得分＋1"
+            local title = "#cFF33CC 新羽毛出现，得分＋1"
             local font = 14 -- 字体大小
             local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
             local itype = 1 -- 文字板编号
@@ -1247,7 +1269,6 @@ return (function()
             -- Chat:sendSystemMsg("进入战斗区")
 
             playAreaFlag = true
-            
 
         end
 
@@ -1436,7 +1457,7 @@ return (function()
     --     if (string.find(arg.timername, "featherTimer") ~= nil) then
 
     --         -- 创建一个文字板
-    --         local title = "#cFF33CC 羽毛＋1，得分＋1"
+    --         local title = "#cFF33CC 新羽毛出现，得分＋1"
     --         local font = 14 -- 字体大小
     --         local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
     --         local itype = 1 -- 文字板编号
