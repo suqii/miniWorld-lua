@@ -588,9 +588,9 @@ return (function()
         -- GameRule.CurTime = 17.9 -- 当前时间
         -- GameRule.LifeNum = 9 -- 玩家生命
         -- GameRule.TeamNum = 2
-        -- GameRule.MaxPlayers = 12
+        GameRule.MaxPlayers = 12
         GameRule.CameraDir = 1 -- 1:正视角
-        -- GameRule.StartMode = 0 -- 0:房主开启
+        GameRule.StartMode = 0 -- 0:房主开启
         GameRule.StartPlayers = 2
         -- GameRule.ScoreKillMob = 3 --击杀特定怪物+3分
         GameRule.ScoreKillPlayer = 5 -- 击杀玩家+5分
@@ -598,7 +598,7 @@ return (function()
         GameRule.DisplayScore = 1 -- 显示比分 1:true
         GameRule.ViewMode = 1 -- 开启失败观战 0:不开启 1:开启
         GameRule.BlockDestroy = 0 -- 是否可摧毁方块 0:否 1:是
-        -- GameRule.CountDown = 10
+        GameRule.CountDown = 3
     end
     -- 初始玩家道具
     function GainItems(playerId)
@@ -985,13 +985,84 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.EquipOff]=], Player_EquipOff)
         -- 游戏结束
         ScriptSupportEvent:registerEvent([=[Game.End]=], Game_GameOver)
-
         -- 玩家使用道具
         ScriptSupportEvent:registerEvent([=[Player.UseItem]=], Player_UseItem)
         -- 玩家新增道具
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
         -- 玩家加入队伍
-        -- ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], Player_JoinTeam)
+        -- ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], function(e)
+        --     print("玩家加入队伍:", e.eventobjid)
+        --     local playerId = e.eventobjid
+        --     local ret, teamId = Player:getTeam(playerId)
+        --     print("teamId", teamId)
+        --     if (teamId == 0) then
+        --         local re1 = Actor:setPosition(playerId, Graph.redTeam.pos.x,
+        --                                       Graph.redTeam.pos.y,
+        --                                       Graph.redTeam.pos.z)
+        --         print("red执行结果=", re1)
+        --     elseif (teamId == 1) then
+        --         local re2 = Actor:setPosition(playerId, Graph.blueTeam.pos.x,
+        --                                       Graph.blueTeam.pos.y,
+        --                                       Graph.blueTeam.pos.z)
+        --         print("blue执行结果=", re2)
+        --     elseif (teamId == 2) then
+        --         local re3 = Actor:setPosition(playerId, Graph.greenTeam.pos.x,
+        --                                       Graph.greenTeam.pos.y,
+        --                                       Graph.greenTeam.pos.z)
+        --         print("green执行结果=", re3)
+        --     elseif (teamId == 3) then
+        --         local re4 = Actor:setPosition(playerId, Graph.yellowTeam.pos.x,
+        --                                       Graph.yellowTeam.pos.y,
+        --                                       Graph.yellowTeam.pos.z)
+        --         print("ye执行结果=", re4)
+        --     end
+        -- end)
+        -- 游戏update
+        -- ScriptSupportEvent:registerEvent([=[Game.Run]=], function(e)
+        --     -- print("playerPool", playerPool)
+        --     for i, v in ipairs(playerPool) do
+        --         -- print(v)
+        --         -- 获取玩家队伍
+        --         local ret, teamId = Player:getTeam(v)
+        --         -- print("队伍id",teamId)
+        --         -- savePlayerData(v, rankS[teamId])
+        --         if (teamId == 0) then
+        --             playersChoose[v].teamFlag = 1
+        --         end
+        --         if (playersChoose[v].teamFlag == 1) then
+        --             print("开设设定队伍")
+        --             local playerId = v
+        --             local ret, teamId = Player:getTeam(playerId)
+        --             print("teamId", teamId)
+        --             if (teamId == 1) then
+        --                 local re1 = Actor:setPosition(playerId,
+        --                                               Graph.redTeam.pos.x,
+        --                                               Graph.redTeam.pos.y,
+        --                                               Graph.redTeam.pos.z)
+        --                 print("red执行结果=", re1)
+        --             elseif (teamId == 2) then
+        --                 local re2 = Actor:setPosition(playerId,
+        --                                               Graph.blueTeam.pos.x,
+        --                                               Graph.blueTeam.pos.y,
+        --                                               Graph.blueTeam.pos.z)
+        --                 print("blue执行结果=", re2)
+        --             elseif (teamId == 3) then
+        --                 local re3 = Actor:setPosition(playerId,
+        --                                               Graph.greenTeam.pos.x,
+        --                                               Graph.greenTeam.pos.y,
+        --                                               Graph.greenTeam.pos.z)
+        --                 print("green执行结果=", re3)
+        --             elseif (teamId == 4) then
+        --                 local re4 = Actor:setPosition(playerId,
+        --                                               Graph.yellowTeam.pos.x,
+        --                                               Graph.yellowTeam.pos.y,
+        --                                               Graph.yellowTeam.pos.z)
+        --                 print("ye执行结果=", re4)
+        --             end
+        --             playersChoose[v].teamFlag = 0
+        --         end
+        --     end
+        -- end)
 
     end
 
@@ -1223,7 +1294,7 @@ return (function()
                 local result, objid = World:spawnItem(8, 7, 3, 4249, 1)
                 -- 删除文字板
                 local re = Graphics:removeGraphicsByPos(8, 9, 3, 1, 1)
-                local title = "#cFF33CC 新羽毛出现，得分＋1"
+                local title = "#cFF33CC 生成羽毛中，得分＋1"
                 local font = 14 -- 字体大小
                 local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
                 local itype = 1 -- 文字板编号
@@ -1253,7 +1324,7 @@ return (function()
                                       false, "", event.eventobjid, featherTimer,
                                       event.eventobjid)
             -- 创建一个文字板
-            local title = "#cFF33CC 新羽毛出现，得分＋1"
+            local title = "#cFF33CC 生成羽毛中，得分＋1"
             local font = 14 -- 字体大小
             local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
             local itype = 1 -- 文字板编号
@@ -1457,7 +1528,7 @@ return (function()
     --     if (string.find(arg.timername, "featherTimer") ~= nil) then
 
     --         -- 创建一个文字板
-    --         local title = "#cFF33CC 新羽毛出现，得分＋1"
+    --         local title = "#cFF33CC 羽毛＋1，得分＋1"
     --         local font = 14 -- 字体大小
     --         local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
     --         local itype = 1 -- 文字板编号
@@ -1480,12 +1551,25 @@ return (function()
     end
     -- 任一玩家进入游戏
     Game_AnyPlayer_EnterGame = function(event)
+        -- print("玩家进入游戏")
+
         -- 初始化玩家信息
         InitGamePlayer(event.eventobjid)
         -- 将玩家id添加到玩家列表
         playerPool[#playerPool + 1] = event.eventobjid
         -- 加入玩家选择组
-        playersChoose[event.eventobjid] = {itemid = 0, scutIdx = 0, wareId = 0}
+        playersChoose[event.eventobjid] = {
+            itemid = 0,
+            scutIdx = 0,
+            wareId = 0,
+            teamFlag = 0
+        }
+        -- 设置位置
+        -- local re2 = Actor:setPosition(event.eventobjid,
+        --                                               15,
+        --                                               -6,
+        --                                               13)
+        --                 print("初始化玩家位置结果=", re2)
 
     end
     -- 玩家脱下装备
