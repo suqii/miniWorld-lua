@@ -1011,6 +1011,31 @@ return (function()
         end
 
     end
+    -- 初始化队伍位置
+    function initPlayerPos(playerId, teamId)
+        if (teamId == 1) then
+            local re1 = Actor:setPosition(playerId, Graph.redTeam.pos.x,
+                                          Graph.redTeam.pos.y - 1,
+                                          Graph.redTeam.pos.z)
+            print("初始红队位置结果：", re1)
+        elseif (teamId == 2) then
+            local re2 = Actor:setPosition(playerId, Graph.blueTeam.pos.x,
+                                          Graph.blueTeam.pos.y - 1,
+                                          Graph.blueTeam.pos.z)
+            print("初始蓝队位置结果：", re2)
+        elseif (teamId == 3) then
+            local re3 = Actor:setPosition(playerId, Graph.greenTeam.pos.x,
+                                          Graph.greenTeam.pos.y - 1,
+                                          Graph.greenTeam.pos.z)
+            print("初始绿色队位置结果：", re3)
+        elseif (teamId == 4) then
+            local re4 = Actor:setPosition(playerId, Graph.yellowTeam.pos.x,
+                                          Graph.yellowTeam.pos.y - 1,
+                                          Graph.yellowTeam.pos.z)
+            print("初始黄队位置结果：", re4)
+        end
+
+    end
 
     -- 监听事件
     function ListenEvents_MiniDemo()
@@ -1053,46 +1078,19 @@ return (function()
 
         -- 游戏update
         -- ScriptSupportEvent:registerEvent([=[Game.Run]=], function(e)
-        --     -- print("playerPool", playerPool)
         --     for i, v in ipairs(playerPool) do
-        --         -- print(v)
         --         -- 获取玩家队伍
-        --         local ret, teamId = Player:getTeam(v)
-        --         -- print("队伍id",teamId)
-        --         -- savePlayerData(v, rankS[teamId])
+        --         local playerId = v
+        --         local ret, teamId = Player:getTeam(playerId)
+        --         -- print("玩家id为：", playerId, "的队伍id为：", teamId)
         --         if (teamId == 0) then
-        --             playersChoose[v].teamFlag = 1
+        --             print("玩家id为：", playerId, "的队伍未初始化")
+        --             playersChoose[playerId].teamFlag = 1
         --         end
-        --         if (playersChoose[v].teamFlag == 1) then
-        --             print("开设设定队伍")
-        --             local playerId = v
-        --             local ret, teamId = Player:getTeam(playerId)
-        --             print("teamId", teamId)
-        --             if (teamId == 1) then
-        --                 local re1 = Actor:setPosition(playerId,
-        --                                               Graph.redTeam.pos.x,
-        --                                               Graph.redTeam.pos.y,
-        --                                               Graph.redTeam.pos.z)
-        --                 print("red执行结果=", re1)
-        --             elseif (teamId == 2) then
-        --                 local re2 = Actor:setPosition(playerId,
-        --                                               Graph.blueTeam.pos.x,
-        --                                               Graph.blueTeam.pos.y,
-        --                                               Graph.blueTeam.pos.z)
-        --                 print("blue执行结果=", re2)
-        --             elseif (teamId == 3) then
-        --                 local re3 = Actor:setPosition(playerId,
-        --                                               Graph.greenTeam.pos.x,
-        --                                               Graph.greenTeam.pos.y,
-        --                                               Graph.greenTeam.pos.z)
-        --                 print("green执行结果=", re3)
-        --             elseif (teamId == 4) then
-        --                 local re4 = Actor:setPosition(playerId,
-        --                                               Graph.yellowTeam.pos.x,
-        --                                               Graph.yellowTeam.pos.y,
-        --                                               Graph.yellowTeam.pos.z)
-        --                 print("ye执行结果=", re4)
-        --             end
+        --         if (playersChoose[playerId].teamFlag == 1 and teamId ~= 0) then
+        --             print("玩家id为：", playerId, "的队伍id为：",
+        --                   teamId, "初始化成功")
+        --             initPlayerPos(playerId, teamId)
         --             playersChoose[v].teamFlag = 0
         --         end
         --     end
