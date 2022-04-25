@@ -591,14 +591,14 @@ return (function()
         -- GameRule.LifeNum = 9 -- 玩家生命
         -- GameRule.TeamNum = 2
         GameRule.MaxPlayers = 12
-        GameRule.CameraDir = 1 -- 1:正视角
-        GameRule.StartMode = 0 -- 0:房主开启
+        -- GameRule.CameraDir = 1 -- 1:正视角
+        -- GameRule.StartMode = 0 -- 0:房主开启
         GameRule.StartPlayers = 2
         -- GameRule.ScoreKillMob = 3 --击杀特定怪物+3分
         GameRule.ScoreKillPlayer = 5 -- 击杀玩家+5分
         -- GameRule.PlayerDieDrops = 0 -- 死亡掉落 1:true
         GameRule.DisplayScore = 1 -- 显示比分 1:true
-        GameRule.ViewMode = 1 -- 开启失败观战 0:不开启 1:开启
+        -- GameRule.ViewMode = 1 -- 开启失败观战 0:不开启 1:开启
         GameRule.BlockDestroy = 0 -- 是否可摧毁方块 0:否 1:是
         GameRule.CountDown = 3
     end
@@ -668,7 +668,7 @@ return (function()
         -- 可丢弃道具
         -- Player:setActionAttrState(playerId, 2048, false)
         -- 可使用道具
-        Actor:setActionAttrState(playerId, 16, false)
+        -- Actor:setActionAttrState(playerId, 16, false)
 
         -- 玩家移动方式
         -- Player:changPlayerMoveType(playerId, 1)
@@ -1051,34 +1051,6 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
         -- 玩家点击生物，在聊天框显示生物id
 
-        -- 玩家加入队伍
-        -- ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], function(e)
-        --     print("玩家加入队伍:", e.eventobjid)
-        --     local playerId = e.eventobjid
-        --     local ret, teamId = Player:getTeam(playerId)
-        --     print("teamId", teamId)
-        --     if (teamId == 0) then
-        --         local re1 = Actor:setPosition(playerId, Graph.redTeam.pos.x,
-        --                                       Graph.redTeam.pos.y,
-        --                                       Graph.redTeam.pos.z)
-        --         print("red执行结果=", re1)
-        --     elseif (teamId == 1) then
-        --         local re2 = Actor:setPosition(playerId, Graph.blueTeam.pos.x,
-        --                                       Graph.blueTeam.pos.y,
-        --                                       Graph.blueTeam.pos.z)
-        --         print("blue执行结果=", re2)
-        --     elseif (teamId == 2) then
-        --         local re3 = Actor:setPosition(playerId, Graph.greenTeam.pos.x,
-        --                                       Graph.greenTeam.pos.y,
-        --                                       Graph.greenTeam.pos.z)
-        --         print("green执行结果=", re3)
-        --     elseif (teamId == 3) then
-        --         local re4 = Actor:setPosition(playerId, Graph.yellowTeam.pos.x,
-        --                                       Graph.yellowTeam.pos.y,
-        --                                       Graph.yellowTeam.pos.z)
-        --         print("ye执行结果=", re4)
-        --     end
-        -- end)
         -- 游戏update
         -- ScriptSupportEvent:registerEvent([=[Game.Run]=], function(e)
         --     -- print("playerPool", playerPool)
