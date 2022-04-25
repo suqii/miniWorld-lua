@@ -375,9 +375,11 @@ return (function()
     -- npc商店
     local npcShop = {
         red = {id = 4319270112},
-        blue = {id = 4319270111},
+        -- blue = {id = 4319270111},
+        blue = {id = 4323670905},
         green = {id = 4319270110},
-        yellow = {id = 4319270113}
+        -- yellow = {id = 4319270113}
+        yellow = {id = 4335374483}
     }
 
     -------------------------------自定义方法-------------------------------
@@ -747,7 +749,7 @@ return (function()
     end
     -- 玩家道具附魔属性增加
     local function Prop_Add(eventobjid, pName)
-        print('玩家获得装备', pName)
+        -- print('玩家获得装备', pName)
 
         -- 击退附魔 “葱鸭”抱枕 咸鱼抱枕
         if (pName == '中型枕头' or pName == '“葱鸭”抱枕' or pName ==
@@ -951,6 +953,64 @@ return (function()
         Block:placeBlock(blockid, Graph.yellowTeam.pos2.x,
                          Graph.yellowTeam.pos2.y, Graph.yellowTeam.pos2.z, 0)
     end
+    -- 传送点生成空气墙
+    function sendDoorWall(flag)
+        local flag = flag or 0
+        -- print("flag", flag)
+        -- 空气墙id
+        -- local wallId = 1001
+        local wallId = 1
+        if flag == 0 then
+            -- 生成空气墙
+            -- 红队
+            Block:placeBlock(wallId, Graph.redTeam.pos.x, Graph.redTeam.pos.y,
+                             Graph.redTeam.pos.z, 0)
+            Block:placeBlock(wallId, Graph.redTeam.pos.x,
+                             Graph.redTeam.pos.y - 1, Graph.redTeam.pos.z, 0)
+            -- 蓝队
+            Block:placeBlock(wallId, Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
+                             Graph.blueTeam.pos.z, 0)
+            Block:placeBlock(wallId, Graph.blueTeam.pos.x,
+                             Graph.blueTeam.pos.y - 1, Graph.blueTeam.pos.z, 0)
+            -- 绿队
+            Block:placeBlock(wallId, Graph.greenTeam.pos.x,
+                             Graph.greenTeam.pos.y, Graph.greenTeam.pos.z, 0)
+            Block:placeBlock(wallId, Graph.greenTeam.pos.x,
+                             Graph.greenTeam.pos.y - 1, Graph.greenTeam.pos.z, 0)
+            -- 黄队
+            Block:placeBlock(wallId, Graph.yellowTeam.pos.x,
+                             Graph.yellowTeam.pos.y, Graph.yellowTeam.pos.z, 0)
+            Block:placeBlock(wallId, Graph.yellowTeam.pos.x,
+                             Graph.yellowTeam.pos.y - 1, Graph.yellowTeam.pos.z,
+                             0)
+
+        else
+            -- 销毁空气墙
+            -- 红队
+            Block:destroyBlock(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
+                               Graph.redTeam.pos.z, false)
+            Block:destroyBlock(Graph.redTeam.pos.x, Graph.redTeam.pos.y - 1,
+                               Graph.redTeam.pos.z, false)
+            -- 蓝队
+            Block:destroyBlock(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
+                               Graph.blueTeam.pos.z, false)
+            Block:destroyBlock(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y - 1,
+                               Graph.blueTeam.pos.z, false)
+            -- 绿队
+            Block:destroyBlock(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y,
+                               Graph.greenTeam.pos.z, false)
+            Block:destroyBlock(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y - 1,
+                               Graph.greenTeam.pos.z, false)
+            -- 黄队
+            Block:destroyBlock(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
+                               Graph.yellowTeam.pos.z, false)
+            Block:destroyBlock(Graph.yellowTeam.pos.x,
+                               Graph.yellowTeam.pos.y - 1,
+                               Graph.yellowTeam.pos.z, false)
+
+        end
+
+    end
 
     -- 监听事件
     function ListenEvents_MiniDemo()
@@ -989,6 +1049,8 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.UseItem]=], Player_UseItem)
         -- 玩家新增道具
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
+        -- 玩家点击生物，在聊天框显示生物id
+
         -- 玩家加入队伍
         -- ScriptSupportEvent:registerEvent([=[Player.JoinTeam]=], function(e)
         --     print("玩家加入队伍:", e.eventobjid)
@@ -1069,36 +1131,53 @@ return (function()
     -------------------------------游戏事件-------------------------------
 
     Game_StartGame = function()
-        -- Chat:sendSystemMsg("游戏开始")
+        Chat:sendSystemMsg("游戏开始")
 
         -- 初始化游戏规则
         if not Data.isRuleInit then InitGameRule() end
-        -- 初始化生成道具区域
-        -- 通过起点终点坐标创建区域
-        local result, areaid = Area:createAreaRectByRange({x = 9, y = 6, z = 2},
-                                                          {x = 7, y = 11, z = 4})
-        propAreaId = areaid
-        -- 在此位置播放特效
-        World:playParticalEffect(8, 6, 3, propParticleId, 3)
+        -- 初始化游戏数据
+        if (Data.deadFlag == false) then
+            Data.deadFlag = true
+            -- 初始化npc商店生物状态
+            initNpcShop()
+            -- 初始化生成道具区域
+            -- 通过起点终点坐标创建区域
+            local result, areaid = Area:createAreaRectByRange({
+                x = 9,
+                y = 6,
+                z = 2
+            }, {x = 7, y = 11, z = 4})
+            propAreaId = areaid
+            -- 在此位置播放特效
+            World:playParticalEffect(8, 6, 3, propParticleId, 3)
 
-        -- 创建一个文字板
-        local title = " 道具区" -- 文字内容
-        local font = 16 -- 字体大小
-        local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
-        local itype = 1 -- 文字板编号
-        -- 创建一个文字板信息，存到graphicsInfo中
-        local graphicsInfo =
-            Graphics:makeGraphicsText(title, font, alpha, itype)
-        local re = Graphics:createGraphicsTxtByPos(8, 8, 3, graphicsInfo, 0, 0)
-        -- 初始战斗区
-        local result, areaid = Area:createAreaRectByRange({
-            x = -7,
-            y = 0,
-            z = 16
-        }, {x = 22, y = 15, z = -9})
-        playAreaId = areaid
-        -- 初始化传送点方块
-        replacePowerBlock(123)
+            -- 创建一个文字板
+            local title = " 道具区" -- 文字内容
+            local font = 16 -- 字体大小
+            local alpha = 0 -- 背景透明度(0:完全透明 100:不透明)
+            local itype = 1 -- 文字板编号
+            -- 创建一个文字板信息，存到graphicsInfo中
+            local graphicsInfo = Graphics:makeGraphicsText(title, font, alpha,
+                                                           itype)
+            local re = Graphics:createGraphicsTxtByPos(8, 8, 3, graphicsInfo, 0,
+                                                       0)
+
+            -- 初始战斗区
+            local result, areaid = Area:createAreaRectByRange({
+                x = -7,
+                y = 0,
+                z = 16
+            }, {x = 22, y = 15, z = -9})
+            playAreaId = areaid
+
+            -- 初始化传送点方块
+            -- replacePowerBlock(123)
+            -- 初始传送门能源
+            replacePowerBlock(415)
+            -- 初始化传送点空气墙
+            sendDoorWall(1)
+
+        end
         -- 计时器结束函数
         --   function door(playerId)
         --     if (Data.deadFlag == false) then
@@ -1130,35 +1209,6 @@ return (function()
         --                           30, true,
         --                           "赛场传送门开启倒计时：", 0,
         --                           door, 0)
-        if (Data.deadFlag == false) then
-            -- 创建进入赛场传送门文字
-            -- 红队
-            createDoorText(Graph.redTeam.pos.x, Graph.redTeam.pos.y,
-                           Graph.redTeam.pos.z)
-            -- 蓝队
-            createDoorText(Graph.blueTeam.pos.x, Graph.blueTeam.pos.y,
-                           Graph.blueTeam.pos.z)
-            -- 绿队
-            createDoorText(Graph.greenTeam.pos.x, Graph.greenTeam.pos.y,
-                           Graph.greenTeam.pos.z)
-            -- 黄队
-            createDoorText(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
-                           Graph.yellowTeam.pos.z)
-
-            -- 初始化玩家信息
-            -- InitGamePlayer(isTestMode)
-
-            -- 初始传送门能源
-            replacePowerBlock(415)
-            Data.deadFlag = true
-        end
-        -- 初始化npc商店生物状态
-        initNpcShop()
-
-    end
-    -- 玩家死亡
-    Player_Dead = function(trigger_obj)
-
         -- if (Data.deadFlag == false) then
         --     -- 创建进入赛场传送门文字
         --     -- 红队
@@ -1174,14 +1224,14 @@ return (function()
         --     createDoorText(Graph.yellowTeam.pos.x, Graph.yellowTeam.pos.y,
         --                    Graph.yellowTeam.pos.z)
 
-        --     -- 初始化玩家信息
-        --     -- InitGamePlayer(isTestMode)
-        --     -- 初始化npc商店生物状态
-        --     initNpcShop()
         --     -- 初始传送门能源
         --     replacePowerBlock(415)
         --     Data.deadFlag = true
         -- end
+
+    end
+    -- 玩家死亡
+    Player_Dead = function(trigger_obj)
 
         -- 他杀
         if (trigger_obj['toobjid']) then
