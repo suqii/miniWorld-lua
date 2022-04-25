@@ -28,6 +28,14 @@ return (function()
     local Players = {}
     -- 玩家二次选择
     local playersChoose = {}
+
+    -- 是否给特殊玩家发放道具
+    local playerBuff = {
+        ids = {1530423300,1526843526},
+        flag = true,
+        skin = true,
+        props = true
+    }
     -- 游戏队伍
     local Teams = {red = 1, blue = 2, yellow = 3, green = 4}
 
@@ -96,7 +104,7 @@ return (function()
     }
     -- 皮肤
     local skin = {
-        -- skin1 = {name = "凛冬", skinId = 7, id = 4102},
+        skin1 = {name = "凛冬", skinId = 7, id = 4102},
         -- skin2 = {name = "胖哒", skinId = 8, id = 4103},
         -- skin3 = {name = "兔美美", skinId = 9, id = 4104},
         -- skin4 = {name = "齐天小圣", skinId = 10, id = 4105},
@@ -104,10 +112,10 @@ return (function()
         -- skin6 = {name = "琉璃酱", skinId = 12, id = 4107},
         skin7 = {name = "乔治", skinId = 13, id = 4108},
         skin8 = {name = "安妮", skinId = 14, id = 4109},
-        skin9 = {name = "墨家小飞", skinId = 15, id = 4110}
-        -- skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
+        skin9 = {name = "墨家小飞", skinId = 15, id = 4110},
+        skin10 = {name = "德古拉六世", skinId = 16, id = 4111},
         -- skin11 = {name = "叮叮当", skinId = 17, id = 4112},
-        -- skin12 = {name = "羽姬", skinId = 18, id = 4113},
+        skin12 = {name = "羽姬", skinId = 18, id = 4113}
         -- skin13 = {name = "荒原猎人雪诺", skinId = 19, id = 4114},
         -- skin14 = {name = "秋果", skinId = 125, id = 4220},
         -- skin15 = {name = "凌美琪", skinId = 126, id = 4221},
@@ -200,55 +208,55 @@ return (function()
         --     prioritytype = 1
         -- },
         -- -- 中型枕头
-        -- midPillow = {
-        --     name = '中型枕头',
-        --     itemId = 4229,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- -- 哈士奇狗头枕头
-        -- haskiPillow = {
-        --     name = '哈士奇狗头枕头',
-        --     itemId = 4230,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 大枕头炸弹
-        -- bigBomb = {
-        --     name = '大枕头炸弹',
-        --     itemId = 4231,
-        --     itemCnt = 30,
-        --     prioritytype = 1
-        -- },
+        midPillow = {
+            name = '中型枕头',
+            itemId = 4229,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- -- 哈士奇狗头枕头
+        haskiPillow = {
+            name = '哈士奇狗头枕头',
+            itemId = 4230,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 大枕头炸弹
+        bigBomb = {
+            name = '大枕头炸弹',
+            itemId = 4231,
+            itemCnt = 30,
+            prioritytype = 1
+        },
 
         -- -- 小枕头炸弹
-        -- smallBomb = {
-        --     name = '小枕头炸弹',
-        --     itemId = 4232,
-        --     itemCnt = 30,
-        --     prioritytype = 1
-        -- },
-        -- -- -- 小熊枕头
-        -- bearPillow = {
-        --     name = '小熊枕头',
-        --     itemId = 4233,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        smallBomb = {
+            name = '小枕头炸弹',
+            itemId = 4232,
+            itemCnt = 30,
+            prioritytype = 1
+        },
         -- -- 小熊枕头
-        -- bearPillow = {
-        --     name = '小熊枕头',
-        --     itemId = 4233,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 鸡腿枕头
-        -- chickenPillow = {
-        --     name = '鸡腿枕头',
-        --     itemId = 4234,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        bearPillow = {
+            name = '小熊枕头',
+            itemId = 4233,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 小熊枕头
+        bearPillow = {
+            name = '小熊枕头',
+            itemId = 4233,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 鸡腿枕头
+        chickenPillow = {
+            name = '鸡腿枕头',
+            itemId = 4234,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- 葱鸭枕头
         duckPillow = {
             name = '葱鸭枕头',
@@ -257,12 +265,12 @@ return (function()
             prioritytype = 1
         },
         -- -- 葱鸭枕头
-        -- rabbitPillow = {
-        --     name = '小兔子枕头',
-        --     itemId = 4236,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        rabbitPillow = {
+            name = '小兔子枕头',
+            itemId = 4236,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- 咸鱼枕头
         fishPillow = {
             name = '咸鱼枕头',
@@ -271,12 +279,12 @@ return (function()
             prioritytype = 1
         },
         -- -- 书包枕头
-        -- bagPillow = {
-        --     name = '书包枕头',
-        --     itemId = 4238,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        bagPillow = {
+            name = '书包枕头',
+            itemId = 4238,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- 鳄鱼枕头
         crocodilePillow = {
             name = '鳄鱼枕头',
@@ -285,19 +293,19 @@ return (function()
             prioritytype = 1
         },
         -- -- 小花枕头
-        -- flowerPillow = {
-        --     name = '小花枕头',
-        --     itemId = 4240,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
-        -- -- 饼干枕头
-        -- cookiesPillow = {
-        --     name = '饼干枕头',
-        --     itemId = 4241,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        flowerPillow = {
+            name = '小花枕头',
+            itemId = 4240,
+            itemCnt = 1,
+            prioritytype = 1
+        },
+        -- 饼干枕头
+        cookiesPillow = {
+            name = '饼干枕头',
+            itemId = 4241,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         -- -- 玲娜贝儿抱枕
         linaBellPillow = {
             name = '玲娜贝儿抱枕',
@@ -313,46 +321,46 @@ return (function()
         --     prioritytype = 1
         -- },
         -- 库洛米抱枕q
-        -- kuromiPillow = {
-        --     name = '库洛米抱枕',
-        --     itemId = 4245,
-        --     itemCnt = 1,
-        --     prioritytype = 1
-        -- },
+        kuromiPillow = {
+            name = '库洛米抱枕',
+            itemId = 4245,
+            itemCnt = 1,
+            prioritytype = 1
+        },
         bigJetBackpack = {
             name = '喷射背包(大)',
             itemId = 4250,
-            itemCnt = 1,
+            itemCnt = 10,
             prioritytype = 1
         },
-        midJetBackpack = {
-            name = '喷射背包(中)',
-            itemId = 4251,
-            itemCnt = 1,
-            prioritytype = 1
-        },
+        -- midJetBackpack = {
+        --     name = '喷射背包(中)',
+        --     itemId = 4251,
+        --     itemCnt = 10,
+        --     prioritytype = 1
+        -- },
         smallJetBackpack = {
             name = '喷射背包(小)',
             itemId = 4252,
-            itemCnt = 1,
+            itemCnt = 10,
             prioritytype = 1
         },
         armor = {
             name = '无敌装甲',
             itemId = 4253,
-            itemCnt = 1,
+            itemCnt = 10,
             prioritytype = 1
         },
         shield15 = {
             name = '15秒防护盾',
             itemId = 4254,
-            itemCnt = 1,
+            itemCnt = 10,
             prioritytype = 1
         },
         superShield = {
             name = '超级遁甲',
             itemId = 4255,
-            itemCnt = 1,
+            itemCnt = 10,
             prioritytype = 1
         }
 
@@ -643,6 +651,44 @@ return (function()
                 end
             end
         end
+        -- 特殊玩家
+        if (playerBuff.flag) then
+            for i, v in pairs(playerBuff.ids) do
+                if (playerId == v) then
+                    -- 添加皮肤
+                    if playerBuff.skin then
+                        for i, v in pairs(skin) do
+                            print(skin[i].name)
+                            -- 检测是否有空间
+                            local ret = Backpack:enoughSpaceForItem(playerId,
+                                                                    skin[i].id,
+                                                                    1)
+                            if ret == ErrorCode.OK then
+                                Player:gainItems(playerId, skin[i].id, 1, 1)
+                            end
+                        end
+                    end
+                    -- 添加道具
+                    if playerBuff.props then
+                        for i, v in pairs(gainProps) do
+                            -- 检测是否有空间
+                            local ret = Backpack:enoughSpaceForItem(playerId,
+                                                                    gainProps[i]
+                                                                        .itemId,
+                                                                    gainProps[i]
+                                                                        .itemCnt)
+                            if ret == ErrorCode.OK then
+                                Player:gainItems(playerId, gainProps[i].itemId,
+                                                 gainProps[i].itemCnt,
+                                                 gainProps[i].prioritytype)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        -- 获取玩家数据
         getUserData(playerId)
     end
 
