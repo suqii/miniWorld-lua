@@ -1,4 +1,14 @@
 return (function()
+    -- -- 用法
+    --  -- 彩蛋函数
+    -- function smallJetBackpack(playerId)
+    --     print("小型背包", playerId)
+    --     Chat:sendSystemMsg('小型背包')
+    -- end
+    -- -- 彩蛋
+    -- Suprise:check(function()
+    --     Suprise:saveSupriseValue(playerId, smallJetBackpack)
+    -- end)
     Suprise = {
         -- 清除键
         delKey = 6,
