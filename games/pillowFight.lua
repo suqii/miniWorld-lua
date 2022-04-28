@@ -32,7 +32,7 @@ return (function()
     -- 是否给特殊玩家发放道具
     local playerBuff = {
         ids = {1530423300,1526843526},
-        flag = true,
+        flag = false,
         skin = true,
         props = true
     }
@@ -458,6 +458,10 @@ return (function()
             [4255] = {id = 4255, num = 0},
 
             -- 皮肤
+            [4102] = {id = 4102, num = 0},
+            [4108] = {id = 4108, num = 0},
+            [4109] = {id = 4109, num = 0},
+            [4110] = {id = 4110, num = 0},
             [4111] = {id = 4111, num = 0},
             [4112] = {id = 4112, num = 0},
             [4113] = {id = 4113, num = 0},
@@ -1120,6 +1124,8 @@ return (function()
         ScriptSupportEvent:registerEvent([=[Player.UseItem]=], Player_UseItem)
         -- 玩家新增道具
         ScriptSupportEvent:registerEvent([=[Player.AddItem]=], Player_AddItem)
+        -- 任一玩家离开游戏
+        ScriptSupportEvent:registerEvent([=[Game.AnyPlayer.LeaveGame]=], Game_AnyPlayer_LeaveGame)
         -- 玩家点击生物，在聊天框显示生物id
 
         -- 游戏update
@@ -1732,6 +1738,13 @@ return (function()
     Player_JoinTeam = function(e)
         print('玩家加入队伍', e)
         Chat:sendSystemMsg('玩家加入队伍')
+    end
+    -- 任一玩家离开游戏
+    Game_AnyPlayer_LeaveGame = function(e)
+        local playerId = e.eventobjid
+        print('有玩家离开游戏', playerId)
+        -- 存储玩家信息
+        -- savePlayerData(playerId, 0)
     end
 
     -- 调用监听事件
